@@ -89,8 +89,8 @@ export const extractPdfData = async (req, res) => {
         const formattedLatex = formatResumeToLatex(latexContent);
 
         res.json({
-            // extractedData,
-            // latexContent,
+            extractedData,
+            latexContent,
             formattedLatex
         });
     } catch (error) {
