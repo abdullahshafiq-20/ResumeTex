@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 // import { formatResumeToLatex } from "../utils/tokenizer.js"
 // import { generateLatexCV } from "../utils/formatter.js"
-import { generateCVLatex }  from "../utils/formatterV1.js"
+import { generateCVLatex }  from "../utils/formatterV2.js"
 import dotenv from 'dotenv';
 dotenv.config();
 
