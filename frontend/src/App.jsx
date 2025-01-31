@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import Squares from "./components/background/Squares";
 import SplitText from "./components/SplitText";
 import BeforeAfterPage from "./pages/BeforeAfterPage";
+import ResponsePage from "./pages/ResponsePage";
 import FileUploader from "./components/FileUploader";
 
 import "./App.css";
@@ -25,7 +27,10 @@ export default function App() {
         />
       </div>
       <div className="content-layer flex flex-col items-center justify-center min-h-screen">
-        <BeforeAfterPage />
+        <Routes>
+          <Route path="/" element={<BeforeAfterPage />} />
+          <Route path="/response" element={<ResponsePage />} />
+        </Routes>
       </div>
     </div>
   );

@@ -3,9 +3,11 @@ import pdfjsLib from "pdfjs-dist";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import {convertLatexToPdfAndUpload} from "../utils/latexCodeToPdf.js"
 // import { formatResumeToLatex } from "../utils/tokenizer.js"
 // import { generateLatexCV } from "../utils/formatter.js"
 import { generateCVLatex }  from "../utils/formatterV2.js"
+import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -91,10 +93,18 @@ export const extractPdfData = async (req, res) => {
         const latexContent = await ConvertLatex(extractedData);
         const formattedLatex = latexContent;
 
+        const link = await convertJsonTexToPdf(formattedLatex);
+
+
+
+
+
+
+
         res.json({
-            extractedData,
-            latexContent: latexContent,
-            formattedLatex: formattedLatex
+            // extractedData,
+            // latexContent: latexContent,
+            link
         });
     } catch (error) {
         console.error('Error:', error);
@@ -104,7 +114,7 @@ export const extractPdfData = async (req, res) => {
 
 const ConvertLatex = async (extractedData) => {
     try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_3);
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_2);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
         const LATEX_CONVERSION_PROMPT = `As a data analyst, analyze and structure the following JSON CV data:
@@ -283,7 +293,10 @@ const ConvertLatex = async (extractedData) => {
         7. If you see there are some description which are not upto the mark you are open to modify them but make sure the meaning of the description is not changed.`;
 
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
+        console.log("calling gemini api")
         const response = await result.response;
+
+        console.log("response from gemini api");
         let latexContent = response.text();
         
         // Clean up the response - remove markdown code blocks and any extra whitespace
@@ -302,7 +315,15 @@ const ConvertLatex = async (extractedData) => {
         
         // For debugging
         console.log('Formatted LaTeX:', formattedLatex);
-        
+
+        console.log('caling tex function');
+
+        // Wait for the URL to be returned
+        // const link = await convertLatexToPdfAndUpload(formattedLatex);
+
+        // console.log('File uploaded successfully');
+        // console.log('Link:', link); // Now this will show the actual URL
+
         return formattedLatex;
     } catch (error) {
         console.error('LaTeX conversion error:', error);

@@ -111,6 +111,7 @@ const generateCVLatex = (cvData) => {
             const email = header.contact_info?.email?.value || '';
             const phone = header.contact_info?.phone?.value || '';
             const linkedin = header.contact_info?.linkedin?.value || '';
+            const portfolio = header.contact_info?.portfolio?.value || '';
             const github = header.contact_info?.github?.value || '';
             const location = header.contact_info?.location?.value || '';
             const name = header.name || 'Name Not Provided';
@@ -136,6 +137,10 @@ const generateCVLatex = (cvData) => {
             if (linkedin) {
                 const linkedinLink = linkedin.startsWith('http') ? linkedin : `https://${linkedin}`;
                 contactSections.push(createSafeLink(linkedin, linkedinLink));
+            }
+            if (portfolio) {
+                const portfolioLink = portfolio.startsWith('http') ? portfolio : `https://${portfolio}`;
+                contactSections.push(`\\href{${portfolioLink}}{\\raisebox{-0.2\\height}\\faGlobe\\ \\underline{${escapeLaTeX(portfolio)}}}`);
             }
             
             if (github) {

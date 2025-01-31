@@ -8,16 +8,18 @@ export const handlePdfUpload = async (file) => {
             throw new Error("No file provided")
         }
 
-        // Check if file is PDF
-        if (file.mimetype !== 'application/pdf') {
+        // Check if file is PDF or TEX
+        const allowedMimeTypes = ['application/pdf', 'application/x-tex', 'text/x-tex'];
+        if (!allowedMimeTypes.includes(file.mimetype)) {
             // Remove the uploaded file
             fs.unlinkSync(file.path)
-            throw new Error("Only PDF files are allowed")
+            throw new Error("Only PDF and TEX files are allowed")
         }
 
-        // Upload PDF to cloudinary
+        // Upload file to cloudinary
         const uploadResult = await cloudinaryUploader.upload(file.path, {
-            resource_type: 'raw' // Required for PDF upload
+            resource_type: 'raw', // Required for both PDF and TEX upload
+            format: file.originalname.split('.').pop() // Preserve file extension
         })
 
         // Clean up - remove file from local storage
@@ -35,6 +37,7 @@ export const handlePdfUpload = async (file) => {
         throw error
     }
 }
+
 // Controller using the upload function
 export const pdfUpload = async (request, response) => {
     try {
@@ -43,7 +46,7 @@ export const pdfUpload = async (request, response) => {
         response.json({
             data: uploadResult,
             status: true,
-            message: "PDF uploaded successfully!"
+            message: "File uploaded successfully!"
         })
 
     } catch (error) {
