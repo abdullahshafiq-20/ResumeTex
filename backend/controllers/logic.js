@@ -3,7 +3,9 @@ import pdfjsLib from "pdfjs-dist";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { formatResumeToLatex } from "../utils/tokenizer.js"
+// import { formatResumeToLatex } from "../utils/tokenizer.js"
+// import { generateLatexCV } from "../utils/formatter.js"
+import { generateCVLatex }  from "../utils/formatterV1.js"
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -83,15 +85,16 @@ export const extractPdfData = async (req, res) => {
             links
         };
 
+        // console.log(extractedData);
+
         // Convert to LaTeX
         const latexContent = await ConvertLatex(extractedData);
-        // const formattedLatex = formatLatexContent(latexContent);
-        const formattedLatex = formatResumeToLatex(latexContent);
+        const formattedLatex = latexContent;
 
         res.json({
-            // extractedData,
-            // latexContent,
-            formattedLatex
+            extractedData,
+            latexContent: latexContent,
+            formattedLatex: formattedLatex
         });
     } catch (error) {
         console.error('Error:', error);
@@ -102,90 +105,213 @@ export const extractPdfData = async (req, res) => {
 const ConvertLatex = async (extractedData) => {
     try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_3);
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-        const LATEX_CONVERSION_PROMPT = `You are a LaTeX expert. I will provide you with JSON data containing extracted text and links from a PDF document. Your task is to convert this into a professional LaTeX CV document.
+        const LATEX_CONVERSION_PROMPT = `As a data analyst, analyze and structure the following JSON CV data:
 
-        Input Structure:
+        ${JSON.stringify(extractedData)}
+        
+        Return a structured CV in this format:
         {
-            "text": "[extracted text content]",
-            "links": [
-                {
-                    "url": "[link URL]",
-                    "context": "[link text]"
+          "cv_template": {
+            "metadata": {
+              "section_order": [
+                "header", "summary", "experience", "education", "skills", "projects", "certifications", "courses", "languages", "volunteer", "awards", "publications", "interests", "references"
+              ]
+            },
+            "sections": {
+              "header": {
+                "name": "Your Full Name",
+                "title": "Your Professional Title, e.g., Software Engineer",
+                "contact_info": {
+                  "email": {"value": "Your Email", "link": "mailto:Your Email"},
+                  "phone": {"value": "Your Phone Number", "link": "tel:Your Phone Number"},
+                  "portfolio": {"value": "Your Portfolio URL", "link": "Your Portfolio URL"},
+                  "linkedin": {"value": "Your LinkedIn Profile", "link": "LinkedIn Profile URL"},
+                  "location": {"value": "City, Country"}
                 }
-                // ... more links
-            ]
+              },
+              "summary": {
+                "section_title": "Summary",
+                "content": "Brief professional summary highlighting your experience, skills, and career goals."
+              },
+              "experience": {
+                "section_title": "Professional Experience",
+                "items": [
+                  {
+                    "type": "job",
+                    "title": "Job Title",
+                    "company": "Company Name",
+                    "url": "Company URL",
+                    "location": "City, Country",
+                    "dates": {"start": "Start Date", "end": "End Date", "is_current": false},
+                    "achievements": [
+                      "Achievement 1",
+                      "Achievement 2"
+                    ],
+                    "technologies": ["Technology 1", "Technology 2"]
+                  }
+                ]
+              },
+              "education": {
+                "section_title": "Education",
+                "items": [
+                  {
+                    "degree": "Degree Title",
+                    "institution": "Institution Name",
+                    "url": "Institution URL",
+                    "location": "City, Country",
+                    "dates": {"start": "Start Date", "end": "End Date"},
+                    "gpa": "GPA",
+                    "honors": ["Honor or Award"]
+                  }
+                ]
+              },
+              "skills": {
+                "section_title": "Skills",
+                "categories": [
+                  {
+                    "name": "Technical Skills",
+                    "items": ["Skill 1", "Skill 2"],
+                    "description": "Short description based on data",
+                    "proficiency": "expert"
+                  },
+                  {
+                    "name": "Soft Skills",
+                    "items": ["Skill 1", "Skill 2"],
+                    "description": "Short description based on data",
+                    "proficiency": "intermediate"
+                  }
+                ]
+              },
+              "projects": {
+                "section_title": "Projects",
+                "items": [
+                  {
+                    "title": "Project Title",
+                    "url": "Project URL",
+                    "description": "Project Description",
+                    "dates": {"start": "Start Date", "end": "End Date"},
+                    "technologies": ["Technology 1", "Technology 2"],
+                    "key_contributions": ["Contribution 1", "Contribution 2"]
+                  }
+                ]
+              },
+              "certifications": {
+                "section_title": "Certifications",
+                "items": [
+                  {
+                    "title": "Certification Name",
+                    "institution": "Issuing Institution",
+                    "url": "Certification URL",
+                    "date": {"start": "Start Date", "end": "End Date"},
+                  }
+                ]
+              },
+              "courses": {
+                "section_title": "Courses",
+                "items": [
+                  "Course Name 1",
+                  "Course Name 2"
+                ]
+              },
+              "languages": {
+                "section_title": "Languages",
+                "items": [
+                  {"name": "Language", "proficiency": "Proficiency Level"}
+                ]
+              },
+              "volunteer": {
+                "section_title": "Volunteer Experience",
+                "items": [
+                  {
+                    "title": "Volunteer Role",
+                    "organization": "Organization Name",
+                    "location": "City, Country",
+                    "dates": {"start": "Start Date", "end": "End Date"},
+                    "achievements": ["Achievement 1"]
+                  }
+                ]
+              },
+              "awards": {
+                "section_title": "Awards & Achievements",
+                "items": ["Award Name and Date"]
+              },
+              "publications": {
+                "section_title": "Publications",
+                "items": [
+                  {
+                    "title": "Publication Title",
+                    "url": "Publication URL",
+                    "date": "Publication Date"
+                  }
+                ]
+              },
+              "interests": {
+                "section_title": "Interests",
+                "items": ["Interest 1", "Interest 2"]
+              },
+              "references": {
+                "section_title": "References",
+                "items": [
+                  {
+                    "name": "Reference Name",
+                    "title": "Title",
+                    "company": "Company Name",
+                    "email": "Email",
+                    "phone": "Phone Number"
+                  }
+                ]
+              }
+            },
+            "rendering_rules": {
+              "date_format": "MMM YYYY",
+              "hide_empty_sections": true,
+              "max_items_per_section": "No limit for now",
+              "truncate_descriptions_at": 600
+            }
+          }
         }
-
-        Required Tasks:
-
-        1. Create a complete LaTeX document that:
-        - Uses a professional CV template
-        - Properly maps all hyperlinks to their text
-        - Maintains professional formatting
-        - Handles all special characters
-
-        2. Follow these specific rules:
-        - Search for each link's context in the main text
-        - Wrap found contexts with \\href{url}{context}
-        - Escape all special LaTeX characters (%, &, $, #, _, {, }, ~, ^)
-        - Maintain proper document structure
-        - Use consistent spacing and formatting
-
-        3. Use this LaTeX package structure:
-        \\documentclass[11pt,a4paper]{article}
-        \\usepackage[utf8]{inputenc}
-        \\usepackage[T1]{fontenc}
-        \\usepackage{hyperref}
-        \\usepackage[margin=1in]{geometry}
-        \\usepackage{titlesec}
-        \\usepackage{enumitem}
-        \\usepackage{fontawesome}
-        \\usepackage{xcolor}
-
-        % Define professional colors
-        \\definecolor{primary}{RGB}{0, 51, 102}
-        \\definecolor{linkcolor}{RGB}{0, 102, 204}
-
-        % Configure hyperref
-        \\hypersetup{
-            colorlinks=true,
-            linkcolor=linkcolor,
-            urlcolor=linkcolor
-        }
-
-        % Set section formatting
-        \\titleformat{\\section}
-            {\\Large\\bfseries\\color{primary}}
-            {}{0em}{}[\\titlerule]
-
-        4. Handle these specific cases:
-        - If a link's context appears multiple times, link all instances
-        - If a context isn't found exactly, look for close matches
-        - Preserve any existing formatting (bold, italic)
-        - Handle line breaks within link text
-        - Process any Unicode characters correctly
-
-        5. Generate the output maintaining:
-        - Professional CV sections
-        - Clean, readable LaTeX code
-        - Proper indentation
-        - Consistent formatting
-
-        Process the following content and provide a complete LaTeX document:
-
-        ${JSON.stringify(extractedData, null, 2)}`;
+        
+        Instructions:
+        1. Extract and categorize all sections from input text
+        2. Match links to corresponding sections/items
+        3. Consume all the provided data in the structured CV, dont repsond like "rest of the data....."
+        4. Dont include any additional CV sections in the sections object, if you dont have the data for a section, dont include it in the JSON and if there is section which is not in the sections object, ajdust this data in the sections i have defined above. 
+        5. Ensure all dates follow MMM YYYY format
+        6. Preserve all URLs and links in their respective fields
+        7. If you see there are some description which are not upto the mark you are open to modify them but make sure the meaning of the description is not changed.`;
 
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
         const response = await result.response;
-        return response.text();
+        let latexContent = response.text();
+        
+        // Clean up the response - remove markdown code blocks and any extra whitespace
+        latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
+                                 .replace(/```\n?/g, '')        // Remove closing ```
+                                 .trim();                       // Remove extra whitespace
+        
+        // For debugging
+        console.log('Cleaned response:', latexContent);
+        
+        // Parse the JSON to validate it
+        const parsedData = JSON.parse(latexContent);
+        
+        // Generate the formatted LaTeX
+        const formattedLatex = generateCVLatex(parsedData);
+        
+        // For debugging
+        console.log('Formatted LaTeX:', formattedLatex);
+        
+        return formattedLatex;
     } catch (error) {
         console.error('LaTeX conversion error:', error);
+        if (error instanceof SyntaxError) {
+            console.error('Invalid JSON response from AI:', latexContent);
+        }
         throw new Error('Failed to convert to LaTeX');
     }
 };
-
 
 
 
