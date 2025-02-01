@@ -1,5 +1,5 @@
 import { cloudinaryUploader } from "../utils/cloudinary.js"
-import fs from "fs"
+import busboy from "busboy"
 
 // Separate reusable upload function
 export const handlePdfUpload = async (file) => {
@@ -39,21 +39,64 @@ export const handlePdfUpload = async (file) => {
 }
 
 // Controller using the upload function
-export const pdfUpload = async (request, response) => {
-    try {
-        const uploadResult = await handlePdfUpload(request.file)
-        
-        response.json({
-            data: uploadResult,
-            status: true,
-            message: "File uploaded successfully!"
-        })
+export const pdfUpload = async (req, res) => {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
 
-    } catch (error) {
-        response.status(500).json({
+    const bb = busboy({ headers: req.headers });
+
+    bb.on('file', (name, file, info) => {
+        const { filename, mimeType } = info;
+
+        // Check if file is PDF or TEX
+        const allowedMimeTypes = ['application/pdf', 'application/x-tex', 'text/x-tex'];
+        if (!allowedMimeTypes.includes(mimeType)) {
+            res.status(400).json({
+                data: [],
+                status: false,
+                message: "Only PDF and TEX files are allowed"
+            });
+            return;
+        }
+
+        const cloudinaryStream = cloudinaryUploader.upload_stream(
+            {
+                resource_type: 'raw',
+                format: filename.split('.').pop() // Preserve file extension
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('Upload to Cloudinary failed:', error);
+                    res.status(500).json({
+                        data: [],
+                        status: false,
+                        message: "Upload to Cloudinary failed"
+                    });
+                } else {
+                    res.json({
+                        data: {
+                            url: result.secure_url,
+                            name: result.original_filename,
+                        },
+                        status: true,
+                        message: "File uploaded successfully!"
+                    });
+                }
+            }
+        );
+
+        file.pipe(cloudinaryStream);
+    });
+
+    bb.on('error', (error) => {
+        console.error('Error processing form:', error);
+        res.status(500).json({
             data: [],
             status: false,
-            message: error.message,
-        })
-    }
+            message: "Error processing form"
+        });
+    });
+
+    req.pipe(bb);
 }

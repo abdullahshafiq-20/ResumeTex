@@ -1,62 +1,76 @@
 import { cloudinaryUploader } from "../utils/cloudinary.js";
-import fs from "fs";
-import path from "path";
+import busboy from "busboy";
 
-// Helper function to create a temporary TEX file from text content
-const createTempTexFile = (formattedLatex) => {
-    const tempDir = path.join(process.cwd(), 'temp');
-    
-    // Create temp directory if it doesn't exist
-    if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir);
+export const texContentUpload = async (req, res) => {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
-    
-    const tempFilePath = path.join(tempDir, `temp_${Date.now()}.tex`);
-    fs.writeFileSync(tempFilePath, formattedLatex);
-    return tempFilePath;
-};
 
-export const texContentUpload = async (request, response) => {
-    let tempFilePath = null;
-    
-    try {
-        const { formattedLatex } = request.body;
-        
+    const bb = busboy({ headers: req.headers });
+    let formattedLatex = '';
+
+    bb.on('field', (name, val) => {
+        if (name === 'formattedLatex') {
+            formattedLatex = val;
+        }
+    });
+
+    bb.on('finish', async () => {
         if (!formattedLatex) {
-            throw new Error("No text content provided");
+            return res.status(400).json({
+                data: [],
+                status: false,
+                message: "No text content provided"
+            });
         }
 
-        // Create temporary TEX file
-        tempFilePath = createTempTexFile(formattedLatex);
+        // Create a buffer from the LaTeX content
+        const buffer = Buffer.from(formattedLatex);
 
-        // Upload to Cloudinary using the same uploader as in fileUpload.js
-        const uploadResult = await cloudinaryUploader.upload(tempFilePath, {
-            resource_type: 'raw',
-            format: 'tex'
-        });
+        // Upload directly to Cloudinary using buffer
+        try {
+            const uploadResult = await new Promise((resolve, reject) => {
+                const cloudinaryStream = cloudinaryUploader.upload_stream(
+                    {
+                        resource_type: 'raw',
+                        format: 'tex'
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
 
-        // Clean up - remove temporary file
-        fs.unlinkSync(tempFilePath);
+                cloudinaryStream.end(buffer);
+            });
 
-        response.json({
-            data: {
-                url: uploadResult.secure_url,
-                name: uploadResult.original_filename,
-            },
-            status: true,
-            message: "TEX file created and uploaded successfully!"
-        });
+            res.json({
+                data: {
+                    url: uploadResult.secure_url,
+                    name: uploadResult.original_filename,
+                },
+                status: true,
+                message: "TEX file created and uploaded successfully!"
+            });
 
-    } catch (error) {
-        // Clean up temporary file in case of error
-        if (tempFilePath && fs.existsSync(tempFilePath)) {
-            fs.unlinkSync(tempFilePath);
+        } catch (error) {
+            console.error('Upload to Cloudinary failed:', error);
+            res.status(500).json({
+                data: [],
+                status: false,
+                message: error.message
+            });
         }
+    });
 
-        response.status(500).json({
+    bb.on('error', (error) => {
+        console.error('Error processing form:', error);
+        res.status(500).json({
             data: [],
             status: false,
-            message: error.message,
+            message: "Error processing form"
         });
-    }
+    });
+
+    req.pipe(bb);
 };
