@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(
   {
-    origin: 'https://resume-convertor-latex.vercel.app/',
+    origin: 'https://resume-tex.vercel.app/',
     credentials: true
   }
 ));
