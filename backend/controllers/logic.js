@@ -345,7 +345,16 @@ export const ConvertLatex = async (req, res) => {
 
 export const convertJsonTexToPdf = async (req, res) => {
   const { formattedLatex } = req.body;
+  
+  // Add validation for required input
+  if (!formattedLatex) {
+    return res.status(400).json({ error: 'formattedLatex is required' });
+  }
+
   try {
+      // Add Content-Length header and ensure proper encoding
+      const texContent = Buffer.from(formattedLatex, 'utf-8');
+      
       const response = await axios.post(
           'https://api.advicement.io/v1/templates/pub-tex-to-pdf-with-pdflatex-v1/compile',
           {
@@ -354,7 +363,8 @@ export const convertJsonTexToPdf = async (req, res) => {
           {
               headers: {
                   'Adv-Security-Token': process.env.ADVICEMENT_API_TOKEN,
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  'Content-Length': texContent.length
               }
           }
       );
@@ -398,12 +408,25 @@ export const convertJsonTexToPdf = async (req, res) => {
       return res.status(408).json({ error: 'PDF URL not found after multiple attempts' });
 
   } catch (error) {
+      // Enhance error logging
       console.error('Error converting LaTeX to PDF:', {
           message: error.message,
-          response: error.response?.data
+          stack: error.stack,
+          response: error.response?.data,
+          status: error.response?.status
       });
-      return res.status(500).json({ 
-          error: `LaTeX to PDF conversion failed: ${error.message}`
+      
+      // Return more specific error messages
+      if (error.response?.status === 413) {
+          return res.status(413).json({ error: 'LaTeX content too large' });
+      }
+      if (error.response?.status === 401) {
+          return res.status(401).json({ error: 'Invalid API token' });
+      }
+      
+      return res.status(error.response?.status || 500).json({ 
+          error: `LaTeX to PDF conversion failed: ${error.message}`,
+          details: error.response?.data
       });
   }
 }
