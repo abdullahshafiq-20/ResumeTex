@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function CardRotate({ children, onSendToBack, sensitivity }) {
+function CardRotate({ children, onSendToBack, sensitivity,  }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotateX = useTransform(y, [-100, 100], [60, -60]);
@@ -40,16 +40,17 @@ export default function Stack({
   cardDimensions = { width: 208, height: 208 },
   cardsData = [],
   animationConfig = { stiffness: 260, damping: 20 },
-  sendToBackOnClick = true
+  sendToBackOnClick = true,
+  onTemplateSelect
 }) {
   const [cards, setCards] = useState(
     cardsData.length
       ? cardsData
       : [
-        { id: 1, img: "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?q=80&w=500&auto=format" },
-        { id: 2, img: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=500&auto=format" },
-        { id: 3, img: "https://images.unsplash.com/photo-1452626212852-811d58933cae?q=80&w=500&auto=format" },
-        { id: 4, img: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=500&auto=format" }
+        { id: 1, img: "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?q=80&w=500&auto=format", template: "Template 1" },
+        { id: 2, img: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=500&auto=format", template: "Template 2" },
+        { id: 3, img: "https://images.unsplash.com/photo-1452626212852-811d58933cae?q=80&w=500&auto=format", template: "Template 3" },
+        { id: 4, img: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=500&auto=format", template: "Template 4" }
       ]
   );
 
@@ -59,13 +60,24 @@ export default function Stack({
       const index = newCards.findIndex((card) => card.id === id);
       const [card] = newCards.splice(index, 1);
       newCards.unshift(card);
+      
+      if (onTemplateSelect) {
+        onTemplateSelect(newCards[newCards.length - 1].template);
+      }
+      
       return newCards;
     });
   };
 
+  useEffect(() => {
+    if (cards.length && onTemplateSelect) {
+      onTemplateSelect(cards[cards.length - 1].template);
+    }
+  }, []);
+
   return (
     <div
-      className="relative"
+      className="relative" 
       style={{
         width: cardDimensions.width,
         height: cardDimensions.height,
@@ -84,7 +96,7 @@ export default function Stack({
             sensitivity={sensitivity}
           >
             <motion.div
-              className="absolute w-full h-full rounded-lg overflow-hidden cursor-pointer"
+              className="absolute w-full h-full rounded-lg overflow-hidden cursor-pointer shadow-xl"
               onClick={() => sendToBack(card.id)}
               animate={{
                 rotateZ: (cards.length - index - 1) * 4 + randomRotate,
@@ -102,11 +114,19 @@ export default function Stack({
                 height: cardDimensions.height,
               }}
             >
-              <img
-                src={card.img}
-                alt={`card-${card.id}`}
-                className="w-full h-full object-cover"
-              />
+              <div className="relative w-full h-full ">
+                <img
+                  src={card.img}
+                  alt={`card-${card.id}`}
+                  className="w-full h-full object-fit"
+                />
+                <span className="absolute bottom-4 left-4 bg-[#2563EB] text-white px-2 py-1 rounded text-sm font-semibold">
+                  {card.template}
+                </span>
+                <span className="absolute bottom-4 right-4 bg-[#2563EB] text-white px-2 py-1 rounded text-sm font-semibold">
+                  After
+                </span>
+              </div>
             </motion.div>
           </CardRotate>
         );

@@ -5,6 +5,7 @@ import SplitText from "./components/SplitText";
 import BeforeAfterPage from "./pages/BeforeAfterPage";
 import ResponsePage from "./pages/ResponsePage";
 import FileUploader from "./components/FileUploader";
+import { Toaster } from 'react-hot-toast';
 
 import "./App.css";
 
@@ -16,22 +17,25 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      <div className="background-layer">
-        <Squares
-          speed={0.1}
-          squareSize={30}
-          direction="diagonal" // up, down, left, right, diagonal
-          borderColor="rgba(0, 0, 0, 0.01)"
-          hoverFillColor="rgba(0, 0, 0, 0.03)"
-        />
+    <>
+      <Toaster />
+      <div className="app-container">
+        <div className="background-layer">
+          <Squares
+            speed={0.1}
+            squareSize={30}
+            direction="diagonal" // up, down, left, right, diagonal
+            borderColor="rgba(0, 0, 0, 0.01)"
+            hoverFillColor="#2563EB"
+          />
+        </div>
+        <div className="content-layer flex flex-col items-center justify-center min-h-screen">
+          <Routes>
+            <Route path="/" element={<BeforeAfterPage />} />
+            <Route path="/response" element={<ResponsePage />} />
+          </Routes>
+        </div>
       </div>
-      <div className="content-layer flex flex-col items-center justify-center min-h-screen">
-        <Routes>
-          <Route path="/" element={<BeforeAfterPage />} />
-          <Route path="/response" element={<ResponsePage />} />
-        </Routes>
-      </div>
-    </div>
+    </>
   );
 }

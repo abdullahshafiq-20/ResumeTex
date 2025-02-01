@@ -1,4 +1,4 @@
-const generateCVLatex = (cvData) => {
+const generateCVLatexTemplateV1 = (cvData) => {
     // Helper function to escape LaTeX special characters
     const escapeLaTeX = (text) => {
         if (!text) return '';
@@ -36,70 +36,75 @@ const generateCVLatex = (cvData) => {
     };
 
     // Generate LaTeX document header
-    const generateHeader = () => `\\documentclass[letterpaper,11pt]{article}
-
-\\usepackage{latexsym}
-\\usepackage[empty]{fullpage}
-\\usepackage{titlesec}
-\\usepackage{marvosym}
-\\usepackage[usenames,dvipsnames]{color}
-\\usepackage{verbatim}
-\\usepackage{enumitem}
-\\usepackage[hidelinks]{hyperref}
-\\usepackage{fancyhdr}
-\\usepackage[english]{babel}
-\\usepackage{tabularx}
-\\usepackage{fontawesome5}
-\\usepackage{multicol}
-\\setlength{\\multicolsep}{-3.0pt}
-\\setlength{\\columnsep}{-1pt}
-\\input{glyphtounicode}
-
-\\pagestyle{fancy}
-\\fancyhf{} % clear all header and footer fields
-\\fancyfoot{}
-\\renewcommand{\\headrulewidth}{0pt}
-\\renewcommand{\\footrulewidth}{0pt}
-
-% Adjust margins
-\\addtolength{\\oddsidemargin}{-0.6in}
-\\addtolength{\\evensidemargin}{-0.5in}
-\\addtolength{\\textwidth}{1.19in}
-\\addtolength{\\topmargin}{-.7in}
-\\addtolength{\\textheight}{1.4in}
-
-\\urlstyle{same}
-
-\\raggedbottom
-\\raggedright
-\\setlength{\\tabcolsep}{0in}
-
-% Sections formatting
-\\titleformat{\\section}{
-  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
-}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
-
-% Custom commands
-\\newcommand{\\resumeItem}[1]{
-  \\item\\small{
-    {#1 \\vspace{-2pt}}
+    const generateHeader = () => `\\documentclass[11pt,a4paper]{article}
+  
+  % Required packages
+  \\usepackage[utf8]{inputenc}
+  \\usepackage[T1]{fontenc}
+  \\usepackage{hyperref}
+  \\usepackage{geometry}
+  \\usepackage{enumitem}
+  \\usepackage{titlesec}
+  \\usepackage{xcolor}
+  
+  % Configure page margins
+  \\geometry{
+    top=1cm,
+    bottom=1cm,
+    left=1cm,
+    right=1cm,
+    includehead,
+    includefoot
   }
-}
-
-\\newcommand{\\resumeSubheading}[4]{
-  \\vspace{-2pt}\\item
-    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
-      \\textbf{#1} & \\textbf{\\small #2} \\\\
-      \\textit{\\small#3} & \\textit{\\small #4} \\\\
-    \\end{tabular*}\\vspace{-7pt}
-}
-
-\\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.0in, label={}]}
-\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
-\\newcommand{\\resumeItemListStart}{\\begin{itemize}}
-\\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}
-
-\\begin{document}`;
+  
+  % Configure spacing
+  \\setlength{\\parindent}{0pt}
+  \\setlength{\\parskip}{6pt}
+  \\setlength{\\itemsep}{3pt}
+  \\setlength{\\parsep}{0pt}
+  \\setlength{\\headsep}{24pt}
+  \\setlength{\\footskip}{24pt}
+  
+  % Configure section spacing and formatting
+  \\titleformat{\\section}{\\Large\\bfseries}{}{0em}{}[\\titlerule]
+  \\titlespacing*{\\section}
+    {0pt}  % left margin
+    {18pt} % space before
+    {8pt}  % space after
+  
+  % Configure subsection spacing and formatting
+  \\titleformat{\\subsection}
+    {\\bfseries}  % format
+    {}            % label
+    {0em}         % sep
+    {}            % before-code
+  \\titlespacing*{\\subsection}
+    {0pt}   % left margin
+    {12pt}  % space before
+    {6pt}   % space after
+  
+  % List spacing configuration
+  \\setlist[itemize]{
+    topsep=4pt,
+    itemsep=2pt,
+    parsep=2pt,
+    leftmargin=1.5em
+  }
+  
+  % Configure hyperlinks
+  \\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdfborder={0 0 0}
+  }
+  
+  % Custom commands
+  \\newcommand{\\cvitem}[2]{\\textbf{#1}: #2\\\\[4pt]}
+  \\newcommand{\\daterange}[2]{#1 -- #2}
+  
+  \\begin{document}`;
 
     // All section generator functions
     const sectionGenerators = {
@@ -107,55 +112,19 @@ const generateCVLatex = (cvData) => {
             const header = cvData.cv_template.sections.header;
             if (!header) return '';
 
-            // Safely extract values with fallbacks
-            const email = header.contact_info?.email?.value || '';
-            const phone = header.contact_info?.phone?.value || '';
-            const linkedin = header.contact_info?.linkedin?.value || '';
-            const portfolio = header.contact_info?.portfolio?.value || '';
-            const github = header.contact_info?.github?.value || '';
-            const location = header.contact_info?.location?.value || '';
-            const name = header.name || 'Name Not Provided';
-            
-            // Helper function to create safe hyperlinks
-            const createSafeLink = (text, link) => {
-                if (!text || !link) return '';
-                const cleanLink = link.replace(/^https?:\/\//, ''); // Remove protocol if exists
-                return `\\href{${link}}{\\raisebox{-0.2\\height}\\faLinkedin\\ \\underline{${escapeLaTeX(cleanLink)}}}`;
-            };
-
-            // Build contact sections conditionally
-            const contactSections = [];
-            
-            if (phone) {
-                contactSections.push(`\\raisebox{-0.1\\height}\\faPhone\\ ${escapeLaTeX(phone)}`);
-            }
-            
-            if (email) {
-                contactSections.push(`\\href{mailto:${email}}{\\raisebox{-0.2\\height}\\faEnvelope\\  \\underline{${escapeLaTeX(email)}}}`);
-            }
-            
-            if (linkedin) {
-                const linkedinLink = linkedin.startsWith('http') ? linkedin : `https://${linkedin}`;
-                contactSections.push(createSafeLink(linkedin, linkedinLink));
-            }
-            if (portfolio) {
-                const portfolioLink = portfolio.startsWith('http') ? portfolio : `https://${portfolio}`;
-                contactSections.push(`\\href{${portfolioLink}}{\\raisebox{-0.2\\height}\\faGlobe\\ \\underline{${escapeLaTeX(portfolio)}}}`);
-            }
-            
-            if (github) {
-                const githubLink = github.startsWith('http') ? github : `https://${github}`;
-                const cleanGithubLink = githubLink.replace(/^https?:\/\//, '');
-                contactSections.push(`\\href{${githubLink}}{\\raisebox{-0.2\\height}\\faGithub\\ \\underline{${escapeLaTeX(cleanGithubLink)}}}`);
-            }
+            const contactParts = [];
+            if (header.contact_info.email?.value) contactParts.push(createHyperlink(header.contact_info.email.value, header.contact_info.email.link));
+            if (header.contact_info.phone?.value) contactParts.push(createHyperlink(header.contact_info.phone.value, header.contact_info.phone.link));
+            if (header.contact_info.linkedin?.value) contactParts.push(createHyperlink(header.contact_info.linkedin.value, header.contact_info.linkedin.link));
+            if (header.contact_info.portfolio?.value) contactParts.push(createHyperlink(header.contact_info.portfolio.value, header.contact_info.portfolio.link));
+            if (header.contact_info.location?.value) contactParts.push(escapeLaTeX(header.contact_info.location.value));
 
             return `
-\\begin{center}
-    {\\Huge \\scshape ${escapeLaTeX(name)}} \\\\ \\vspace{1pt}
-    ${location ? `${escapeLaTeX(location)} \\\\ \\vspace{1pt}` : ''}
-    ${contactSections.length ? `\\small ${contactSections.join(' ~ ')}` : ''}
-    \\vspace{-8pt}
-\\end{center}`;
+  \\begin{center}
+  \\textbf{\\huge ${escapeLaTeX(header.name)}}\\\\[0.5em]
+  \\textit{\\large ${escapeLaTeX(header.title)}}\\\\[0.5em]
+  ${contactParts.join(' | ')}
+  \\end{center}`;
         },
 
         summary: () => {
@@ -169,34 +138,26 @@ const generateCVLatex = (cvData) => {
 
         experience: () => {
             const experience = cvData.cv_template.sections.experience;
-            if (!experience?.items?.length) return '';
+            if (!experience || !experience.items || !experience.items.length) return '';
 
             const experienceItems = experience.items.map(job => {
-                if (!job) return '';
+                const startDate = job.dates?.start ? formatDate(job.dates.start) : '';
+                const endDate = job.dates?.is_current ? 'Present' : (job.dates?.end ? formatDate(job.dates.end) : '');
 
-                const startDate = formatDate(job.dates?.start);
-                const endDate = job.dates?.is_current ? 'Present' : formatDate(job.dates?.end);
-                const company = job.company || 'Company Not Specified';
-                const title = job.title || 'Position Not Specified';
-                const location = job.location || '';
+                return `
+\\subsection*{${createHyperlink(job.company || '', job.url || '')}${job.location ? ` -- ${escapeLaTeX(job.location)}` : ''}}
+\\textit{${escapeLaTeX(job.title || '')}} \\hfill ${startDate}${startDate || endDate ? ' -- ' : ''}${endDate}
 
-                return `    \\resumeSubheading
-      {${escapeLaTeX(company)}}{${startDate} -- ${endDate}}
-      {${escapeLaTeX(title)}}{${escapeLaTeX(location)}}
-      ${job.achievements?.length ? `\\resumeItemListStart
-        ${job.achievements.map(achievement => 
-          `\\resumeItem{${escapeLaTeX(achievement || '')}}`
-        ).join('\n        ')}
-      \\resumeItemListEnd` : ''}`
-            }).filter(Boolean).join('\n\n');
+${job.achievements?.length ? `\\begin{itemize}[leftmargin=*]
+${createListItems(job.achievements)}
+\\end{itemize}` : ''}
 
-            if (!experienceItems) return '';
+${job.technologies?.length ? `\\textbf{Technologies:} ${job.technologies.map(tech => escapeLaTeX(tech || '')).join(' | ')}` : ''}`
+            }).join('\n\n');
 
             return `
-\\section{${escapeLaTeX(experience.section_title || 'Experience')}}
-  \\resumeSubHeadingListStart
-${experienceItems}
-  \\resumeSubHeadingListEnd`;
+  \\section{${escapeLaTeX(experience.section_title || 'Experience')}}
+  ${experienceItems}`;
         },
 
         education: () => {
@@ -283,18 +244,29 @@ ${certItems}`;
 
         courses: () => {
             const courses = cvData.cv_template.sections.courses;
-            if (!courses || !courses.items || !courses.items.length) return '';
-
-            const courseItems = courses.items.map(course => `
-\\subsection*{${escapeLaTeX(course.title)}${course.location ? ` -- ${escapeLaTeX(course.location)}` : ''}}
-\\textit{${escapeLaTeX(course.institution)}} \\hfill ${formatDate(course.dates.start)} -- ${course.dates.is_current ? 'Present' : formatDate(course.dates.end)}
-
-${course.description ? escapeLaTeX(course.description) : ''}`
-            ).join('\n\n');
+            if (!courses?.items?.length) return '';
+            
+            // Filter out invalid items and format each course
+            const validCourses = courses.items
+                .filter(course => course && typeof course === 'object')
+                .map(course => {
+                    const title = escapeLaTeX(course.title || '');
+                    const institution = course.institution ? ` at ${escapeLaTeX(course.institution)}` : '';
+                    const location = course.location ? ` - ${escapeLaTeX(course.location)}` : '';
+                    const startDate = course.dates?.start ? formatDate(course.dates.start) : '';
+                    const endDate = course.dates?.end ? formatDate(course.dates.end) : 'Present';
+                    const dates = startDate ? ` (${startDate} -- ${endDate})` : '';
+                    
+                    return `    \\item ${title}${institution}${location}${dates}`;
+                });
+                
+            if (!validCourses.length) return '';
 
             return `
-\\section{${escapeLaTeX(courses.section_title)}}
-${courseItems}`;
+  \\section{${escapeLaTeX(courses.section_title || 'Courses')}}
+  \\begin{itemize}[leftmargin=*]
+${validCourses.join('\n')}
+  \\end{itemize}`;
         },
 
         languages: () => {
@@ -402,4 +374,4 @@ ${createListItems(vol.achievements)}
 };
 
 // Export the function
-export { generateCVLatex };
+export { generateCVLatexTemplateV1 };

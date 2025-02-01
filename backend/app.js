@@ -1,9 +1,16 @@
 import express from "express";
 const app = express();
+import cors from "cors";
 import routes from "./routes/routes.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors(
+  {
+    origin: '*',
+    credentials: true
+  }
+));
 
 app.use("/api", routes);
 

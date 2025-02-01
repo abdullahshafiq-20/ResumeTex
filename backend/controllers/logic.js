@@ -3,11 +3,9 @@ import pdfjsLib from "pdfjs-dist";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import {convertLatexToPdfAndUpload} from "../utils/latexCodeToPdf.js"
-// import { formatResumeToLatex } from "../utils/tokenizer.js"
-// import { generateLatexCV } from "../utils/formatter.js"
-import { generateCVLatex }  from "../utils/formatterV2.js"
-import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
+import { generateCVLatexTemplateV1 }  from "../utils/templateV1.js"
+import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
+// import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -87,24 +85,12 @@ export const extractPdfData = async (req, res) => {
             links
         };
 
-        // console.log(extractedData);
 
-        // Convert to LaTeX
-        const latexContent = await ConvertLatex(extractedData);
-        const formattedLatex = latexContent;
-
-        const link = await convertJsonTexToPdf(formattedLatex);
-
-
-
-
-
-
+        // const latexContent = await ConvertLatex(extractedData, template);
+        // const link = await convertJsonTexToPdf(latexContent);
 
         res.json({
-            // extractedData,
-            // latexContent: latexContent,
-            link
+          extractedData
         });
     } catch (error) {
         console.error('Error:', error);
@@ -112,10 +98,40 @@ export const extractPdfData = async (req, res) => {
     }
 };
 
-const ConvertLatex = async (extractedData) => {
+export const ConvertLatex = async (req, res) => {
+    const { extractedData, template, model: modelName, apiProvider } = req.body;
+    console.log("apiProvider", apiProvider);
+    console.log("model", modelName);
+
+    let apikey;
+    // Select API key based on provider
+    switch(apiProvider) {
+        case 'api_1':
+            apikey = process.env.GEMINI_API_KEY_1;
+            break;
+        case 'api_2':
+            apikey = process.env.GEMINI_API_KEY_2;
+            break;
+        case 'api_3':
+            apikey = process.env.GEMINI_API_KEY_3;
+            break;
+        case 'api_4':
+            apikey = process.env.GEMINI_API_KEY_4;
+            break;
+        case 'api_5':
+            apikey = process.env.GEMINI_API_KEY_5;
+            break;
+        default:
+            return res.status(400).json({ error: 'Invalid API provider specified' });
+    }
+
+    if (!apikey) {
+        return res.status(500).json({ error: 'API key not configured for specified provider' });
+    }
+
     try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_2);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const genAI = new GoogleGenerativeAI(apikey);
+        const model = genAI.getGenerativeModel({ model: modelName });
 
         const LATEX_CONVERSION_PROMPT = `As a data analyst, analyze and structure the following JSON CV data:
 
@@ -207,7 +223,7 @@ const ConvertLatex = async (extractedData) => {
                   }
                 ]
               },
-              "certifications": {
+              "certifications or courses": {
                 "section_title": "Certifications",
                 "items": [
                   {
@@ -216,13 +232,6 @@ const ConvertLatex = async (extractedData) => {
                     "url": "Certification URL",
                     "date": {"start": "Start Date", "end": "End Date"},
                   }
-                ]
-              },
-              "courses": {
-                "section_title": "Courses",
-                "items": [
-                  "Course Name 1",
-                  "Course Name 2"
                 ]
               },
               "languages": {
@@ -294,46 +303,110 @@ const ConvertLatex = async (extractedData) => {
 
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
         console.log("calling gemini api")
-        const response = await result.response;
+        const response = result.response;
+
+        console.log("response:", response);
 
         console.log("response from gemini api");
         let latexContent = response.text();
+
+        console.log("latexContent:", latexContent);
+        
         
         // Clean up the response - remove markdown code blocks and any extra whitespace
         latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
                                  .replace(/```\n?/g, '')        // Remove closing ```
                                  .trim();                       // Remove extra whitespace
-        
-        // For debugging
-        console.log('Cleaned response:', latexContent);
-        
-        // Parse the JSON to validate it
-        const parsedData = JSON.parse(latexContent);
+
+        let parsedData;
+        try {
+            parsedData = JSON.parse(latexContent);
+        } catch (parseError) {
+            console.error('Failed to parse AI response:', latexContent);
+            return res.status(500).json({ error: 'Failed to parse AI response' });
+        }
         
         // Generate the formatted LaTeX
-        const formattedLatex = generateCVLatex(parsedData);
+        let formattedLatex;
+        if (template === 'v2') {
+            formattedLatex = generateCVLatexTemplateV2(parsedData);
+        } else {
+            formattedLatex = generateCVLatexTemplateV1(parsedData);
+        }
+        console.log("formattedLatex:", formattedLatex);
         
-        // For debugging
-        console.log('Formatted LaTeX:', formattedLatex);
-
-        console.log('caling tex function');
-
-        // Wait for the URL to be returned
-        // const link = await convertLatexToPdfAndUpload(formattedLatex);
-
-        // console.log('File uploaded successfully');
-        // console.log('Link:', link); // Now this will show the actual URL
-
-        return formattedLatex;
+        res.json({ formattedLatex });
     } catch (error) {
         console.error('LaTeX conversion error:', error);
-        if (error instanceof SyntaxError) {
-            console.error('Invalid JSON response from AI:', latexContent);
-        }
-        throw new Error('Failed to convert to LaTeX');
+        res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });
     }
 };
 
+
+export const convertJsonTexToPdf = async (req, res) => {
+  const { formattedLatex } = req.body;
+  try {
+      const response = await axios.post(
+          'https://api.advicement.io/v1/templates/pub-tex-to-pdf-with-pdflatex-v1/compile',
+          {
+              texFileContent: formattedLatex
+          },
+          {
+              headers: {
+                  'Adv-Security-Token': process.env.ADVICEMENT_API_TOKEN,
+                  'Content-Type': 'application/json'
+              }
+          }
+      );
+
+      const statusUrl = response.data.documentStatusUrl;
+      console.log('Status URL:', statusUrl);
+      
+      if (!statusUrl) {
+          return res.status(400).json({ error: 'Status URL not found in the initial response' });
+      }
+
+      let attempts = 0;
+      const maxAttempts = 5;
+      const delayBetweenAttempts = 5000;
+
+      while (attempts < maxAttempts) {
+          const statusResponse = await axios.get(statusUrl);
+          console.log(`Attempt ${attempts + 1} - Status response:`, statusResponse.data);
+
+          if (!statusResponse.data) {
+              return res.status(400).json({ error: 'Invalid response from status endpoint' });
+          }
+
+          const pdfUrl = statusResponse.data.documentUrl;
+          console.log(`Attempt ${attempts + 1} - PDF URL:`, pdfUrl);
+
+          if (pdfUrl) {
+              return res.json({ pdfUrl }); // Return immediately when URL is found
+          }
+
+          // Only wait if we haven't reached max attempts
+          if (attempts < maxAttempts - 1) {
+              console.log(`PDF not ready yet. Waiting ${delayBetweenAttempts/1000} seconds before retry...`);
+              await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
+          }
+
+          attempts++;
+      }
+
+      // If we get here, we've exhausted all attempts without finding a URL
+      return res.status(408).json({ error: 'PDF URL not found after multiple attempts' });
+
+  } catch (error) {
+      console.error('Error converting LaTeX to PDF:', {
+          message: error.message,
+          response: error.response?.data
+      });
+      return res.status(500).json({ 
+          error: `LaTeX to PDF conversion failed: ${error.message}`
+      });
+  }
+}
 
 
 

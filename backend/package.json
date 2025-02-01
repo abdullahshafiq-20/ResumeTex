@@ -17,6 +17,7 @@
     "axios": "^1.7.9",
     "child_process": "^1.0.2",
     "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "fs-extra": "^11.3.0",
