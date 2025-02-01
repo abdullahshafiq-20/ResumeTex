@@ -198,18 +198,18 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     };
 
     return (
-        <div className="w-[500px] bg-white rounded-lg border shadow-md">
+        <div className="w-full max-w-[500px] bg-white rounded-lg border shadow-md">
             {/* Header */}
-            <div className="flex items-center justify-center p-4 border-b">
-                <h2 className="text-xl font-semibold">Upload Files</h2>
+            <div className="flex items-center justify-center p-3 sm:p-4 border-b">
+                <h2 className="text-lg sm:text-xl font-semibold">Upload Files</h2>
             </div>
 
             {/* Settings Panel - Always visible */}
-            <div className="p-4 border-b space-y-4">
+            <div className="p-3 sm:p-4 border-b space-y-3 sm:space-y-4">
                 {/* Model Selection */}
                 <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                        <label className="text-sm font-medium text-gray-700">Model Selection</label>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">Model Selection</label>
                         <div className="relative">
                             <button
                                 className="text-gray-400 hover:text-gray-600"
@@ -230,7 +230,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     <select
                         value={selectedModel}
                         onChange={handleModelChange}
-                        className="w-full p-2 border rounded-md text-sm bg-white"
+                        className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
                     >
                         <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                         <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option>
@@ -244,7 +244,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 {/* API Selection */}
                 <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                        <label className="text-sm font-medium text-gray-700">API Provider</label>
+                        <label className="text-xs sm:text-sm font-medium text-gray-700">API Provider</label>
                         <div className="relative">
                             <button
                                 className="text-gray-400 hover:text-gray-600"
@@ -265,7 +265,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     <select
                         value={selectedApi}
                         onChange={handleApiChange}
-                        className="w-full p-2 border rounded-md text-sm bg-white"
+                        className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
                     >
                         <option value="api_1">API 1 (Default)</option>
                         <option value="api_2">API 2</option>
@@ -278,12 +278,12 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-4">
+            <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                 {/* Upload Area */}
                 {!selectedFile && (
                     <div className={`border-2 border-dashed ${template ? 'border-gray-200' : 'border-gray-200 opacity-50'} rounded-lg p-2`}>
-                        <div className="flex flex-col items-center justify-center space-y-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 py-4">
+                            <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -291,7 +291,9 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                                 />
                             </svg>
-                            <p className="text-sm text-gray-600">Drag & drop your PDF file here or</p>
+                            <p className="text-xs sm:text-sm text-gray-600 text-center">
+                                Drag & drop your PDF file here or
+                            </p>
                             <input
                                 type="file"
                                 className="hidden"
@@ -302,7 +304,9 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                             />
                             <label
                                 htmlFor="fileInput"
-                                className={`px-4 py-2 text-sm ${template ? 'bg-gray-100 hover:bg-gray-200 cursor-pointer' : 'bg-gray-100 cursor-not-allowed'} rounded-md`}
+                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm ${
+                                    template ? 'bg-gray-100 hover:bg-gray-200 cursor-pointer' : 'bg-gray-100 cursor-not-allowed'
+                                } rounded-md`}
                             >
                                 Choose PDF file
                             </label>
@@ -310,11 +314,11 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     </div>
                 )}
 
-                {/* File Info and Template Info Combined */}
+                {/* File Info and Template Info */}
                 {selectedFile && (
                     <div className="space-y-2">
-                        <h3 className="text-sm font-medium">File and Template Information</h3>
-                        <div className="rounded-lg border p-3 space-y-3">
+                        <h3 className="text-xs sm:text-sm font-medium">File and Template Information</h3>
+                        <div className="rounded-lg border p-2 sm:p-3 space-y-2 sm:space-y-3">
                             {/* File Information */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -402,9 +406,9 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-center p-4 border-t">
+            <div className="flex justify-center p-3 sm:p-4 border-t">
                 <button
-                    className="px-6 py-2 text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     disabled={!selectedFile || isUploading || !isUploaded || isProcessing}
                     onClick={handleProcess}
                 >
