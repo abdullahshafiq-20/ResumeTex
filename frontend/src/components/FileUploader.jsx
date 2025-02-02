@@ -417,7 +417,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     </div>
                 )}
 
-                <p className="text-xs text-gray-500">Only PDF files. Maximum file size: 10MB</p>
+                <p className="text-xs text-gray-500">Only PDF files. Maximum file size: 5MB</p>
             </div>
 
             {/* Footer */}
