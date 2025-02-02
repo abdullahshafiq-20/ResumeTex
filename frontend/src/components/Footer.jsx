@@ -14,6 +14,9 @@ const Footer = () => {
           GitHub
         </a>
       </p>
+      <p className= 'text-sm' >
+      Uploaded files are temporarily stored on the server and automatically deleted after 5 minutes. No data is retained or saved.
+      </p>
     </footer>
   );
 };
