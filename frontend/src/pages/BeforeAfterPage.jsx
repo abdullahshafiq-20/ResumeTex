@@ -5,10 +5,12 @@ import SplitText from "../components/SplitText";
 import FileUploader from "../components/FileUploader";
 import axios from "axios";
 import Footer from "../components/Footer";
+// import DeploymentLogs from "../components/DeploymentLogs";
 
 const BeforeAfterPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null); // State to track selected template
   const api = import.meta.env.VITE_API_URL;
+  const [deploymentLog, setDeploymentLog] = useState({ type: '', message: '' });
 
   const images = [
     { id: 1, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440045/v1_wrpqtm.png", template: "v1" },
@@ -25,9 +27,24 @@ const BeforeAfterPage = () => {
   const handleFileUpload = async (uploadResponse) => {
     try {
       console.log("Upload successful:", uploadResponse);
+      setDeploymentLog({
+        type: 'success',
+        message: 'File uploaded successfully! Processing your resume...'
+      });
+      
+      // You can update this based on different response states
+      // if (uploadResponse.status === 'processing') {
+      //   setDeploymentLog({
+      //     type: 'normal',
+      //     message: 'Processing your resume. This might take a moment...'
+      //   });
+      // }
     } catch (error) {
       console.error("Error handling upload response:", error);
-      alert("Error processing the file");
+      setDeploymentLog({
+        type: 'danger',
+        message: 'Error processing the file. Please try again.'
+      });
     }
   };
 
@@ -84,7 +101,7 @@ const BeforeAfterPage = () => {
           </div>
         </div>
 
-        <div className="flex justify-center w-full px-2 sm:px-4">
+        <div className="flex  justify-center w-full px-2 sm:px-4">
           <FileUploader 
             onFileUpload={handleFileUpload}
             apiUrl={api}

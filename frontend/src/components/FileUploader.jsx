@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -18,7 +18,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     const [showModelInfo, setShowModelInfo] = useState(false);
     const [showApiInfo, setShowApiInfo] = useState(false);
     const [pId, setpId] = useState(null);
-    // const [fileName, setfileName] = useState(null);
 
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
@@ -212,8 +211,20 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
         }
     };
 
+
+
     return (
         <div className="w-full max-w-[500px] bg-white rounded-lg border shadow-md">
+            {/* Status Strip - Simplified to yellow only */}
+            <div className="h-6 rounded-t-lg flex items-center justify-end px-3 bg-yellow-400/20">
+                <div className="flex items-center space-x-2">
+                    <span className="text-xs text-yellow-600">
+                        API issue solved!
+                    </span>
+                    <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                </div>
+            </div>
+
             {/* Header */}
             <div className="flex items-center justify-center p-3 sm:p-4 border-b">
                 <h2 className="text-lg sm:text-xl font-semibold">Upload Files</h2>
