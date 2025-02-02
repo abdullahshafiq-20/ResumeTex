@@ -7,7 +7,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(
   {
-    origin: 'https://resume-tex.vercel.app',
+    origin: [
+      'https://resume-tex.vercel.app',
+      'http://localhost:5173'
+    ],
     credentials: true
   }
 ));

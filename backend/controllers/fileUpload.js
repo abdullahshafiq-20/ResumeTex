@@ -27,6 +27,7 @@ export const handlePdfUpload = async (file) => {
 
         return {
             url: uploadResult.secure_url,
+            publicId: uploadResult.public_id,
             name: uploadResult.original_filename,
         }
     } catch (error) {
@@ -77,6 +78,7 @@ export const pdfUpload = async (req, res) => {
                     res.json({
                         data: {
                             url: result.secure_url,
+                            publicId: result.public_id,
                             name: result.original_filename,
                         },
                         status: true,

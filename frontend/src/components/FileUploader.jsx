@@ -17,6 +17,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     const [selectedApi, setSelectedApi] = useState('api_1');
     const [showModelInfo, setShowModelInfo] = useState(false);
     const [showApiInfo, setShowApiInfo] = useState(false);
+    const [pId, setpId] = useState(null)
 
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
@@ -55,6 +56,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 console.log('Upload response:', response.data);
                 console.log('Setting pdfurl to:', response.data.data.url);
                 setPdfurl(response.data.data.url);
+                setpId(response.data.data.publicId);
             }
         } catch (error) {
             console.error('Upload failed:', error);
@@ -148,6 +150,16 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 });
                 
                 console.log('Pdflink:', Pdflink.data);
+
+                const DeleteFiles = await axios.post(`${apiUrl}/delete-files`, {
+                    publicId: pId
+                }, {
+                    headers: {
+                        'Content-Type':'application/json'
+                    }
+
+                })
+                console.log('Delete Response :', DeleteFiles.response )
 
                 // Navigate to response page with data
                 setTimeout(() => {
