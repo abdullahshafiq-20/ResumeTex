@@ -7,7 +7,6 @@ import { generateCVLatexTemplateV1 }  from "../utils/templateV1.js"
 import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
 // import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
 import dotenv from 'dotenv';
-import { parseDate } from "pdf-lib";
 dotenv.config();
 
 
@@ -300,55 +299,34 @@ export const ConvertLatex = async (req, res) => {
         4. Dont include any additional CV sections in the sections object, if you dont have the data for a section, dont include it in the JSON and if there is section which is not in the sections object, ajdust this data in the sections i have defined above. 
         5. Ensure all dates follow MMM YYYY format
         6. Preserve all URLs and links in their respective fields
-        7. If you see there are some description which are not upto the mark you are open to modify them but make sure the meaning of the description is not changed.`;
+        7. If you see there are some description which are not upto the mark you are open to modify them but make sure the meaning of the description is not changed.
+        8. Utilize all the data, it is vey important`;
 
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
         console.log("calling gemini api")
         const response = result.response;
+
+        console.log("response:", response);
+
+        console.log("response from gemini api");
         let latexContent = response.text();
 
-        // Clean and parse the response
-        let cleanedContent = latexContent;
+        console.log("latexContent:", latexContent);
         
-        // Remove markdown code blocks if present
-        if (cleanedContent.includes('```')) {
-            cleanedContent = cleanedContent.replace(/```json\n?/g, '')
-                                         .replace(/```\n?/g, '')
-                                         .trim();
-        }
-
-        // Try to find valid JSON within the response
-        let jsonStartIndex = cleanedContent.indexOf('{');
-        let jsonEndIndex = cleanedContent.lastIndexOf('}');
         
-        if (jsonStartIndex === -1 || jsonEndIndex === -1) {
-            console.error('No valid JSON structure found in response');
-            return res.status(500).json({ 
-                error: 'Invalid response format from AI',
-                details: 'Response does not contain valid JSON structure'
-            });
-        }
-
-        // Extract the JSON portion
-        cleanedContent = cleanedContent.substring(jsonStartIndex, jsonEndIndex + 1);
+        // Clean up the response - remove markdown code blocks and any extra whitespace
+        latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
+                                 .replace(/```\n?/g, '')        // Remove closing ```
+                                 .trim();                       // Remove extra whitespace
 
         let parsedData;
         try {
-            parsedData = JSON.parse(cleanedContent);
+            parsedData = JSON.parse(latexContent);
         } catch (parseError) {
-            console.error('Failed to parse AI response:', {
-                error: parseError.message,
-                content: cleanedContent
-            });
-            return res.status(500).json({ 
-                error: 'Failed to parse AI response',
-                details: parseError.message,
-                // Only include partial content in development
-                partialContent: process.env.NODE_ENV === 'development' ? 
-                    cleanedContent.substring(0, 200) + '...' : undefined
-            });
+            console.error('Failed to parse AI response:', latexContent);
+            return res.status(500).json({ error: 'Failed to parse AI response' });
         }
-
+        
         // Generate the formatted LaTeX
         let formattedLatex;
         if (template === 'v2') {
@@ -356,14 +334,12 @@ export const ConvertLatex = async (req, res) => {
         } else {
             formattedLatex = generateCVLatexTemplateV1(parsedData);
         }
+        console.log("formattedLatex:", formattedLatex);
         
         res.json({ formattedLatex });
     } catch (error) {
         console.error('LaTeX conversion error:', error);
-        res.status(500).json({ 
-            error: 'Failed to convert to LaTeX',
-            details: error.message 
-        });
+        res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });
     }
 };
 
@@ -432,7 +408,6 @@ export const convertJsonTexToPdf = async (req, res) => {
       });
   }
 }
-
 
 
 

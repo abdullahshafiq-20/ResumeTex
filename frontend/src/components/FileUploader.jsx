@@ -18,7 +18,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     const [showModelInfo, setShowModelInfo] = useState(false);
     const [showApiInfo, setShowApiInfo] = useState(false);
     const [pId, setpId] = useState(null);
-    const [fileName, setfileName] = useState(null);
+    // const [fileName, setfileName] = useState(null);
 
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
@@ -123,7 +123,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     }
                 });
                 console.log('Geminicall:', geminicall.data.formattedLatex);
-                setfileName(geminicall.data.name)
+                // setfileName(geminicall.data.name)
                 
                 // Step 3: LaTeX Ready
                 setProcessingStep('latex');
@@ -171,7 +171,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                         pdfUrl: Pdflink.data.pdfUrl,
                         latexCode: geminicall.data.formattedLatex,
                         latexFileUrl: latexFileUrl,
-                        name: fileName
+                        // name: fileName
                     }
                 });
 

@@ -15,7 +15,7 @@ export default function ResponsePage() {
   const pdfUrl = location.state?.pdfUrl || "";
   const latexCode = location.state?.latexCode || "";
   const latexFileUrl = location.state?.latexFileUrl || "";
-  const fileName = location.state?.name || "ResumeTex";
+  // const fileName = location.state?.name || "ResumeTex";
 
   console.log("PDF URL:", pdfUrl);
 
