@@ -329,7 +329,7 @@ export const ConvertLatex = async (req, res) => {
             return res.status(500).json({ error: 'Failed to parse AI response' });
         }
         
-        const name = parsedData.cv_template.sections.header.name;
+        // const name = parsedData.cv_template.sections.header.name;
         // Generate the formatted LaTeX
         let formattedLatex;
         if (template === 'v2') {
@@ -339,7 +339,7 @@ export const ConvertLatex = async (req, res) => {
         }
         console.log("formattedLatex:", formattedLatex);
         
-        res.json({ formattedLatex, name });
+        res.json({ formattedLatex});
     } catch (error) {
         console.error('LaTeX conversion error:', error);
         res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });
