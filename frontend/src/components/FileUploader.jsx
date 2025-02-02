@@ -248,7 +248,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                         className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
                     >
                         <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option>
+                        {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
                         <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                         {/* <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                         <option value="claude-3-opus">Claude 3 Opus</option>
