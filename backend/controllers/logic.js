@@ -7,6 +7,7 @@ import { generateCVLatexTemplateV1 }  from "../utils/templateV1.js"
 import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
 // import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
 import dotenv from 'dotenv';
+import { parseDate } from "pdf-lib";
 dotenv.config();
 
 
@@ -311,7 +312,9 @@ export const ConvertLatex = async (req, res) => {
         let latexContent = response.text();
 
         console.log("latexContent:", latexContent);
-        
+
+        // const FullName = response.text().sections.header.name;
+      
         
         // Clean up the response - remove markdown code blocks and any extra whitespace
         latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
@@ -326,6 +329,7 @@ export const ConvertLatex = async (req, res) => {
             return res.status(500).json({ error: 'Failed to parse AI response' });
         }
         
+        const name = parsedData.cv_template.sections.header.name;
         // Generate the formatted LaTeX
         let formattedLatex;
         if (template === 'v2') {
@@ -335,7 +339,7 @@ export const ConvertLatex = async (req, res) => {
         }
         console.log("formattedLatex:", formattedLatex);
         
-        res.json({ formattedLatex });
+        res.json({ formattedLatex, name });
     } catch (error) {
         console.error('LaTeX conversion error:', error);
         res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });
@@ -407,6 +411,7 @@ export const convertJsonTexToPdf = async (req, res) => {
       });
   }
 }
+
 
 
 

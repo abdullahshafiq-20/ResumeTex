@@ -15,6 +15,7 @@ export default function ResponsePage() {
   const pdfUrl = location.state?.pdfUrl || "";
   const latexCode = location.state?.latexCode || "";
   const latexFileUrl = location.state?.latexFileUrl || "";
+  const fileName = location.state?.name || "ResumeTex";
 
   console.log("PDF URL:", pdfUrl);
 
@@ -22,10 +23,7 @@ export default function ResponsePage() {
   const proxyPdfUrl = pdfUrl ? `${import.meta.env.VITE_API_URL}/proxy-pdf?url=${encodeURIComponent(pdfUrl)}` : "";
   const overleafProjectUrl = latexFileUrl ? `https://www.overleaf.com/docs?snip_uri=${latexFileUrl}` : "";
 
-  const sampleLatexCode = `\\documentclass[letterpaper,11pt]{article}
-\\usepackage{latexsym}
-\\usepackage{empty}{fullpage}
-\\usepackage{titlesec}`;
+
 
   const handleCopyClick = async () => {
     try {
