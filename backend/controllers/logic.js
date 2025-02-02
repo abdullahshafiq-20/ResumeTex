@@ -305,31 +305,50 @@ export const ConvertLatex = async (req, res) => {
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
         console.log("calling gemini api")
         const response = result.response;
-
-        console.log("response:", response);
-
-        console.log("response from gemini api");
         let latexContent = response.text();
 
-        console.log("latexContent:", latexContent);
-
-        // const FullName = response.text().sections.header.name;
-      
+        // Clean and parse the response
+        let cleanedContent = latexContent;
         
-        // Clean up the response - remove markdown code blocks and any extra whitespace
-        latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
-                                 .replace(/```\n?/g, '')        // Remove closing ```
-                                 .trim();                       // Remove extra whitespace
+        // Remove markdown code blocks if present
+        if (cleanedContent.includes('```')) {
+            cleanedContent = cleanedContent.replace(/```json\n?/g, '')
+                                         .replace(/```\n?/g, '')
+                                         .trim();
+        }
+
+        // Try to find valid JSON within the response
+        let jsonStartIndex = cleanedContent.indexOf('{');
+        let jsonEndIndex = cleanedContent.lastIndexOf('}');
+        
+        if (jsonStartIndex === -1 || jsonEndIndex === -1) {
+            console.error('No valid JSON structure found in response');
+            return res.status(500).json({ 
+                error: 'Invalid response format from AI',
+                details: 'Response does not contain valid JSON structure'
+            });
+        }
+
+        // Extract the JSON portion
+        cleanedContent = cleanedContent.substring(jsonStartIndex, jsonEndIndex + 1);
 
         let parsedData;
         try {
-            parsedData = JSON.parse(latexContent);
+            parsedData = JSON.parse(cleanedContent);
         } catch (parseError) {
-            console.error('Failed to parse AI response:', latexContent);
-            return res.status(500).json({ error: 'Failed to parse AI response' });
+            console.error('Failed to parse AI response:', {
+                error: parseError.message,
+                content: cleanedContent
+            });
+            return res.status(500).json({ 
+                error: 'Failed to parse AI response',
+                details: parseError.message,
+                // Only include partial content in development
+                partialContent: process.env.NODE_ENV === 'development' ? 
+                    cleanedContent.substring(0, 200) + '...' : undefined
+            });
         }
-        
-        // const name = parsedData.cv_template.sections.header.name;
+
         // Generate the formatted LaTeX
         let formattedLatex;
         if (template === 'v2') {
@@ -337,12 +356,14 @@ export const ConvertLatex = async (req, res) => {
         } else {
             formattedLatex = generateCVLatexTemplateV1(parsedData);
         }
-        console.log("formattedLatex:", formattedLatex);
         
-        res.json({ formattedLatex});
+        res.json({ formattedLatex });
     } catch (error) {
         console.error('LaTeX conversion error:', error);
-        res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });
+        res.status(500).json({ 
+            error: 'Failed to convert to LaTeX',
+            details: error.message 
+        });
     }
 };
 
