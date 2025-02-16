@@ -18,15 +18,10 @@ RUN apt-get update && apt-get install -y \
     texlive-fonts-extra \
     texlive-latex-recommended \
     texlive-luatex \
-    enumitem \
-    geometry \
-    hyperref \
-    fontspec \
-    xunicode \
-    xltxtra \
-    collection-fontsrecommended \
-    collection-latexrecommended \
     && rm -rf /var/lib/apt/lists/*
+
+# Create pdfs directory
+RUN mkdir -p pdfs && chmod 777 pdfs
 
 # Copy application files
 COPY . .
