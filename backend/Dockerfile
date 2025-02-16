@@ -1,0 +1,38 @@
+FROM node:18
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+# Install Node.js dependencies
+RUN npm install
+
+# Install required TeX Live packages
+RUN apt-get update && apt-get install -y \
+    texlive-latex-base \
+    texlive-latex-extra \
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-fonts-extra \
+    texlive-latex-recommended \
+    texlive-luatex \
+    enumitem \
+    geometry \
+    hyperref \
+    fontspec \
+    xunicode \
+    xltxtra \
+    collection-fontsrecommended \
+    collection-latexrecommended \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy application files
+COPY . .
+
+# Expose the application port
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
