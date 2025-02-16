@@ -2,12 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import latex from 'node-latex';
 import { promisify } from 'util';
-import { exec } from 'child_process';
 import { cloudinaryUploader } from "../utils/cloudinary.js";
 
 const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
-const execAsync = promisify(exec);
 
 export const convertJsonTexToPdfLocally = async (req, res) => {
     const { formattedLatex } = req.body;
@@ -17,21 +15,6 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
     }
 
     try {
-        // Verify pdflatex is installed
-        // try {
-        //     await execAsync('D:\\texlive\\2024\\bin\\windows\\pdflatex.exe --version', {
-        //         env: {
-        //             ...process.env,
-        //             PATH: `D:\\texlive\\2024\\bin\\windows;${process.env.PATH}`
-        //         }
-        //     });
-        // } catch (error) {
-        //     console.error('pdflatex is not installed or not accessible:', error);
-        //     return res.status(500).json({ 
-        //         error: 'LaTeX compiler not found or not accessible. Please check the installation.'
-        //     });
-        // }
-
         // Define output file paths
         const outputDir = path.resolve('pdfs');
         if (!fs.existsSync(outputDir)) {
@@ -52,13 +35,8 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
         const pdfStream = latex(formattedLatex, {
             errorLogs: path.join(outputDir, `latex_error_${timestamp}.log`),
             passes: 2,
-            cmd: 'D:\\texlive\\2024\\bin\\windows\\pdflatex.exe',
+            cmd: 'pdflatex', // Use system pdflatex
             inputs: [outputDir],
-            env: {
-                ...process.env,
-                PATH: `D:\\texlive\\2024\\bin\\windows;${process.env.PATH}`,
-                TEXINPUTS: '.:',
-            },
             precompiled: false,
             shellEscape: true
         });
@@ -68,7 +46,6 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
 
             pdfStream.on('error', async (err) => {
                 console.error('LaTeX compilation error:', err);
-                // Clean up the tex file if there's an error
                 try {
                     await unlinkAsync(texFilePath);
                 } catch (cleanupError) {
