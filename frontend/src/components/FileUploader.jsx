@@ -144,10 +144,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 setProcessingMessage('Converting to PDF...');
                 const Pdflink = await axios.post(`${apiUrl}/convertJsonTexToPdfLocally`, {
                     formattedLatex: geminicall.data.formattedLatex
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+
                 });
                 
                 console.log('Pdflink:', Pdflink.data);

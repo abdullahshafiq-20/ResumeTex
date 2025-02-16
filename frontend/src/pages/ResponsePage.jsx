@@ -20,7 +20,7 @@ export default function ResponsePage() {
   console.log("PDF URL:", pdfUrl);
 
   // Create proxy URL
-  const proxyPdfUrl = pdfUrl ? `${import.meta.env.VITE_API_URL}/proxy-pdf?url=${encodeURIComponent(pdfUrl)}` : "";
+  // const proxyPdfUrl = pdfUrl ? `${import.meta.env.VITE_API_URL}/proxy-pdf?url=${encodeURIComponent(pdfUrl)}` : "";
   const overleafProjectUrl = latexFileUrl ? `https://www.overleaf.com/docs?snip_uri=${latexFileUrl}` : "";
 
 

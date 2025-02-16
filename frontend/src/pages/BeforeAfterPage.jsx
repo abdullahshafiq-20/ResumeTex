@@ -10,7 +10,8 @@ import Footer from "../components/Footer";
 const BeforeAfterPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null); // State to track selected template
   const [serverStatus, setServerStatus] = useState('loading'); // 'loading', 'up', 'down'
-  const api = import.meta.env.VITE_API_URL_1;
+  const api = import.meta.env.VITE_API_URL;
+  const api_1 = import.meta.env.VITE_API_URL_1;
   const [deploymentLog, setDeploymentLog] = useState({ type: '', message: '' });
 
   // Status styles configuration
@@ -42,7 +43,7 @@ const BeforeAfterPage = () => {
   useEffect(() => {
     const checkServerStatus = async () => {
       try {
-        const response = await axios.get(`${api}/`);
+        const response = await axios.get(`${api_1}/`);
         console.log('Server check response:', response.status);
         if (response.status === 200) {
           setServerStatus('up');
