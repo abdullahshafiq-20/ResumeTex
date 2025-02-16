@@ -32,11 +32,25 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
         const output = fs.createWriteStream(pdfFilePath);
 
         // Use the LaTeX content directly instead of creating a read stream
+        // const pdfStream = latex(formattedLatex, {
+        //     errorLogs: path.join(outputDir, `latex_error_${timestamp}.log`),
+        //     passes: 2,
+        //     cmd: 'pdflatex', // Use system pdflatex
+        //     inputs: [outputDir],
+        //     precompiled: false,
+        //     shellEscape: true
+        // });
+
         const pdfStream = latex(formattedLatex, {
             errorLogs: path.join(outputDir, `latex_error_${timestamp}.log`),
             passes: 2,
-            cmd: 'pdflatex', // Use system pdflatex
+            cmd: 'D:\\texlive\\2024\\bin\\windows\\pdflatex.exe',
             inputs: [outputDir],
+            env: {
+                ...process.env,
+                PATH: `D:\\texlive\\2024\\bin\\windows;${process.env.PATH}`,
+                TEXINPUTS: '.:',
+            },
             precompiled: false,
             shellEscape: true
         });

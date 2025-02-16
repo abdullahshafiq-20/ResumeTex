@@ -18,7 +18,7 @@ app.use(cors(
 app.use("/api", routes);
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.status(200).json({ status: 'ok' });
 });
 
 app.listen(3000, () => {

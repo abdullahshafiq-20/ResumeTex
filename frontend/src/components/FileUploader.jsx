@@ -142,7 +142,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 // Step 4: PDF Conversion
                 setProcessingStep('converting');
                 setProcessingMessage('Converting to PDF...');
-                const Pdflink = await axios.post(`${apiUrl}/convert-json-tex-to-pdf`, {
+                const Pdflink = await axios.post(`${apiUrl}/convertJsonTexToPdfLocally`, {
                     formattedLatex: geminicall.data.formattedLatex
                 }, {
                     headers: {

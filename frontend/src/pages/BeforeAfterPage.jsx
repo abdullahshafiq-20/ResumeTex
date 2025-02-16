@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRightIcon } from "lucide-react";
 import Stack from "../components/Stack";
 import SplitText from "../components/SplitText";
@@ -9,8 +9,64 @@ import Footer from "../components/Footer";
 
 const BeforeAfterPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null); // State to track selected template
-  const api = import.meta.env.VITE_API_URL;
+  const [serverStatus, setServerStatus] = useState('loading'); // 'loading', 'up', 'down'
+  const api = import.meta.env.VITE_API_URL_1;
   const [deploymentLog, setDeploymentLog] = useState({ type: '', message: '' });
+
+  // Status styles configuration
+  const statusConfig = {
+    up: {
+      dotColor: 'bg-green-500',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+      borderColor: 'border-green-200',
+      text: 'Server Online'
+    },
+    loading: {
+      dotColor: 'bg-orange-500',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-700',
+      borderColor: 'border-orange-200',
+      text: 'Checking Status...'
+    },
+    down: {
+      dotColor: 'bg-red-500',
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-700',
+      borderColor: 'border-red-200',
+      text: 'Server Offline'
+    }
+  };
+
+  // Check server status
+  useEffect(() => {
+    const checkServerStatus = async () => {
+      try {
+        const response = await axios.get(`${api}/`);
+        console.log('Server check response:', response.status);
+        if (response.status === 200) {
+          setServerStatus('up');
+        } else {
+          setServerStatus('down');
+        }
+      } catch (error) {
+        console.error('Server check failed:', error);
+        setServerStatus('down');
+      }
+    };
+
+    // Initial check
+    checkServerStatus();
+
+    // Set up interval to check every 30 seconds
+    const interval = setInterval(checkServerStatus, 30000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, [api]);
+
+  // Get current status configuration
+  const currentStatus = statusConfig[serverStatus];
 
   const images = [
     { id: 1, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440045/v1_wrpqtm.png", template: "v1" },
@@ -53,7 +109,31 @@ const BeforeAfterPage = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
+      {/* Enhanced Server Status Indicator */}
+      <div className={`
+        absolute top-4 right-4 
+        flex items-center gap-2 
+        ${currentStatus.bgColor}
+        ${currentStatus.textColor}
+        border ${currentStatus.borderColor}
+        rounded-full px-4 py-2 
+        shadow-sm
+        transition-all duration-300 ease-in-out
+      `}>
+        <div className="flex items-center gap-2">
+          <div className={`
+            w-2.5 h-2.5 rounded-full 
+            ${currentStatus.dotColor}
+            ${serverStatus === 'loading' ? 'animate-pulse' : ''}
+            shadow-sm
+          `}/>
+          <span className="text-sm font-medium whitespace-nowrap">
+            {currentStatus.text}
+          </span>
+        </div>
+      </div>
+
       <div className="max-w-4xl w-full">
         <div className="text-center mb-8 sm:mb-12">
           <SplitText
