@@ -8,7 +8,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: [
     'https://resume-tex.vercel.app',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://resumeconvertorlatex.onrender.com'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -16,10 +17,23 @@ app.use(cors({
   exposedHeaders: ['Content-Disposition', 'Content-Length']
 }));
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 app.use("/api", routes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ status: 'ok' });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Something went wrong!',
+    message: err.message 
+  });
 });
 
 app.listen(3000, () => {
