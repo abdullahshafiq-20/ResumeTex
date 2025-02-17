@@ -7,6 +7,7 @@ import { generateCVLatexTemplateV1 }  from "../utils/templateV1.js"
 import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
 // import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
 import dotenv from 'dotenv';
+import { generateCVLatexTemplateV3 } from "../utils/templateV3.js";
 dotenv.config();
 
 
@@ -331,8 +332,12 @@ export const ConvertLatex = async (req, res) => {
         let formattedLatex;
         if (template === 'v2') {
             formattedLatex = generateCVLatexTemplateV2(parsedData);
-        } else {
+
+        } else if (template === 'v1') {
             formattedLatex = generateCVLatexTemplateV1(parsedData);
+        }
+        else {
+          formattedLatex = generateCVLatexTemplateV3(parsedData);
         }
         console.log("formattedLatex:", formattedLatex);
         

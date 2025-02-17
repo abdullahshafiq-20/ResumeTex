@@ -91,7 +91,7 @@ export default function ResponsePage() {
               <div className="p-3">
                 <div className="flex justify-end mb-3">
                   <a
-                    href={proxyPdfUrl}
+                    href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
@@ -123,7 +123,7 @@ export default function ResponsePage() {
                   </div>
                 ) : (
                   <CustomPDFViewer 
-                    pdfUrl={proxyPdfUrl}
+                    pdfUrl={pdfUrl}
                     onError={() => setPdfError(true)}
                   />
                 )}
