@@ -110,89 +110,92 @@ const BeforeAfterPage = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
-      {/* Enhanced Server Status Indicator */}
-      <div className={`
-        absolute top-4 right-4 
-        flex items-center gap-2 
-        ${currentStatus.bgColor}
-        ${currentStatus.textColor}
-        border ${currentStatus.borderColor}
-        rounded-full px-4 py-2 
-        shadow-sm
-        transition-all duration-300 ease-in-out
-      `}>
-        <div className="flex items-center gap-2">
-          <div className={`
-            w-2.5 h-2.5 rounded-full 
-            ${currentStatus.dotColor}
-            ${serverStatus === 'loading' ? 'animate-pulse' : ''}
-            shadow-sm
-          `}/>
-          <span className="text-sm font-medium whitespace-nowrap">
-            {currentStatus.text}
-          </span>
-        </div>
-      </div>
+    // <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
+    //   {/* Enhanced Server Status Indicator */}
+    //   <div className={`
+    //     absolute top-4 right-4 
+    //     flex items-center gap-2 
+    //     ${currentStatus.bgColor}
+    //     ${currentStatus.textColor}
+    //     border ${currentStatus.borderColor}
+    //     rounded-full px-4 py-2 
+    //     shadow-sm
+    //     transition-all duration-300 ease-in-out
+    //   `}>
+    //     <div className="flex items-center gap-2">
+    //       <div className={`
+    //         w-2.5 h-2.5 rounded-full 
+    //         ${currentStatus.dotColor}
+    //         ${serverStatus === 'loading' ? 'animate-pulse' : ''}
+    //         shadow-sm
+    //       `}/>
+    //       <span className="text-sm font-medium whitespace-nowrap">
+    //         {currentStatus.text}
+    //       </span>
+    //     </div>
+    //   </div>
 
-      <div className="max-w-4xl w-full">
-        <div className="text-center mb-8 sm:mb-12">
-          <SplitText
-            text="ResumeTex"
-            className="text-3xl sm:text-4xl font-bold text-center text-black mb-4"
-            delay={100}
-            animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
-            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
-            easing="easeOutCubic"
-            threshold={0.2}
-            rootMargin="-50px"
-            onLetterAnimationComplete={handleAnimationComplete}
-          />
-          <p className="text-lg sm:text-xl text-gray-600 px-2 sm:px-4">
-            Transforming Simple PDFs into Professional LaTeX Resumes Effortlessly!
-          </p>
-        </div>
+    //   <div className="max-w-4xl w-full">
+    //     <div className="text-center mb-8 sm:mb-12">
+    //       <SplitText
+    //         text="ResumeTex"
+    //         className="text-3xl sm:text-4xl font-bold text-center text-black mb-4"
+    //         delay={100}
+    //         animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
+    //         animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
+    //         easing="easeOutCubic"
+    //         threshold={0.2}
+    //         rootMargin="-50px"
+    //         onLetterAnimationComplete={handleAnimationComplete}
+    //       />
+    //       <p className="text-lg sm:text-xl text-gray-600 px-2 sm:px-4">
+    //         Transforming Simple PDFs into Professional LaTeX Resumes Effortlessly!
+    //       </p>
+    //     </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 mb-8 sm:mb-12">
-          <div className="relative w-[200px] sm:w-[250px] h-[320px] sm:h-[400px] transform -rotate-3">
-            <img
-              src="https://cdn-images.zety.com/templates/zety/enfold-18-duo-blue-navy-1165@1x.png"
-              alt="Before"
-              className="w-full h-full object-fit rounded-lg shadow-lg"
-            />
-            <span className="absolute bottom-4 left-4 bg-[#2563EB] text-white px-2 py-1 rounded text-sm font-semibold">
-              Before
-            </span>
-          </div>
+    //     <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 mb-8 sm:mb-12">
+    //       <div className="relative w-[200px] sm:w-[250px] h-[320px] sm:h-[400px] transform -rotate-3">
+    //         <img
+    //           src="https://cdn-images.zety.com/templates/zety/enfold-18-duo-blue-navy-1165@1x.png"
+    //           alt="Before"
+    //           className="w-full h-full object-fit rounded-lg shadow-lg"
+    //         />
+    //         <span className="absolute bottom-4 left-4 bg-[#2563EB] text-white px-2 py-1 rounded text-sm font-semibold">
+    //           Before
+    //         </span>
+    //       </div>
 
-          <ArrowRightIcon className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 rotate-90 md:rotate-0" />
+    //       <ArrowRightIcon className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 rotate-90 md:rotate-0" />
 
-          <div className="relative transform rotate-3">
-            <Stack
-              randomRotation={true}
-              sensitivity={180}
-              sendToBackOnClick={false}
-              cardDimensions={{ 
-                width: window.innerWidth < 640 ? 220 : 270, 
-                height: window.innerWidth < 640 ? 340 : 420 
-              }}
-              cardsData={images}
-              onTemplateSelect={handleTemplateSelection}
-            />
-          </div>
-        </div>
+    //       <div className="relative transform rotate-3">
+    //         <Stack
+    //           randomRotation={true}
+    //           sensitivity={180}
+    //           sendToBackOnClick={false}
+    //           cardDimensions={{ 
+    //             width: window.innerWidth < 640 ? 220 : 270, 
+    //             height: window.innerWidth < 640 ? 340 : 420 
+    //           }}
+    //           cardsData={images}
+    //           onTemplateSelect={handleTemplateSelection}
+    //         />
+    //       </div>
+    //     </div>
 
-        <div className="flex  justify-center w-full px-2 sm:px-4">
-          <FileUploader 
-            onFileUpload={handleFileUpload}
-            apiUrl={api}
-            template={selectedTemplate}
-          />
-        </div>
+    //     <div className="flex  justify-center w-full px-2 sm:px-4">
+    //       <FileUploader 
+    //         onFileUpload={handleFileUpload}
+    //         apiUrl={api}
+    //         template={selectedTemplate}
+    //       />
+    //     </div>
 
-        <Footer />
-      </div>
-    </div>
+    //     <Footer />
+    //   </div>
+    // </div>
+    <>
+    <h1>Sorry, this page is under construction</h1>
+    </>
   );
 };
 
