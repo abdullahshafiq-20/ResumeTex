@@ -279,13 +279,16 @@ ${projectItems}`;
             const certItems = certifications.items.map(cert => {
                 const startDate = cert.date?.start ? formatDate(cert.date.start) : '';
                 const endDate = cert.date?.end ? formatDate(cert.date.end) : 'Present';
+                const dateStr = startDate || endDate ? ` (${startDate}${startDate && endDate ? ' - ' : ''}${endDate})` : '';
 
-                return `\\cvitem{${createHyperlink(cert.title || '', cert.url || '')}}{${escapeLaTeX(cert.institution || '')}${startDate || endDate ? ` (${startDate}${startDate && endDate ? ' - ' : ''}${endDate})` : ''}}`
+                return `    \\item ${createHyperlink(cert.title || '', cert.url || '')} -- ${escapeLaTeX(cert.institution || '')}${dateStr}`;
             }).join('\n');
 
             return `
 \\section{${escapeLaTeX(certifications.section_title || 'Certifications')}}
-${certItems}`;
+\\begin{itemize}[leftmargin=*]
+${certItems}
+\\end{itemize}`;
         },
 
         courses: () => {
@@ -320,12 +323,14 @@ ${validCourses.join('\n')}
             if (!languages || !languages.items || !languages.items.length) return '';
 
             const languageItems = languages.items.map(lang =>
-                `\\cvitem{${escapeLaTeX(lang.name)}}{${escapeLaTeX(lang.proficiency)}}`
+                `    \\item ${escapeLaTeX(lang.name)} -- ${escapeLaTeX(lang.proficiency)}`
             ).join('\n');
 
             return `
-  \\section{${escapeLaTeX(languages.section_title)}}
-  ${languageItems}`;
+\\section{${escapeLaTeX(languages.section_title)}}
+\\begin{itemize}[leftmargin=*]
+${languageItems}
+\\end{itemize}`;
         },
 
         volunteer: () => {
@@ -365,13 +370,16 @@ ${createListItems(vol.achievements)}
             const publications = cvData.cv_template.sections.publications;
             if (!publications || !publications.items || !publications.items.length) return '';
 
-            const pubItems = publications.items.map(pub =>
-                `\\cvitem{${createHyperlink(pub.title, pub.url)}}{${formatDate(pub.date)}}`
-            ).join('\n');
+            const pubItems = publications.items.map(pub => {
+                const date = formatDate(pub.date);
+                return `    \\item ${createHyperlink(pub.title || '', pub.url || '')}${date ? ` (${date})` : ''}`;
+            }).join('\n');
 
             return `
-  \\section{${escapeLaTeX(publications.section_title)}}
-  ${pubItems}`;
+\\section{${escapeLaTeX(publications.section_title || 'Publications')}}
+\\begin{itemize}[leftmargin=*]
+${pubItems}
+\\end{itemize}`;
         },
 
         interests: () => {

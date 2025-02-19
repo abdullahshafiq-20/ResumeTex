@@ -18,13 +18,13 @@ RUN apt-get update && apt-get install -y \
     texlive-fonts-extra \
     texlive-latex-recommended \
     texlive-luatex \
-    texlive-font-utils \
-    lmodern \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure the fullpage.sty and marvosym packages are available
-RUN tlmgr init-usertree || true && \
-    tlmgr install fullpage marvosym || true
+# Install the specific packages that were causing errors
+RUN apt-get update && apt-get install -y \
+    texlive-publishers \    # Contains preprint package which includes fullpage.sty
+    texlive-font-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create pdfs directory
 RUN mkdir -p pdfs && chmod 777 pdfs
