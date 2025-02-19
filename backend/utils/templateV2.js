@@ -402,6 +402,100 @@ ${createListItems(vol.achievements)}
             return `
   \\section{${escapeLaTeX(references.section_title)}}
   ${refItems}`;
+        },
+
+        achievements: () => {
+            const achievements = cvData.cv_template.sections.achievements;
+            if (!achievements?.items?.length) return '';
+
+            const achievementItems = achievements.items.map(achievement => {
+                const date = achievement.date ? formatDate(achievement.date) : '';
+                const description = achievement.description || '';
+                const organization = achievement.organization || '';
+
+                return `    \\item \\textbf{${escapeLaTeX(organization)}}${date ? ` (${date})` : ''}: ${escapeLaTeX(description)}`;
+            }).filter(Boolean).join('\n');
+
+            if (!achievementItems) return '';
+
+            return `
+  \\section{${escapeLaTeX(achievements.section_title || 'Achievements')}}
+  \\begin{itemize}[leftmargin=*]
+${achievementItems}
+  \\end{itemize}`;
+        },
+
+        patents: () => {
+            const patents = cvData.cv_template.sections.patents;
+            if (!patents?.items?.length) return '';
+
+            const patentItems = patents.items.map(patent => {
+                const title = patent.title || '';
+                const number = patent.number || '';
+                const date = patent.date ? formatDate(patent.date) : '';
+                const status = patent.status || '';
+                const inventors = patent.inventors?.join(', ') || '';
+
+                return `    \\item \\textbf{${escapeLaTeX(title)}} ${number ? `(${escapeLaTeX(number)})` : ''}
+      ${date ? `\\\\Filed: ${date}` : ''}${status ? ` | Status: ${escapeLaTeX(status)}` : ''}
+      ${inventors ? `\\\\Inventors: ${escapeLaTeX(inventors)}` : ''}`;
+            }).filter(Boolean).join('\n\n');
+
+            if (!patentItems) return '';
+
+            return `
+  \\section{${escapeLaTeX(patents.section_title || 'Patents')}}
+  \\begin{itemize}[leftmargin=*]
+${patentItems}
+  \\end{itemize}`;
+        },
+
+        research: () => {
+            const research = cvData.cv_template.sections.research;
+            if (!research?.items?.length) return '';
+
+            const researchItems = research.items.map(item => {
+                const title = item.title || '';
+                const institution = item.institution || '';
+                const startDate = item.dates?.start ? formatDate(item.dates.start) : '';
+                const endDate = item.dates?.end ? formatDate(item.dates.end) : '';
+                const supervisor = item.supervisor || '';
+                const description = item.description || '';
+
+                return `    \\resumeSubheading
+      {${escapeLaTeX(title)}}{${startDate}${startDate || endDate ? ' -- ' : ''}${endDate}}
+      {${escapeLaTeX(institution)}}{${escapeLaTeX(supervisor)}${supervisor ? ' (Supervisor)' : ''}}
+      ${description ? `\\resumeItemListStart
+        \\resumeItem{${escapeLaTeX(description)}}
+      \\resumeItemListEnd` : ''}`;
+            }).filter(Boolean).join('\n\n');
+
+            if (!researchItems) return '';
+
+            return `
+  \\section{${escapeLaTeX(research.section_title || 'Research Experience')}}
+  \\resumeSubHeadingListStart
+${researchItems}
+  \\resumeSubHeadingListEnd`;
+        },
+
+        custom: () => {
+            const customSections = cvData.cv_template.sections.custom;
+            if (!customSections?.length) return '';
+
+            return customSections.map(section => {
+                if (!section?.title || !section?.content) return '';
+
+                const content = Array.isArray(section.content) 
+                    ? `\\begin{itemize}[leftmargin=*]
+    ${section.content.map(item => `\\item ${escapeLaTeX(item)}`).join('\n    ')}
+    \\end{itemize}`
+                    : escapeLaTeX(section.content);
+
+                return `
+  \\section{${escapeLaTeX(section.title)}}
+  ${content}`;
+            }).filter(Boolean).join('\n\n');
         }
     };
 

@@ -143,7 +143,7 @@ export const ConvertLatex = async (req, res) => {
           "cv_template": {
             "metadata": {
               "section_order": [
-                "header", "summary", "experience", "education", "skills", "projects", "certifications", "courses", "languages", "volunteer", "awards", "publications", "interests", "references"
+                "header", "summary", "experience", "education", "skills", "projects", "certifications", "courses", "languages", "volunteer", "awards", "publications", "interests", "references", 'achievements', 'patents', 'research', 'custom'
               ]
             },
             "sections": {
@@ -281,6 +281,49 @@ export const ConvertLatex = async (req, res) => {
                     "email": "Email",
                     "phone": "Phone Number"
                   }
+                ]
+              },
+              achievements: {
+                section_title: "Awards & Achievements",
+                items: [
+                    {
+                        organization: "Example Organization",
+                        description: "Achievement description",
+                        date: "2023-01-01"
+                    }
+                ]
+              },
+              patents: {
+                section_title: "Patents",
+                items: [
+                    {
+                        title: "Patent Title",
+                        number: "Patent Number",
+                        url: "Patent URL",
+                        date: "2023-01-01"
+                    }
+                ]
+              },
+              research: {
+                section_title: "Research",
+                items: [
+                    {
+                        title: "Research Title",
+                        description: "Research Description",
+                        url: "Research URL",
+                        date: "2023-01-01"
+                    }
+                ]
+              },
+              custom: {
+                section_title: "Custom Section",
+                items: [
+                    {
+                        title: "Custom Item Title",
+                        description: "Custom Item Description",
+                        url: "Custom Item URL",
+                        date: "2023-01-01"
+                    }
                 ]
               }
             },
