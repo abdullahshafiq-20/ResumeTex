@@ -44,7 +44,7 @@ const BeforeAfterPage = () => {
     const checkServerStatus = async () => {
       try {
         const response = await axios.get(`${api_1}/`);
-        console.log('Server check response:', response.status);
+        // console.log('Server check response:', response.status);
         if (response.status === 200) {
           setServerStatus('up');
         } else {
@@ -70,20 +70,21 @@ const BeforeAfterPage = () => {
   const currentStatus = statusConfig[serverStatus];
 
   const images = [
-    { id: 1, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440045/v1_wrpqtm.png", template: "v1" },
+    // { id: 1, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440045/v1_wrpqtm.png", template: "v1" },
     { id: 2, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440050/v2_aw24xg.png", template: "v2" },
+    // { id: 2, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440050/v2_aw24xg.png", template: "v2" },
     // { id: 3, img: "https://images.unsplash.com/photo-1452626212852-811d58933cae?q=80&w=500&auto=format", template: "v3" },
     // { id: 4, img: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=500&auto=format", template: "v4" },
   ];
 
   const handleTemplateSelection = (template) => {
     setSelectedTemplate(template);
-    console.log("Selected template:", template);
+    // console.log("Selected template:", template);
   };
 
   const handleFileUpload = async (uploadResponse) => {
     try {
-      console.log("Upload successful:", uploadResponse);
+      // console.log("Upload successful:", uploadResponse);
       setDeploymentLog({
         type: 'success',
         message: 'File uploaded successfully! Processing your resume...'
@@ -106,7 +107,7 @@ const BeforeAfterPage = () => {
   };
 
   const handleAnimationComplete = () => {
-    console.log("All letters have animated");
+    // console.log("All letters have animated");
   };
 
   return (

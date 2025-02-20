@@ -17,7 +17,7 @@ export default function ResponsePage() {
   const latexFileUrl = location.state?.latexFileUrl || "";
   // const fileName = location.state?.name || "ResumeTex";
 
-  console.log("PDF URL:", pdfUrl);
+  // console.log("PDF URL:", pdfUrl);
 
   // Create proxy URL
   // const proxyPdfUrl = pdfUrl ? `${import.meta.env.VITE_API_URL}/proxy-pdf?url=${encodeURIComponent(pdfUrl)}` : "";

@@ -359,11 +359,17 @@ ${createListItems(vol.achievements)}
             const awards = cvData.cv_template.sections.awards;
             if (!awards || !awards.items || !awards.items.length) return '';
 
+            const awardItems = awards.items.map(award => {
+                const title = award.title || '';
+                const institution = award.institution ? ` - ${award.institution}` : '';
+                return `    \\item ${createHyperlink(title, award.url || '')}${institution}`;
+            }).join('\n');
+
             return `
-  \\section{${escapeLaTeX(awards.section_title)}}
-  \\begin{itemize}[leftmargin=*]
-  ${createListItems(awards.items)}
-  \\end{itemize}`;
+\\section{${escapeLaTeX(awards.section_title)}}
+\\begin{itemize}[leftmargin=*]
+${awardItems}
+\\end{itemize}`;
         },
 
         publications: () => {
