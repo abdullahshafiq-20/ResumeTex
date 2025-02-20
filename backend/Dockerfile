@@ -22,8 +22,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install the specific packages that were causing errors
 RUN apt-get update && apt-get install -y \
-    texlive-publishers \    # Contains preprint package which includes fullpage.sty
-    # texlive-font-utils \
+    texlive-publishers \
     && rm -rf /var/lib/apt/lists/*
 
 # Create pdfs directory
