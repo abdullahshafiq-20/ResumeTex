@@ -5,6 +5,7 @@ import SplitText from "../components/SplitText";
 import FileUploader from "../components/FileUploader";
 import axios from "axios";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 // import DeploymentLogs from "../components/DeploymentLogs";
 
 const BeforeAfterPage = () => {
@@ -13,6 +14,7 @@ const BeforeAfterPage = () => {
   const api = import.meta.env.VITE_API_URL;
   const api_1 = import.meta.env.VITE_API_URL_1;
   const [deploymentLog, setDeploymentLog] = useState({ type: '', message: '' });
+  const navigate = useNavigate();
 
   // Status styles configuration
   const statusConfig = {
@@ -119,10 +121,11 @@ const BeforeAfterPage = () => {
         ${currentStatus.bgColor}
         ${currentStatus.textColor}
         border ${currentStatus.borderColor}
-        rounded-full px-4 py-2 
+        rounded-lg px-4 py-2 
         shadow-sm
         transition-all duration-300 ease-in-out
       `}>
+
         <div className="flex items-center gap-2">
           <div className={`
             w-2.5 h-2.5 rounded-full 
@@ -134,7 +137,14 @@ const BeforeAfterPage = () => {
             {currentStatus.text}
           </span>
         </div>
+        
       </div>
+      <button
+        onClick={() => navigate('/bug-report')}
+        className="absolute top-4 left-4 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 ease-in-out shadow-sm"
+      >
+        Report Bug
+      </button>
 
       <div className="max-w-4xl w-full">
         <div className="text-center mb-8 sm:mb-12">

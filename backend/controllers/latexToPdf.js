@@ -3,12 +3,15 @@ import path from 'path';
 import latex from 'node-latex';
 import { promisify } from 'util';
 import { cloudinaryUploader } from "../utils/cloudinary.js";
+import { transporter } from '../utils/transporter.js';
+import { emailTemplate } from '../utils/emailTemplate.js';
 
 const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
 
 export const convertJsonTexToPdfLocally = async (req, res) => {
-    const { formattedLatex } = req.body;
+    const { formattedLatex, email } = req.body;
+    console.log("emial: ",email)
 
     if (!formattedLatex) {
         return res.status(400).json({ error: 'LaTeX content is required' });
@@ -81,6 +84,17 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                     await unlinkAsync(pdfFilePath);
 
                     // Return only the secure URL
+                    const emailData = {
+                        from: process.env.EMAIL,
+                        to: email,
+                        subject: `Your ResumeTex PDF is Ready`,
+                        html: emailTemplate(uploadResult.secure_url),
+                    };
+                    try {
+                        await transporter.sendMail(emailData);
+                    } catch (error) {
+                        console.error(error);
+                    }
                     res.status(200).json({
                         pdfUrl: uploadResult.secure_url
                     });

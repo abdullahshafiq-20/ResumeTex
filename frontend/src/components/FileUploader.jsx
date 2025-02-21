@@ -122,6 +122,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     }
                 });
                 console.log('Geminicall:', geminicall.data.formattedLatex);
+                const recEmail = geminicall.data.email;
                 // setfileName(geminicall.data.name)
                 
                 // Step 3: LaTeX Ready
@@ -130,7 +131,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Brief pause to show message
 
                 const LatexUrl = await axios.post(`${apiUrl}/tex-content`, {
-                    formattedLatex: geminicall.data.formattedLatex
+                    formattedLatex: geminicall.data.formattedLatex,
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -143,7 +144,8 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 setProcessingStep('converting');
                 setProcessingMessage('Converting to PDF...');
                 const Pdflink = await axios.post(`${apiUrl}/convertJsonTexToPdfLocally`, {
-                    formattedLatex: geminicall.data.formattedLatex
+                    formattedLatex: geminicall.data.formattedLatex,
+                    email : recEmail
                 }, {
                     headers: {
                         'Content-Type': 'application/json'

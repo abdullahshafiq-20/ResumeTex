@@ -8,6 +8,7 @@ import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
 // import  convertJsonTexToPdf  from "../utils/JsonTextoPdf.js"
 import dotenv from 'dotenv';
 import { generateCVLatexTemplateV3 } from "../utils/templateV3.js";
+import { log } from "console";
 dotenv.config();
 
 
@@ -350,12 +351,12 @@ export const ConvertLatex = async (req, res) => {
         console.log("calling gemini api")
         const response = result.response;
 
-        console.log("response:", response);
+        // console.log("response:", response);
 
         console.log("response from gemini api");
         let latexContent = response.text();
 
-        console.log("latexContent:", latexContent);
+        // console.log("latexContent:", latexContent);
         
         
         // Clean up the response - remove markdown code blocks and any extra whitespace
@@ -372,6 +373,8 @@ export const ConvertLatex = async (req, res) => {
         }
         
         // Generate the formatted LaTeX
+        const email = parsedData.cv_template.sections.header.contact_info.email.value;
+        console.log("email:", email);
         let formattedLatex;
         if (template === 'v2') {
             formattedLatex = generateCVLatexTemplateV2(parsedData);
@@ -382,9 +385,9 @@ export const ConvertLatex = async (req, res) => {
         else {
           formattedLatex = generateCVLatexTemplateV3(parsedData);
         }
-        console.log("formattedLatex:", formattedLatex);
+        // console.log("formattedLatex:", formattedLatex);
         
-        res.json({ formattedLatex });
+        res.json({ formattedLatex, email });
     } catch (error) {
         console.error('LaTeX conversion error:', error);
         res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });

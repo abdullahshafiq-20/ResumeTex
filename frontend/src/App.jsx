@@ -4,6 +4,7 @@ import Squares from "./components/background/Squares";
 import SplitText from "./components/SplitText";
 import BeforeAfterPage from "./pages/BeforeAfterPage";
 import ResponsePage from "./pages/ResponsePage";
+import BugReportPage from "./pages/BugReportPage";
 import FileUploader from "./components/FileUploader";
 import { Toaster } from 'react-hot-toast';
 
@@ -33,6 +34,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<BeforeAfterPage />} />
             <Route path="/response" element={<ResponsePage />} />
+            <Route path="/bug-report" element={<BugReportPage />} />
           </Routes>
         </div>
       </div>

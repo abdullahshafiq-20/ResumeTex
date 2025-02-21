@@ -3,10 +3,10 @@ import { pdfUpload } from "../controllers/fileUpload.js"
 import { cloudinaryConfig } from "../utils/cloudinary.js"
 import { extractPdfData, ConvertLatex, convertJsonTexToPdf } from "../controllers/logic.js"
 import {proxyPdf} from "../controllers/proxyPdf.js"
-import axios from "axios"
 import { texContentUpload } from "../controllers/texFileUpload.js"
 import { deleteFilesController } from '../controllers/deleteFile.js'
 import { convertJsonTexToPdfLocally } from '../controllers/latexToPdf.js'
+import { bugForm } from "../controllers/bugForm.js"
 
 const router = express.Router();
 
@@ -19,6 +19,7 @@ router.post("/convert-json-tex-to-pdf", convertJsonTexToPdf)
 router.post("/tex-content", texContentUpload)
 router.post('/delete-files', deleteFilesController)
 router.post('/convertJsonTexToPdfLocally', convertJsonTexToPdfLocally)
+router.post('/bugForm', bugForm)
 
 
 
