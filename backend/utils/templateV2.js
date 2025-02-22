@@ -357,61 +357,35 @@ ${createListItems(vol.achievements)}
 
         awards: () => {
             const awards = cvData.cv_template.sections.awards;
-            if (!awards?.items?.length) return '';
-        
-            const awardItems = awards.items.map(award => {
-                // Handle both string and object formats
-                if (typeof award === 'string') {
-                    return `    \\item ${escapeLaTeX(award)}`;
-                }
-                const title = award.title || '';
-                const institution = award.institution ? ` - ${award.institution}` : '';
-                return `    \\item ${createHyperlink(title, award.url || '')}${institution}`;
-            }).join('\n');
-        
+            if (!awards || !awards.items || !awards.items.length) return '';
+
+            const awardItems = awards.items.map(award => `
+    \\resumeSubheading
+      {${escapeLaTeX(award.organization)}}{${formatDate(award.date)}}
+      {${escapeLaTeX(award.description)}}{}
+    `).join('\n');
+
             return `
-        \\section{${escapeLaTeX(awards.section_title || 'Awards & Achievements')}}
-        \\begin{itemize}[leftmargin=*]
-        ${awardItems}
-        \\end{itemize}`;
+\\section{${escapeLaTeX(awards.section_title)}}
+\\resumeSubHeadingListStart
+${awardItems}
+\\resumeSubHeadingListEnd`;
         },
-        
-        references: () => {
-            const references = cvData.cv_template.sections.references;
-            if (!references?.items?.length) return '';
-        
-            const refItems = references.items.map(ref => {
-                const parts = [];
-                
-                // Only add name if it exists
-                if (ref.name) {
-                    parts.push(`    \\item {\\textbf{${escapeLaTeX(ref.name)}}}`);
-                }
-        
-                // Combine title and company if either exists
-                const titlePart = ref.title ? escapeLaTeX(ref.title) : '';
-                const companyPart = ref.company ? `, ${escapeLaTeX(ref.company)}` : '';
-                if (titlePart || companyPart) {
-                    parts.push(`        ${titlePart}${companyPart}`);
-                }
-        
-                // Handle email object correctly
-                const emailPart = ref.email?.value ? `Email: ${escapeLaTeX(ref.email.value)}` : '';
-                const phonePart = ref.phone ? `Phone: ${escapeLaTeX(ref.phone)}` : '';
-                if (emailPart || phonePart) {
-                    parts.push(`        ${emailPart}${emailPart && phonePart ? ' | ' : ''}${phonePart}`);
-                }
-        
-                return parts.join('\\\\\n');
-            }).filter(Boolean).join('\n\n');
-        
-            if (!refItems) return '';
-        
+
+        publications: () => {
+            const publications = cvData.cv_template.sections.publications;
+            if (!publications || !publications.items || !publications.items.length) return '';
+
+            const pubItems = publications.items.map(pub => {
+                const date = formatDate(pub.date);
+                return `    \\item ${createHyperlink(pub.title || '', pub.url || '')}${date ? ` (${date})` : ''}`;
+            }).join('\n');
+
             return `
-        \\section{${escapeLaTeX(references.section_title || 'References')}}
-        \\begin{itemize}[leftmargin=*]
-        ${refItems}
-        \\end{itemize}`;
+\\section{${escapeLaTeX(publications.section_title || 'Publications')}}
+\\begin{itemize}[leftmargin=*]
+${pubItems}
+\\end{itemize}`;
         },
 
         interests: () => {
@@ -427,6 +401,87 @@ ${createListItems(vol.achievements)}
             return `
   \\section{${escapeLaTeX(interests.section_title)}}
   ${validItems.map(interest => escapeLaTeX(interest)).join(' | ')}`;
+        },
+
+        references: () => {
+            const references = cvData.cv_template.sections.references;
+            if (!references || !references.items || !references.items.length) return '';
+
+            const refItems = references.items.map(ref => `
+    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
+      \\textbf{${escapeLaTeX(ref.name)}} & ${escapeLaTeX(ref.title)} \\\\
+      ${escapeLaTeX(ref.company)} & ${ref.email ? `Email: ${escapeLaTeX(ref.email.value)}` : ''}${ref.phone ? ` | Phone: ${escapeLaTeX(ref.phone)}` : ''} \\\\
+    \\end{tabular*}`).join('\n\n');
+
+            return `
+\\section{${escapeLaTeX(references.section_title)}}
+${refItems}`;
+        },
+
+        achievements: () => {
+            const achievements = cvData.cv_template.sections.achievements;
+            if (!achievements || !achievements.items || !achievements.items.length) return '';
+
+            const achievementItems = achievements.items.map(achievement => `
+    \\resumeSubheading
+      {${escapeLaTeX(achievement.organization)}}{${formatDate(achievement.date)}}
+      {${escapeLaTeX(achievement.description)}}{}
+    `).join('\n');
+
+            return `
+\\section{${escapeLaTeX(achievements.section_title)}}
+\\resumeSubHeadingListStart
+${achievementItems}
+\\resumeSubHeadingListEnd`;
+        },
+
+        patents: () => {
+            const patents = cvData.cv_template.sections.patents;
+            if (!patents || !patents.items || !patents.items.length) return '';
+
+            const patentItems = patents.items.map(patent => `
+    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
+      ${createHyperlink(patent.title, patent.url)} & ${formatDate(patent.date)} \\\\
+      Patent Number: ${escapeLaTeX(patent.number)} & \\\\
+    \\end{tabular*}`).join('\n\n');
+
+            return `
+\\section{${escapeLaTeX(patents.section_title)}}
+${patentItems}`;
+        },
+
+        research: () => {
+            const research = cvData.cv_template.sections.research;
+            if (!research || !research.items || !research.items.length) return '';
+
+            const researchItems = research.items.map(item => `
+    \\resumeSubheading
+      {${createHyperlink(item.title, item.url)}}{${formatDate(item.date)}}
+      {${escapeLaTeX(item.description)}}{}
+    `).join('\n');
+
+            return `
+\\section{${escapeLaTeX(research.section_title)}}
+\\resumeSubHeadingListStart
+${researchItems}
+\\resumeSubHeadingListEnd`;
+        },
+
+        custom: () => {
+            const custom = cvData.cv_template.sections.custom;
+            if (!custom || !custom.items || !custom.items.length) return '';
+
+            const customItems = custom.items.map(item => `
+    \\resumeSubheading
+      {${createHyperlink(item.title, item.url)}}{${formatDate(item.date)}}
+      {${escapeLaTeX(item.description)}}{}
+    `).join('\n');
+
+            return `
+\\section{${escapeLaTeX(custom.section_title)}}
+\\resumeSubHeadingListStart
+${customItems}
+\\resumeSubHeadingListEnd`;
         }
     };
 
