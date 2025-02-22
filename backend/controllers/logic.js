@@ -356,7 +356,7 @@ export const ConvertLatex = async (req, res) => {
         console.log("response from gemini api");
         let latexContent = response.text();
 
-        // console.log("latexContent:", latexContent);
+        console.log("latexContent:", latexContent);
         
         
         // Clean up the response - remove markdown code blocks and any extra whitespace

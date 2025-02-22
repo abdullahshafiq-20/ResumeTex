@@ -221,7 +221,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
             <div className="h-6 rounded-t-lg flex items-center justify-end px-3 bg-yellow-400/20">
                 <div className="flex items-center space-x-2">
                     <span className="text-xs text-yellow-600">
-                        API issue solved!
+                        Sometimes the Pdf may not be produced, In that case please try again. 
                     </span>
                     <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse"></div>
                 </div>

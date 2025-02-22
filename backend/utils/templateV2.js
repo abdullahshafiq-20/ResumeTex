@@ -357,35 +357,61 @@ ${createListItems(vol.achievements)}
 
         awards: () => {
             const awards = cvData.cv_template.sections.awards;
-            if (!awards || !awards.items || !awards.items.length) return '';
-
+            if (!awards?.items?.length) return '';
+        
             const awardItems = awards.items.map(award => {
+                // Handle both string and object formats
+                if (typeof award === 'string') {
+                    return `    \\item ${escapeLaTeX(award)}`;
+                }
                 const title = award.title || '';
                 const institution = award.institution ? ` - ${award.institution}` : '';
                 return `    \\item ${createHyperlink(title, award.url || '')}${institution}`;
             }).join('\n');
-
+        
             return `
-\\section{${escapeLaTeX(awards.section_title)}}
-\\begin{itemize}[leftmargin=*]
-${awardItems}
-\\end{itemize}`;
+        \\section{${escapeLaTeX(awards.section_title || 'Awards & Achievements')}}
+        \\begin{itemize}[leftmargin=*]
+        ${awardItems}
+        \\end{itemize}`;
         },
-
-        publications: () => {
-            const publications = cvData.cv_template.sections.publications;
-            if (!publications || !publications.items || !publications.items.length) return '';
-
-            const pubItems = publications.items.map(pub => {
-                const date = formatDate(pub.date);
-                return `    \\item ${createHyperlink(pub.title || '', pub.url || '')}${date ? ` (${date})` : ''}`;
-            }).join('\n');
-
+        
+        references: () => {
+            const references = cvData.cv_template.sections.references;
+            if (!references?.items?.length) return '';
+        
+            const refItems = references.items.map(ref => {
+                const parts = [];
+                
+                // Only add name if it exists
+                if (ref.name) {
+                    parts.push(`    \\item {\\textbf{${escapeLaTeX(ref.name)}}}`);
+                }
+        
+                // Combine title and company if either exists
+                const titlePart = ref.title ? escapeLaTeX(ref.title) : '';
+                const companyPart = ref.company ? `, ${escapeLaTeX(ref.company)}` : '';
+                if (titlePart || companyPart) {
+                    parts.push(`        ${titlePart}${companyPart}`);
+                }
+        
+                // Handle email object correctly
+                const emailPart = ref.email?.value ? `Email: ${escapeLaTeX(ref.email.value)}` : '';
+                const phonePart = ref.phone ? `Phone: ${escapeLaTeX(ref.phone)}` : '';
+                if (emailPart || phonePart) {
+                    parts.push(`        ${emailPart}${emailPart && phonePart ? ' | ' : ''}${phonePart}`);
+                }
+        
+                return parts.join('\\\\\n');
+            }).filter(Boolean).join('\n\n');
+        
+            if (!refItems) return '';
+        
             return `
-\\section{${escapeLaTeX(publications.section_title || 'Publications')}}
-\\begin{itemize}[leftmargin=*]
-${pubItems}
-\\end{itemize}`;
+        \\section{${escapeLaTeX(references.section_title || 'References')}}
+        \\begin{itemize}[leftmargin=*]
+        ${refItems}
+        \\end{itemize}`;
         },
 
         interests: () => {
@@ -401,21 +427,6 @@ ${pubItems}
             return `
   \\section{${escapeLaTeX(interests.section_title)}}
   ${validItems.map(interest => escapeLaTeX(interest)).join(' | ')}`;
-        },
-
-        references: () => {
-            const references = cvData.cv_template.sections.references;
-            if (!references || !references.items || !references.items.length) return '';
-
-            const refItems = references.items.map(ref => `
-  \\cvitem{${escapeLaTeX(ref.name)}}{
-    ${escapeLaTeX(ref.title)}${ref.company ? `, ${escapeLaTeX(ref.company)}` : ''}\\\\
-    ${ref.email ? `Email: ${escapeLaTeX(ref.email)}` : ''}${ref.phone ? ` | Phone: ${escapeLaTeX(ref.phone)}` : ''}
-  }`).join('\n\n');
-
-            return `
-  \\section{${escapeLaTeX(references.section_title)}}
-  ${refItems}`;
         }
     };
 
