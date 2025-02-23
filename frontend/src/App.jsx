@@ -7,6 +7,8 @@ import ResponsePage from "./pages/ResponsePage";
 import BugReportPage from "./pages/BugReportPage";
 import FileUploader from "./components/FileUploader";
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/react';
+
 
 import "./App.css";
 
@@ -20,6 +22,7 @@ export default function App() {
   return (
     <>
       <Toaster />
+      <Analytics />
       <div className="app-container">
         <div className="background-layer">
           <Squares
