@@ -1,3 +1,5 @@
+// this function is not in use
+
 import axios from 'axios';
 export const proxyPdf = async (req, res) => {
     try {

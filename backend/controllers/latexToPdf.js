@@ -90,13 +90,15 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                         subject: `Your ResumeTex PDF is Ready`,
                         html: emailTemplate(uploadResult.secure_url),
                     };
-                    try {
-                        await transporter.sendMail(emailData);
-                    } catch (error) {
-                        console.error(error);
-                    }
+                    // try {
+                    //     await transporter.sendMail(emailData);
+                    // } catch (error) {
+                    //     console.error(error);
+                    // }
                     res.status(200).json({
-                        pdfUrl: uploadResult.secure_url
+                        pdfUrl: uploadResult.secure_url,
+                        publicId: uploadResult.public_id,
+                        name: uploadResult.original_filename
                     });
                 } catch (error) {
                     console.error('Upload error:', error);
