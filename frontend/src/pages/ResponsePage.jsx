@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CustomPDFViewer from "../components/CustomPdfViewer";
+import { ChevronLeft } from "lucide-react";
 
 export default function ResponsePage() {
   const location = useLocation();
@@ -40,7 +41,14 @@ export default function ResponsePage() {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 pt-4">
       <div className="flex flex-col items-start">
+
         <div className="w-full mb-6">
+        <button
+            onClick={() => navigate("/")}
+            className="flex mr-4 p-2 rounded-lg bg-white hover:bg-gray-100 transition-colors border border-gray-200 align-self-md-start"
+          >
+            <ChevronLeft size={24} />
+          </button>
           <h1 className="text-2xl font-bold mb-2 text-center">
             Your Resume is Ready
           </h1>

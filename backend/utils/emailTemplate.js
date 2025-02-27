@@ -20,7 +20,7 @@ export const emailTemplate = (link) => {
                         <table width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td style="text-align: center; padding: 24px;">
-                                    <img src="https://res.cloudinary.com/dlthjlibc/image/upload/v1740158843/email-logo-resumeLatex_bxi3rf.png" 
+                                    <img src="https://res.cloudinary.com/dlthjlibc/image/upload/v1740686845/email-logo-resumeLatex_cembnt.png" 
                                          alt="ResumeTex Logo" 
                                          style="width: 80px; height: auto; margin-bottom: 16px;"
                                     />

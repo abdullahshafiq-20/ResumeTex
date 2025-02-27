@@ -6,39 +6,41 @@ import FileUploader from "../components/FileUploader";
 import axios from "axios";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+import CountUp from "../components/Countup";
+import { Bug, FileText } from "lucide-react";
 // import DeploymentLogs from "../components/DeploymentLogs";
 
 const BeforeAfterPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null); // State to track selected template
-  const [serverStatus, setServerStatus] = useState('loading'); // 'loading', 'up', 'down'
+  const [serverStatus, setServerStatus] = useState("loading"); // 'loading', 'up', 'down'
   const api = import.meta.env.VITE_API_URL;
   const api_1 = import.meta.env.VITE_API_URL_1;
-  const [deploymentLog, setDeploymentLog] = useState({ type: '', message: '' });
+  const [deploymentLog, setDeploymentLog] = useState({ type: "", message: "" });
   const navigate = useNavigate();
 
   // Status styles configuration
   const statusConfig = {
     up: {
-      dotColor: 'bg-green-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-700',
-      borderColor: 'border-green-200',
-      text: 'Server Online'
+      dotColor: "bg-green-500",
+      bgColor: "bg-green-50",
+      textColor: "text-green-700",
+      borderColor: "border-green-200",
+      text: "Server Online",
     },
     loading: {
-      dotColor: 'bg-orange-500',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-orange-700',
-      borderColor: 'border-orange-200',
-      text: 'Checking Status...'
+      dotColor: "bg-orange-500",
+      bgColor: "bg-orange-50",
+      textColor: "text-orange-700",
+      borderColor: "border-orange-200",
+      text: "Checking Status...",
     },
     down: {
-      dotColor: 'bg-red-500',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-700',
-      borderColor: 'border-red-200',
-      text: 'Server Offline'
-    }
+      dotColor: "bg-red-500",
+      bgColor: "bg-red-50",
+      textColor: "text-red-700",
+      borderColor: "border-red-200",
+      text: "Server Offline",
+    },
   };
 
   // Check server status
@@ -48,13 +50,13 @@ const BeforeAfterPage = () => {
         const response = await axios.get(`${api_1}/`);
         // console.log('Server check response:', response.status);
         if (response.status === 200) {
-          setServerStatus('up');
+          setServerStatus("up");
         } else {
-          setServerStatus('down');
+          setServerStatus("down");
         }
       } catch (error) {
-        console.error('Server check failed:', error);
-        setServerStatus('down');
+        console.error("Server check failed:", error);
+        setServerStatus("down");
       }
     };
 
@@ -73,7 +75,11 @@ const BeforeAfterPage = () => {
 
   const images = [
     // { id: 1, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440045/v1_wrpqtm.png", template: "v1" },
-    { id: 2, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440050/v2_aw24xg.png", template: "v2" },
+    {
+      id: 2,
+      img: "https://res.cloudinary.com/dlthjlibc/image/upload/v1740654640/Screenshot_2025-02-27_160731_dkzmst.png",
+      template: "v2",
+    },
     // { id: 2, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440050/v2_aw24xg.png", template: "v2" },
     // { id: 3, img: "https://images.unsplash.com/photo-1452626212852-811d58933cae?q=80&w=500&auto=format", template: "v3" },
     // { id: 4, img: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=500&auto=format", template: "v4" },
@@ -88,10 +94,10 @@ const BeforeAfterPage = () => {
     try {
       // console.log("Upload successful:", uploadResponse);
       setDeploymentLog({
-        type: 'success',
-        message: 'File uploaded successfully! Processing your resume...'
+        type: "success",
+        message: "File uploaded successfully! Processing your resume...",
       });
-      
+
       // You can update this based on different response states
       // if (uploadResponse.status === 'processing') {
       //   setDeploymentLog({
@@ -102,8 +108,8 @@ const BeforeAfterPage = () => {
     } catch (error) {
       console.error("Error handling upload response:", error);
       setDeploymentLog({
-        type: 'danger',
-        message: 'Error processing the file. Please try again.'
+        type: "danger",
+        message: "Error processing the file. Please try again.",
       });
     }
   };
@@ -115,38 +121,49 @@ const BeforeAfterPage = () => {
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
       {/* Enhanced Server Status Indicator */}
-      <div className={`
-        absolute top-4 right-4 
+
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <div
+          className={`
         flex items-center gap-2 
         ${currentStatus.bgColor}
         ${currentStatus.textColor}
         border ${currentStatus.borderColor}
         rounded-lg px-4 py-2 
-        shadow-sm
+        
         transition-all duration-300 ease-in-out
-      `}>
-
-        <div className="flex items-center gap-2">
-          <div className={`
+      `}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className={`
             w-2.5 h-2.5 rounded-full 
             ${currentStatus.dotColor}
-            ${serverStatus === 'loading' ? 'animate-pulse' : ''}
-            shadow-sm
-          `}/>
-          <span className="text-sm font-medium whitespace-nowrap">
-            {currentStatus.text}
-          </span>
+            ${serverStatus === "loading" ? "animate-pulse" : ""}
+            
+          `}
+            />
+            <span className="text-sm font-medium whitespace-nowrap">
+              {currentStatus.text}
+            </span>
+          </div>
         </div>
-        
+        <button
+          onClick={() => navigate("/documentation")}
+          className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 ease-in-out "
+        >
+          <FileText size={20} />
+          <span>Documentation</span>
+        </button>
+        <button
+          onClick={() => navigate("/bug-report")}
+          className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-sm font-medium text-red-700  hover:bg-red-100 transition-all duration-300 ease-in-out "
+        >
+          <Bug size={20} />
+        </button>
       </div>
-      <button
-        onClick={() => navigate('/bug-report')}
-        className="absolute top-4 left-4 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 ease-in-out shadow-sm"
-      >
-        Report Bug
-      </button>
 
-      <div className="max-w-4xl w-full">
+      <div className="max-w-4xl w-full mt-10 sm:mt-16">
         <div className="text-center mb-8 sm:mb-12">
           <SplitText
             text="ResumeTex"
@@ -159,9 +176,35 @@ const BeforeAfterPage = () => {
             rootMargin="-50px"
             onLetterAnimationComplete={handleAnimationComplete}
           />
-          <p className="text-lg sm:text-xl text-gray-600 px-2 sm:px-4">
-            Transforming Simple PDFs into Professional LaTeX Resumes Effortlessly!
+          <p className="text-lg sm:text-xl text-gray-600 px-2 sm:px-4 mt-4">
+            Transforming Simple PDFs into Professional LaTeX Resumes
+            Effortlessly!
           </p>
+
+          <div className="mt-6 flex justify-center">
+            <div className="border border-blue-200 rounded-lg px-6 py-4 bg-blue-50  inline-flex items-center">
+              <div className="text-center">
+                <p className="text-sm text-blue-600 font-medium mb-1">
+                  Successful Conversions
+                </p>
+                <div className="flex items-center justify-center">
+                  <CountUp
+                    from={0}
+                    to={101}
+                    separator=","
+                    duration={2}
+                    className="text-3xl font-bold text-blue-700"
+                  />
+                  <span className="text-3xl font-bold text-blue-700 ml-1">
+                    +
+                  </span>
+                </div>
+                <p className="text-xs text-blue-500 mt-1">
+                  Happy users and counting!
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 mb-8 sm:mb-12">
@@ -183,9 +226,9 @@ const BeforeAfterPage = () => {
               randomRotation={true}
               sensitivity={180}
               sendToBackOnClick={false}
-              cardDimensions={{ 
-                width: window.innerWidth < 640 ? 220 : 270, 
-                height: window.innerWidth < 640 ? 340 : 420 
+              cardDimensions={{
+                width: window.innerWidth < 640 ? 220 : 270,
+                height: window.innerWidth < 640 ? 340 : 420,
               }}
               cardsData={images}
               onTemplateSelect={handleTemplateSelection}
@@ -193,8 +236,16 @@ const BeforeAfterPage = () => {
           </div>
         </div>
 
-        <div className="flex  justify-center w-full px-2 sm:px-4">
-          <FileUploader 
+        <div className="flex flex-col items-center justify-center px-2 sm:px-4">
+          <div className=" bg-white">
+            <div className="w-full max-w-[500px] mb-4 border border-yellow-300 rounded-lg px-6 py-3 bg-yellow-50  text-center">
+              <p className="text-sm text-yellow-600">
+              Note: In some cases, the PDF may not be generated. If this occurs, please try converting again.
+              </p>
+            </div>
+          </div>
+
+          <FileUploader
             onFileUpload={handleFileUpload}
             apiUrl={api}
             template={selectedTemplate}

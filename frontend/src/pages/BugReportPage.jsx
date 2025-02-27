@@ -1,9 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from 'react-hot-toast';
+import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
 const BugReportPage = () => {
+    const navigate = useNavigate();
+    
     const api = import.meta.env.VITE_API_URL;
     const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,7 +23,10 @@ const BugReportPage = () => {
       console.log("Form submitted:", formData);
       const response = await axios.post(`${api}/bugForm`, formData);
       if (response.status === 200) {
-        toast.success("Bug report submitted successfully!");
+        toast.success("Bug report submitted successfully!", {
+          position: 'bottom-center',
+          duration: 5000,
+        });
         setFormData({
           name: "",
           email: "",
@@ -46,7 +53,17 @@ const BugReportPage = () => {
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
+          
+          <div className="flex-col items-center justify-center">
+          <button
+            onClick={() => navigate("/")}
+            className="flex mr-4 p-2 rounded-lg bg-white hover:bg-gray-100 transition-colors border border-gray-200 align-self-md-start"
+          >
+            <ChevronLeft size={24} />
+          </button>
           <h2 className="text-3xl font-bold text-gray-900">Report a Bug</h2>
+
+          </div>
           <p className="mt-2 text-gray-600">
             Help us improve by reporting any issues you encounter
           </p>
