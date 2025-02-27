@@ -8,7 +8,6 @@ import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
 import CountUp from "../components/Countup";
 import { Bug, FileText } from "lucide-react";
-// import DeploymentLogs from "../components/DeploymentLogs";
 
 const BeforeAfterPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null); // State to track selected template
