@@ -6,7 +6,7 @@ import FileUploader from "../components/FileUploader";
 import axios from "axios";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
-import CountUp from "../components/Countup";
+import CountUp from "../components/CountUp";
 import { Bug, FileText } from "lucide-react";
 
 const BeforeAfterPage = () => {
