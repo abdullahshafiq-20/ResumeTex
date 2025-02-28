@@ -16,15 +16,8 @@ export default function ResponsePage() {
   const pdfUrl = location.state?.pdfUrl || "";
   const latexCode = location.state?.latexCode || "";
   const latexFileUrl = location.state?.latexFileUrl || "";
-  // const fileName = location.state?.name || "ResumeTex";
 
-  // console.log("PDF URL:", pdfUrl);
-
-  // Create proxy URL
-  // const proxyPdfUrl = pdfUrl ? `${import.meta.env.VITE_API_URL}/proxy-pdf?url=${encodeURIComponent(pdfUrl)}` : "";
   const overleafProjectUrl = latexFileUrl ? `https://www.overleaf.com/docs?snip_uri=${latexFileUrl}` : "";
-
-
 
   const handleCopyClick = async () => {
     try {
@@ -39,20 +32,19 @@ export default function ResponsePage() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 pt-4">
+    <div className="w-full max-w-4xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6">
       <div className="flex flex-col items-start">
-
-        <div className="w-full mb-6">
-        <button
+        <div className="w-full mb-4 sm:mb-6">
+          <button
             onClick={() => navigate("/")}
-            className="flex mr-4 p-2 rounded-lg bg-white hover:bg-gray-100 transition-colors border border-gray-200 align-self-md-start"
+            className="flex mr-3 sm:mr-4 p-1.5 sm:p-2 rounded-lg bg-white hover:bg-gray-100 transition-colors border border-gray-200"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} className="sm:w-5 sm:h-5" />
           </button>
-          <h1 className="text-2xl font-bold mb-2 text-center">
+          <h1 className="text-xl sm:text-2xl font-bold mb-1.5 sm:mb-2 text-center mt-3 sm:mt-4">
             Your Resume is Ready
           </h1>
-          <p className="text-gray-600 text-center text-sm max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-gray-600 text-center max-w-2xl mx-auto">
             Your resume has been transformed into LaTeX format. You can view the
             PDF preview or access the LaTeX code below.
           </p>
@@ -60,19 +52,19 @@ export default function ResponsePage() {
 
         <div className="w-full">
           {/* Navigation Button */}
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-3 sm:mb-4">
             <button
               onClick={() => navigate("/")}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               Convert Another Resume
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="grid grid-cols-2 mb-4 border rounded-md overflow-hidden">
+          <div className="grid grid-cols-2 mb-3 sm:mb-4 border rounded-md overflow-hidden">
             <button
-              className={`py-2.5 text-sm font-medium transition-colors ${
+              className={`py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === "pdf"
                   ? "bg-white border-b-2 border-[#2563EB]"
                   : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -82,7 +74,7 @@ export default function ResponsePage() {
               Rendered PDF
             </button>
             <button
-              className={`py-2.5 text-sm font-medium transition-colors ${
+              className={`py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors ${
                 activeTab === "latex"
                   ? "bg-white border-b-2 border-[#2563EB]"
                   : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -96,16 +88,16 @@ export default function ResponsePage() {
           {/* Content */}
           <div className="bg-white rounded-lg border border-gray-200">
             {activeTab === "pdf" ? (
-              <div className="p-3">
-                <div className="flex justify-end mb-3">
+              <div className="p-2 sm:p-3">
+                <div className="flex justify-end mb-2 sm:mb-3">
                   <a
                     href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     <svg
-                      className="w-4 h-4"
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -121,11 +113,11 @@ export default function ResponsePage() {
                   </a>
                 </div>
                 {pdfError ? (
-                  <div className="p-4 text-center">
-                    <p className="text-gray-600 mb-2">
+                  <div className="p-3 sm:p-4 text-center">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1.5 sm:mb-2">
                       Unable to display PDF preview due to Dynamic API cost.
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-2xs sm:text-xs text-gray-500">
                       Please use the "open in overleaf" button in "LaTex code" tab to open your converted resume.
                     </p>
                   </div>
@@ -137,12 +129,14 @@ export default function ResponsePage() {
                 )}
               </div>
             ) : (
-              <div className="p-3">
-                <div className="flex justify-end gap-2 mb-3">
-                  <button className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded-md transition-colors cursur-pointer" onClick={() => window.open(overleafProjectUrl, "_blank")}
+              <div className="p-2 sm:p-3">
+                <div className="flex justify-end gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                  <button 
+                    className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors cursor-pointer" 
+                    onClick={() => window.open(overleafProjectUrl, "_blank")}
                   >
                     <svg
-                      className="w-4 h-4"
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -157,17 +151,17 @@ export default function ResponsePage() {
                     Open in Overleaf
                   </button>
                   <button 
-                    className={`flex items-center gap-2 px-4 py-2 text-sm border rounded-md transition-colors ${
+                    className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm border rounded-md transition-colors ${
                       copySuccess 
                         ? 'bg-green-50 border-green-200 text-green-600' 
                         : 'border-gray-300 hover:bg-gray-50'
                     }`}
-                    onClick= {handleCopyClick}
+                    onClick={handleCopyClick}
                   >
                     {copySuccess ? (
                       <>
                         <svg
-                          className="w-4 h-4"
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -184,7 +178,7 @@ export default function ResponsePage() {
                     ) : (
                       <>
                         <svg
-                          className="w-4 h-4"
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -201,7 +195,7 @@ export default function ResponsePage() {
                     )}
                   </button>
                 </div>
-                <pre className="bg-gray-900 text-gray-100 p-3 rounded-md overflow-x-auto font-mono text-sm">
+                <pre className="bg-gray-900 text-gray-100 p-2 sm:p-3 rounded-md overflow-x-auto font-mono text-2xs sm:text-xs">
                   <code>{latexCode}</code>
                 </pre>
               </div>

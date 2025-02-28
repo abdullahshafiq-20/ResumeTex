@@ -47,7 +47,6 @@ const BeforeAfterPage = () => {
     const checkServerStatus = async () => {
       try {
         const response = await axios.get(`${api_1}/`);
-        // console.log('Server check response:', response.status);
         if (response.status === 200) {
           setServerStatus("up");
         } else {
@@ -73,37 +72,23 @@ const BeforeAfterPage = () => {
   const currentStatus = statusConfig[serverStatus];
 
   const images = [
-    // { id: 1, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440045/v1_wrpqtm.png", template: "v1" },
     {
       id: 2,
       img: "https://res.cloudinary.com/dlthjlibc/image/upload/v1740654640/Screenshot_2025-02-27_160731_dkzmst.png",
       template: "v2",
     },
-    // { id: 2, img: "https://res.cloudinary.com/dkb1rdtmv/image/upload/v1738440050/v2_aw24xg.png", template: "v2" },
-    // { id: 3, img: "https://images.unsplash.com/photo-1452626212852-811d58933cae?q=80&w=500&auto=format", template: "v3" },
-    // { id: 4, img: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=500&auto=format", template: "v4" },
   ];
 
   const handleTemplateSelection = (template) => {
     setSelectedTemplate(template);
-    // console.log("Selected template:", template);
   };
 
   const handleFileUpload = async (uploadResponse) => {
     try {
-      // console.log("Upload successful:", uploadResponse);
       setDeploymentLog({
         type: "success",
         message: "File uploaded successfully! Processing your resume...",
       });
-
-      // You can update this based on different response states
-      // if (uploadResponse.status === 'processing') {
-      //   setDeploymentLog({
-      //     type: 'normal',
-      //     message: 'Processing your resume. This might take a moment...'
-      //   });
-      // }
     } catch (error) {
       console.error("Error handling upload response:", error);
       setDeploymentLog({
@@ -114,59 +99,57 @@ const BeforeAfterPage = () => {
   };
 
   const handleAnimationComplete = () => {
-    // console.log("All letters have animated");
+    // Animation complete handler
   };
 
   return (
-    <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
+    <div className="min-h-screen py-6 sm:py-10 px-3 sm:px-6 lg:px-8 flex items-center justify-center relative">
       {/* Enhanced Server Status Indicator */}
-
-      <div className="absolute top-4 right-4 flex items-center gap-2">
+      <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-1.5 sm:gap-2">
         <div
           className={`
-        flex items-center gap-2 
+        flex items-center gap-1.5 sm:gap-2 
         ${currentStatus.bgColor}
         ${currentStatus.textColor}
         border ${currentStatus.borderColor}
-        rounded-lg px-4 py-2 
-        
+        rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 
         transition-all duration-300 ease-in-out
       `}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div
               className={`
-            w-2.5 h-2.5 rounded-full 
+            w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full 
             ${currentStatus.dotColor}
             ${serverStatus === "loading" ? "animate-pulse" : ""}
-            
           `}
             />
-            <span className="text-sm font-medium whitespace-nowrap">
+            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
               {currentStatus.text}
             </span>
           </div>
         </div>
         <button
           onClick={() => navigate("/documentation")}
-          className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 ease-in-out "
+          className="flex items-center gap-1.5 sm:gap-2 bg-white border border-gray-200 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 ease-in-out"
         >
-          <FileText size={20} />
+          <FileText size={16} className="sm:w-5 sm:h-5" />
           <span>Documentation</span>
         </button>
         <button
           onClick={() => navigate("/bug-report")}
-          className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-sm font-medium text-red-700  hover:bg-red-100 transition-all duration-300 ease-in-out "
+          className="flex items-center gap-1.5 sm:gap-2 bg-red-50 border border-red-200 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-red-700 hover:bg-red-100 transition-all duration-300 ease-in-out"
         >
-          <Bug size={20} />
+          <Bug size={16} className="sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">Report Bug</span>
         </button>
       </div>
 
       <div className="max-w-4xl w-full mt-10 sm:mt-16">
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-6 sm:mb-10">
           <SplitText
             text="ResumeTex"
-            className="text-3xl sm:text-4xl font-bold text-center text-black mb-4"
+            className="text-2xl sm:text-4xl font-bold text-center text-black mb-3 sm:mb-4"
             delay={100}
             animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
             animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
@@ -175,15 +158,15 @@ const BeforeAfterPage = () => {
             rootMargin="-50px"
             onLetterAnimationComplete={handleAnimationComplete}
           />
-          <p className="text-lg sm:text-xl text-gray-600 px-2 sm:px-4 mt-4">
+          <p className="text-sm sm:text-lg text-gray-600 px-2 sm:px-4 mt-3 sm:mt-4">
             Transforming Simple PDFs into Professional LaTeX Resumes
             Effortlessly!
           </p>
 
-          <div className="mt-6 flex justify-center">
-            <div className="border border-blue-200 rounded-lg px-6 py-4 bg-blue-50  inline-flex items-center">
+          <div className="mt-4 sm:mt-6 flex justify-center">
+            <div className="border border-blue-200 rounded-lg px-4 sm:px-6 py-3 sm:py-4 bg-blue-50 inline-flex items-center">
               <div className="text-center">
-                <p className="text-sm text-blue-600 font-medium mb-1">
+                <p className="text-xs sm:text-sm text-blue-600 font-medium mb-0.5 sm:mb-1">
                   Successful Conversions
                 </p>
                 <div className="flex items-center justify-center">
@@ -192,13 +175,13 @@ const BeforeAfterPage = () => {
                     to={101}
                     separator=","
                     duration={2}
-                    className="text-3xl font-bold text-blue-700"
+                    className="text-xl sm:text-3xl font-bold text-blue-700"
                   />
-                  <span className="text-3xl font-bold text-blue-700 ml-1">
+                  <span className="text-xl sm:text-3xl font-bold text-blue-700 ml-0.5 sm:ml-1">
                     +
                   </span>
                 </div>
-                <p className="text-xs text-blue-500 mt-1">
+                <p className="text-2xs sm:text-xs text-blue-500 mt-0.5 sm:mt-1">
                   Happy users and counting!
                 </p>
               </div>
@@ -206,19 +189,19 @@ const BeforeAfterPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 mb-8 sm:mb-12">
-          <div className="relative w-[200px] sm:w-[250px] h-[320px] sm:h-[400px] transform -rotate-3">
+        <div className="flex flex-col md:flex-row items-center justify-center space-y-6 sm:space-y-8 md:space-y-0 md:space-x-6 sm:md:space-x-8 mb-6 sm:mb-10">
+          <div className="relative w-[180px] sm:w-[250px] h-[290px] sm:h-[400px] transform -rotate-3">
             <img
               src="https://cdn-images.zety.com/templates/zety/enfold-18-duo-blue-navy-1165@1x.png"
               alt="Before"
               className="w-full h-full object-fit rounded-lg shadow-lg"
             />
-            <span className="absolute bottom-4 left-4 bg-[#2563EB] text-white px-2 py-1 rounded text-sm font-semibold">
+            <span className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 bg-[#2563EB] text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm font-semibold">
               Before
             </span>
           </div>
 
-          <ArrowRightIcon className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 rotate-90 md:rotate-0" />
+          <ArrowRightIcon className="w-6 h-6 sm:w-10 sm:h-10 text-gray-400 rotate-90 md:rotate-0" />
 
           <div className="relative transform rotate-3">
             <Stack
@@ -226,8 +209,8 @@ const BeforeAfterPage = () => {
               sensitivity={180}
               sendToBackOnClick={false}
               cardDimensions={{
-                width: window.innerWidth < 640 ? 220 : 270,
-                height: window.innerWidth < 640 ? 340 : 420,
+                width: window.innerWidth < 640 ? 200 : 270,
+                height: window.innerWidth < 640 ? 310 : 420,
               }}
               cardsData={images}
               onTemplateSelect={handleTemplateSelection}
@@ -236,10 +219,10 @@ const BeforeAfterPage = () => {
         </div>
 
         <div className="flex flex-col items-center justify-center px-2 sm:px-4">
-          <div className=" bg-white">
-            <div className="w-full max-w-[500px] mb-4 border border-yellow-300 rounded-lg px-6 py-3 bg-yellow-50  text-center">
-              <p className="text-sm text-yellow-600">
-              Note: In some cases, the PDF may not be generated. If this occurs, please try converting again.
+          <div className="w-full">
+            <div className="w-full max-w-[500px] mx-auto mb-3 sm:mb-4 border border-yellow-300 rounded-lg px-4 sm:px-6 py-2 sm:py-3 bg-yellow-50 text-center">
+              <p className="text-xs sm:text-sm text-yellow-600">
+                Note: In some cases, the PDF may not be generated. If this occurs, please try converting again.
               </p>
             </div>
           </div>
@@ -254,9 +237,6 @@ const BeforeAfterPage = () => {
         <Footer />
       </div>
     </div>
-    // <>
-    // <h1>Sorry, this page is under construction</h1>
-    // </>
   );
 };
 
