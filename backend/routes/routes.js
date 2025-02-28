@@ -6,7 +6,7 @@ import { ConvertLatex } from "../controllers/latexConversion.js"
 import {proxyPdf} from "../controllers/proxyPdf.js"
 import { texContentUpload } from "../controllers/texFileUpload.js"
 import { deleteFilesController } from '../controllers/deleteFile.js'
-import { convertJsonTexToPdfLocally } from '../controllers/latexToPdf.js'
+import { convertJsonTexToPdfLocally, getCount } from '../controllers/latexToPdf.js'
 import { bugForm } from "../controllers/bugForm.js"
 
 const router = express.Router();
@@ -20,6 +20,7 @@ router.post("/tex-content", texContentUpload)
 router.post('/delete-files', deleteFilesController)
 router.post('/convertJsonTexToPdfLocally', convertJsonTexToPdfLocally)
 router.post('/bugForm', bugForm)
+router.get('/getCount', getCount)
 
 
 

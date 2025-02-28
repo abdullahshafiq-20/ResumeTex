@@ -5,6 +5,9 @@ import { promisify } from 'util';
 import { cloudinaryUploader } from "../utils/cloudinary.js";
 import { transporter } from '../utils/transporter.js';
 import { emailTemplate } from '../utils/emailTemplate.js';
+import Count from '../models/countSchema.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
@@ -83,6 +86,18 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                     await unlinkAsync(texFilePath);
                     await unlinkAsync(pdfFilePath);
 
+                    // here impliment the cou nt incriment to mongose
+                    try {
+                        const count = await Count.findOne({});
+                        count.count += 1;
+                        await count.save();
+                        
+                    } catch (error) {
+                        console.error('Count error:', error);
+                        
+                    }
+
+
                     // Return only the secure URL
                     const emailData = {
                         from: process.env.EMAIL,
@@ -118,3 +133,16 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
         });
     }
 };
+
+export const getCount = async (req, res) => {
+    try {
+        const count = await Count.findOne({});
+        res.status(200).json({ count: count.count });
+    } catch (error) {
+        console.error('Count error:', error);
+        res.status(500).json({
+            error: 'Failed to get count',
+            details: error.message
+        });
+    }
+}

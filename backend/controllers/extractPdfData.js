@@ -2,6 +2,7 @@ import pdfjsLib from "pdfjs-dist";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
+import Count from '../models/countSchema.js';
 
 
 const __filename = fileURLToPath(import.meta.url);

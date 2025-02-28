@@ -1,6 +1,9 @@
 import express from "express";
 const app = express();
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
+import mongoose from "mongoose";
 import routes from "./routes/routes.js";
 
 app.use(express.json());
@@ -16,6 +19,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Disposition', 'Content-Length']
 }));
+
+mongoose.connect(process.env.URI).then(() => {
+  console.log("Connected to MongoDB");
+}
+);
+ 
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);

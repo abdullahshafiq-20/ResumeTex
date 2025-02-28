@@ -24,6 +24,7 @@ export const handlePdfUpload = async (file) => {
 
         // Clean up - remove file from local storage
         fs.unlinkSync(file.path)
+        
 
         return {
             url: uploadResult.secure_url,

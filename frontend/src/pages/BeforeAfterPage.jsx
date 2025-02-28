@@ -16,6 +16,7 @@ const BeforeAfterPage = () => {
   const api_1 = import.meta.env.VITE_API_URL_1;
   const [deploymentLog, setDeploymentLog] = useState({ type: "", message: "" });
   const navigate = useNavigate();
+  const [count, setCount] = useState(0);
 
   // Status styles configuration
   const statusConfig = {
@@ -52,6 +53,8 @@ const BeforeAfterPage = () => {
         } else {
           setServerStatus("down");
         }
+        const countResponse = await axios.get(`${api}/getCount`);
+        setCount(countResponse.data.count);
       } catch (error) {
         console.error("Server check failed:", error);
         setServerStatus("down");
@@ -101,6 +104,10 @@ const BeforeAfterPage = () => {
   const handleAnimationComplete = () => {
     // Animation complete handler
   };
+
+
+
+
 
   return (
     <div className="min-h-screen py-6 sm:py-10 px-3 sm:px-6 lg:px-8 flex items-center justify-center relative">
@@ -172,7 +179,7 @@ const BeforeAfterPage = () => {
                 <div className="flex items-center justify-center">
                   <CountUp
                     from={0}
-                    to={101}
+                    to={count}
                     separator=","
                     duration={2}
                     className="text-xl sm:text-3xl font-bold text-blue-700"
