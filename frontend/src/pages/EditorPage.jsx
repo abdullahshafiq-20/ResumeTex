@@ -131,7 +131,7 @@ const EditorPage = () => {
               </label>
               <input
                 type="email"
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                 value={resume.sections.header.contact_info.email.value}
                 onChange={(e) => updateResumeField("header", "contact_info.email.value", e.target.value)}
               />
