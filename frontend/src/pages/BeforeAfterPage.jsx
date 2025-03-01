@@ -7,7 +7,7 @@ import axios from "axios";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
 import CountUp from "../components/CountUp";
-import { Bug, FileText } from "lucide-react";
+import { Bug, FileText, CircleFadingArrowUp } from "lucide-react";
 
 const BeforeAfterPage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null); // State to track selected template
@@ -105,10 +105,6 @@ const BeforeAfterPage = () => {
     // Animation complete handler
   };
 
-
-
-
-
   return (
     <div className="min-h-screen py-6 sm:py-10 px-3 sm:px-6 lg:px-8 flex items-center justify-center relative">
       {/* Enhanced Server Status Indicator */}
@@ -154,17 +150,30 @@ const BeforeAfterPage = () => {
 
       <div className="max-w-4xl w-full mt-10 sm:mt-16">
         <div className="text-center mb-6 sm:mb-10">
-          <SplitText
-            text="ResumeTex"
-            className="text-2xl sm:text-4xl font-bold text-center text-black mb-3 sm:mb-4"
-            delay={100}
-            animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
-            animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
-            easing="easeOutCubic"
-            threshold={0.2}
-            rootMargin="-50px"
-            onLetterAnimationComplete={handleAnimationComplete}
-          />
+          <div className="flex items-start justify-center">
+            <SplitText
+              text="ResumeTex"
+              className="text-2xl sm:text-4xl font-bold text-center text-black mb-3 sm:mb-4"
+              delay={100}
+              animationFrom={{ opacity: 0, transform: "translate3d(0,50px,0)" }}
+              animationTo={{ opacity: 1, transform: "translate3d(0,0,0)" }}
+              easing="easeOutCubic"
+              threshold={0.2}
+              rootMargin="-50px"
+              onLetterAnimationComplete={handleAnimationComplete}
+            />
+            <div className="relative group">
+              <CircleFadingArrowUp
+                size={24}
+                className="text-blue-500 cursor-help"
+              />
+              <div className="absolute left-full   mb-2 transform -translate-x-1/2 hidden group-hover:block bg-black bg-opacity-80 text-white text-xs rounded py-1 px-2 min-w-[150px] z-10">
+                New feature! coming soon.
+                You may get a live editor to cerate your resume.
+              </div>
+            </div>
+          </div>
+
           <p className="text-sm sm:text-lg text-gray-600 px-2 sm:px-4 mt-3 sm:mt-4">
             Transforming Simple PDFs into Professional LaTeX Resumes
             Effortlessly!
@@ -229,7 +238,8 @@ const BeforeAfterPage = () => {
           <div className="w-full">
             <div className="w-full max-w-[500px] mx-auto mb-3 sm:mb-4 border border-yellow-300 rounded-lg px-4 sm:px-6 py-2 sm:py-3 bg-yellow-50 text-center">
               <p className="text-xs sm:text-sm text-yellow-600">
-                Note: In some cases, the PDF may not be generated. If this occurs, please try converting again.
+                Note: In some cases, the PDF may not be generated. If this
+                occurs, please try converting again.
               </p>
             </div>
           </div>
