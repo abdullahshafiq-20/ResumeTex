@@ -9,6 +9,7 @@ import FileUploader from "./components/FileUploader";
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
 import DocumentationPage from "./pages/DocumentationPage";
+import EditorPage from "./pages/EditorPage";
 
 
 import "./App.css";
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/response" element={<ResponsePage />} />
             <Route path="/bug-report" element={<BugReportPage />} />
             <Route path="/documentation" element={<DocumentationPage />} />
+            <Route path="/editor" element={<EditorPage />} />
           </Routes>
         </div>
       </div>
