@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, FileText, AlertCircle, Check, X, InfoIcon } from "lucide-react";
+import { ChevronLeft, FileText, AlertCircle, Check, X, InfoIcon, Github, Linkedin, Mail } from "lucide-react";
 import Footer from "../components/Footer";
 
 const DocumentationPage = () => {
@@ -20,6 +20,73 @@ const DocumentationPage = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             ResumeTex Documentation
           </h1>
+        </div>
+
+        {/* About Developer */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">About Developer</h2>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start">
+            <div className="flex-shrink-0">
+              <img 
+                src="https://res.cloudinary.com/dlthjlibc/image/upload/v1741107587/111144443_biqvg1.png" 
+                alt="Developer Avatar" 
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-blue-500"
+              />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="text-md sm:text-lg font-medium text-gray-800">Abdullah Shafiq</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mt-2 mb-3">
+                Passionate software developer with expertise in AI-powered solutions and web applications. 
+                Creating ResumeTex to help job seekers present their qualifications professionally without 
+                needing to learn complex typesetting systems. Currently working on expanding templates and 
+                improving conversion accuracy.
+              </p>
+              <div className="flex flex-wrap justify-center sm:justify-start gap-3">
+                <a 
+                  href="https://github.com/abdullahshafiq-20" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-gray-800 hover:bg-gray-900 text-white text-xs sm:text-sm py-1.5 px-3 rounded-md flex items-center"
+                >
+                  <Github size={16} className="mr-1.5" />
+                  GitHub
+                </a>
+                <a 
+                  href="https://www.linkedin.com/in/abdullah-shafiq-158073234/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm py-1.5 px-3 rounded-md flex items-center"
+                >
+                  <Linkedin size={16} className="mr-1.5" />
+                  LinkedIn
+                </a>
+                {/* <a 
+                  href="mailto:amitraaj.sharma@gmail.com" 
+                  className="bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm py-1.5 px-3 rounded-md flex items-center"
+                >
+                  <Mail size={16} className="mr-1.5" />
+                  Email
+                </a> */}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Contributions:</h4>
+            <ul className="space-y-1.5">
+              <li className="text-xs sm:text-sm text-gray-600 flex items-start">
+                <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></span>
+                Led design and development of ResumeTex from concept to production
+              </li>
+              <li className="text-xs sm:text-sm text-gray-600 flex items-start">
+                <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></span>
+                Implemented AI-based PDF parsing and LaTeX generation algorithms
+              </li>
+              <li className="text-xs sm:text-sm text-gray-600 flex items-start">
+                <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2 mt-1.5"></span>
+                Created responsive frontend interface with React and Tailwind CSS
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Introduction */}
