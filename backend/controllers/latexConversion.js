@@ -7,26 +7,8 @@ import { generateCVLatexTemplateV3 } from "../utils/templateV3.js";
 import axios from 'axios';
 dotenv.config();
 
-function LatexPrompt (extractedData){
-  const data = JSON.stringify(extractedData);
-  return `As a senior HR data analyst specializing in ATS optimization, transform the following JSON CV data into a highly optimized, ATS-friendly format with emphasis on quantifiable achievements and industry-specific keywords:
 
-        ${data}
-
-        CRITICAL ATS OPTIMIZATION INSTRUCTIONS:
-        1. KEYWORD TARGETING: Embed industry-specific keywords at 3-5% density in summary and experience sections.
-        2. QUANTIFY RESULTS: Transform all achievements into metrics (↑35% revenue, $500K savings, 12 team members).
-        3. POWER VERBS: Lead each bullet with strong action verbs (Spearheaded, Orchestrated, Implemented).
-        4. ATS-COMPATIBLE FORMAT: Eliminate tables, columns, special characters, and complex formatting.
-        5. TECHNICAL SPECIFICITY: List precise versions of tools, technologies, and methodologies with proficiency levels.
-        6. COMPELLING SUMMARY: Craft a 3-line summary with years of experience, expertise, and unique value proposition.
-        7. STRATEGIC STRUCTURE: Use consistent formatting with logical progression and appropriate white space.
-        8. INDUSTRY TERMINOLOGY: Replace generic language with precise industry terms that match ATS algorithms.
-        9. REVERSE CHRONOLOGY: Present most recent experience first with standardized date formats (MMM YYYY).
-        10. VERIFICATION DATA: Include certification IDs, license numbers, and other verifiable credentials.
-        
-        Return a structured CV in this format:
-        {
+const CV_STRUCTURE = `{
           "cv_template": {
             "metadata": {
               "section_order": [
@@ -218,9 +200,30 @@ function LatexPrompt (extractedData){
               "truncate_descriptions_at": 600
             }
           }
-        }
+        }`;
+function LatexPrompt (extractedData){
+  const data = JSON.stringify(extractedData);
+  return `As a senior HR data analyst specializing in ATS optimization, transform the following JSON CV data into a highly optimized, ATS-friendly format with emphasis on quantifiable achievements and industry-specific keywords:
+
+        ${data}
+
+        CRITICAL ATS OPTIMIZATION INSTRUCTIONS:
+        1. KEYWORD TARGETING: Embed industry-specific keywords at 3-5% density in summary and experience sections.
+        2. QUANTIFY RESULTS: Transform all achievements into metrics (↑35% revenue, $500K savings, 12 team members).
+        3. POWER VERBS: Lead each bullet with strong action verbs (Spearheaded, Orchestrated, Implemented).
+        4. ATS-COMPATIBLE FORMAT: Eliminate tables, columns, special characters, and complex formatting.
+        5. TECHNICAL SPECIFICITY: List precise versions of tools, technologies, and methodologies with proficiency levels.
+        6. COMPELLING SUMMARY: Craft a 3-line summary with years of experience, expertise, and unique value proposition.
+        7. STRATEGIC STRUCTURE: Use consistent formatting with logical progression and appropriate white space.
+        8. INDUSTRY TERMINOLOGY: Replace generic language with precise industry terms that match ATS algorithms.
+        9. REVERSE CHRONOLOGY: Present most recent experience first with standardized date formats (MMM YYYY).
+        10. VERIFICATION DATA: Include certification IDs, license numbers, and other verifiable credentials.
+        
+        Return a structured CV in this format:
+        ${CV_STRUCTURE}
+        
           MOST IMPORTANT INSTRUCTIONS TO FOLLOW:
-          1.Extract and categorize all sections from input text.
+          1.Extract and categorize all sections from input text and utilize all the provided data.
           2.Match links to corresponding sections/items.
           3.Consume all the provided data in the structured CV. Do not respond with placeholders like "rest of the data...".
           4.Ensure all content is ATS-friendly by avoiding excessive formatting, symbols, or images. Use clear, keyword-optimized descriptions relevant to the job industry.
@@ -237,8 +240,91 @@ function LatexPrompt (extractedData){
           15.Just return the structured CV data in the specified format. Do not include any additional text or instructions.`;
 }
 
+function LatexPrompt_jobTitle(extractedData, jobTitle){
+  const data = JSON.stringify(extractedData);
+  return `As a senior HR data analyst specializing in ATS optimization, transform the following JSON CV data into a highly optimized, ATS-friendly format tailored specifically for a ${jobTitle} position with emphasis on quantifiable achievements and industry-specific keywords:
+        ${data}
+
+        CRITICAL ATS OPTIMIZATION INSTRUCTIONS:
+        1. KEYWORD TARGETING: Embed ${jobTitle}-specific keywords at 3-5% density in summary and experience sections.
+        2. QUANTIFY RESULTS: Transform all achievements into metrics (↑35% revenue, $500K savings, 12 team members).
+        3. POWER VERBS: Lead each bullet with strong action verbs (Spearheaded, Orchestrated, Implemented).
+        4. ATS-COMPATIBLE FORMAT: Eliminate tables, columns, special characters, and complex formatting.
+        5. TECHNICAL SPECIFICITY: List precise versions of tools, technologies, and methodologies with proficiency levels relevant to ${jobTitle} roles.
+        6. COMPELLING SUMMARY: Craft a 3-line summary highlighting years of experience, expertise, and unique value proposition specifically for a ${jobTitle} position.
+        7. STRATEGIC STRUCTURE: Use consistent formatting with logical progression and appropriate white space.
+        8. INDUSTRY TERMINOLOGY: Replace generic language with precise ${jobTitle} industry terms that match ATS algorithms.
+        9. REVERSE CHRONOLOGY: Present most recent experience first with standardized date formats (MMM YYYY).
+        10. VERIFICATION DATA: Include certification IDs, license numbers, and other verifiable credentials relevant to ${jobTitle} positions.
+
+        Return a structured CV in this format:
+        ${CV_STRUCTURE}
+
+        MOST IMPORTANT INSTRUCTIONS TO FOLLOW:
+        1. Extract and categorize all sections from input text and utilize all the provided data.
+        2. Match links to corresponding sections/items.
+        3. Consume all the provided data in the structured CV. Do not respond with placeholders like "rest of the data...".
+        4. Ensure all content is ATS-friendly by avoiding excessive formatting, symbols, or images. Use clear, keyword-optimized descriptions relevant to ${jobTitle} positions.
+        5. Integrate numeric analytics wherever applicable (e.g., "Increased efficiency by 30%", "Managed a budget of $50K", "Led a team of 10 developers").
+        6. Do not include additional CV sections outside the ones defined in the sections object. If data exists for an undefined section, integrate it into the closest relevant category.
+        7. Ensure all dates follow the "MMM YYYY" format.
+        8. Preserve all URLs and links in their respective fields.
+        9. If descriptions are vague, enhance them while keeping the original meaning intact and aligning with ${jobTitle} requirements.
+        10. Utilize all provided data comprehensively while maintaining a professional, structured format.
+        11. KEYWORD OPTIMIZATION: For each achievement, identify and incorporate at least one ${jobTitle}-related keyword.
+        12. ACTION VERB VARIETY: Use diverse, impactful action verbs at the beginning of each achievement bullet (e.g., "Spearheaded," "Implemented," "Orchestrated").
+        13. ACHIEVEMENT-FOCUSED: Transform responsibility statements into achievement statements with measurable outcomes important for ${jobTitle} roles.
+        14. TECHNICAL SPECIFICATION: Include specific versions, methodologies, and frameworks relevant to ${jobTitle} positions.
+        15. Just return the structured CV data in the specified format. Do not include any additional text or instructions.
+        `;
+}
+
+function LatexPrompt_jobTitle_jobDes(extractedData, jobTitle, jobDescription){
+  const data = JSON.stringify(extractedData);
+  return `
+        As a senior HR data analyst specializing in ATS optimization, transform the following JSON CV data into a highly optimized, ATS-friendly format tailored specifically for a ${jobTitle} position with the following job description:
+
+              "${jobDescription}"
+
+              Emphasize quantifiable achievements and industry-specific keywords that match the job description:
+
+              ${data}
+        CRITICAL ATS OPTIMIZATION INSTRUCTIONS:
+        1. KEYWORD TARGETING: Extract and embed keywords from the job description at 3-5% density in summary and experience sections.
+        2. QUANTIFY RESULTS: Transform all achievements into metrics (↑35% revenue, $500K savings, 12 team members).
+        3. POWER VERBS: Lead each bullet with strong action verbs (Spearheaded, Orchestrated, Implemented) that match requirements in the job description.
+        4. ATS-COMPATIBLE FORMAT: Eliminate tables, columns, special characters, and complex formatting.
+        5. TECHNICAL SPECIFICITY: List precise versions of tools, technologies, and methodologies with proficiency levels mentioned in the job description.
+        6. COMPELLING SUMMARY: Craft a 3-line summary highlighting years of experience, expertise, and unique value proposition that directly addresses job requirements.
+        7. STRATEGIC STRUCTURE: Use consistent formatting with logical progression and appropriate white space.
+        8. INDUSTRY TERMINOLOGY: Replace generic language with precise industry terms from the job description that match ATS algorithms.
+        9. REVERSE CHRONOLOGY: Present most recent experience first with standardized date formats (MMM YYYY).
+        10. VERIFICATION DATA: Include certification IDs, license numbers, and other verifiable credentials relevant to requirements in the job description.
+
+        Return a structured CV in this format:
+        ${CV_STRUCTURE}
+
+        MOST IMPORTANT INSTRUCTIONS TO FOLLOW:
+        1. Extract and categorize all sections from input text and utilize all the provided data.
+        2. Match links to corresponding sections/items.
+        3. Consume all the provided data in the structured CV. Do not respond with placeholders like "rest of the data...".
+        4. Ensure all content is ATS-friendly by avoiding excessive formatting, symbols, or images. Use clear, keyword-optimized descriptions that mirror the job description.
+        5. Integrate numeric analytics wherever applicable (e.g., "Increased efficiency by 30%", "Managed a budget of $50K", "Led a team of 10 developers").
+        6. Do not include additional CV sections outside the ones defined in the sections object. If data exists for an undefined section, integrate it into the closest relevant category.
+        7. Ensure all dates follow the "MMM YYYY" format.
+        8. Preserve all URLs and links in their respective fields.
+        9. If descriptions are vague, enhance them while keeping the original meaning intact and aligning with specific requirements in the job description.
+        10. Utilize all provided data comprehensively while maintaining a professional, structured format.
+        11. KEYWORD OPTIMIZATION: For each achievement, identify and incorporate at least one keyword from the job description.
+        12. ACTION VERB VARIETY: Use diverse, impactful action verbs at the beginning of each achievement bullet that align with the responsibilities in the job description.
+        13. ACHIEVEMENT-FOCUSED: Transform responsibility statements into achievement statements with measurable outcomes that demonstrate qualification for the specific job requirements.
+        14. TECHNICAL SPECIFICATION: Include specific versions, methodologies, and frameworks mentioned in the job description.
+        15. SKILL PRIORITIZATION: Rearrange skills section to highlight those most relevant to the job description first.
+        16. Just return the structured CV data in the specified format. Do not include any additional text or instructions.`;
+}
+
 export const ConvertLatex = async (req, res) => {
-    const { extractedData, template, model: modelName, apiProvider } = req.body;
+    const { extractedData, template, model: modelName, apiProvider, isTailoredResume, jobTitle, jobDescription } = req.body;
     console.log("apiProvider", apiProvider);
     console.log("model", modelName);
 
@@ -247,7 +333,15 @@ export const ConvertLatex = async (req, res) => {
     let mn;
     
     try {
-        const LATEX_CONVERSION_PROMPT = LatexPrompt(extractedData);
+
+        let LATEX_CONVERSION_PROMPT;
+        if(isTailoredResume && jobTitle && jobDescription){
+            LATEX_CONVERSION_PROMPT = LatexPrompt_jobTitle_jobDes(extractedData, jobTitle, jobDescription);
+        }else if(isTailoredResume && jobTitle){
+            LATEX_CONVERSION_PROMPT = LatexPrompt_jobTitle(extractedData, jobTitle);
+        }else{
+        LATEX_CONVERSION_PROMPT = LatexPrompt(extractedData);
+        }
         
         // Determine which API to use based on the model
         if (modelName === 'Qwen 32B') {

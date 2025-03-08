@@ -120,6 +120,7 @@ const DocumentationPage = () => {
             {[
               "PDF to LaTeX conversion with AI-powered formatting",
               "Multiple professional resume templates",
+              "Tailored resume optimization for specific job applications",
               "Preserves your resume structure and content",
               "Download both LaTeX source files and compiled PDFs",
               "No LaTeX knowledge required",
@@ -162,6 +163,17 @@ const DocumentationPage = () => {
             <li className="flex">
               <div className="flex-shrink-0 bg-blue-600 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center mr-2 sm:mr-3">
                 <span className="text-xs sm:text-sm">3</span>
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-medium text-gray-800">Optional: Tailor your resume</h3>
+                <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">
+                  Toggle on "Tailored Resume" and enter the job title and description to optimize your resume for a specific position.
+                </p>
+              </div>
+            </li>
+            <li className="flex">
+              <div className="flex-shrink-0 bg-blue-600 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center mr-2 sm:mr-3">
+                <span className="text-xs sm:text-sm">4</span>
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-medium text-gray-800">Process and download</h3>
@@ -226,6 +238,7 @@ const DocumentationPage = () => {
           <ul className="space-y-2 sm:space-y-3">
             {[
               "Use clean, well-structured PDF files for best conversion accuracy",
+              "For tailored resumes, provide detailed job descriptions for better optimization",
               "Avoid unusual formatting, text boxes, and complex graphics",
               "Ensure your PDF is text-based (not scanned images)",
               "Standard section headings (Experience, Education, Skills) work best",
@@ -251,6 +264,10 @@ const DocumentationPage = () => {
               {
                 q: "Do I need to know LaTeX to use this tool?",
                 a: "Not at all! Our tool handles all the LaTeX coding for you. You just upload your current resume."
+              },
+              {
+                q: "What is the 'Tailored Resume' feature?",
+                a: "This feature allows you to optimize your resume for specific job positions by providing the job title and description, helping you highlight relevant skills and experiences."
               },
               {
                 q: "Will my personal data be stored?",

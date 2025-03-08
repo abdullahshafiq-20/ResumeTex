@@ -131,6 +131,7 @@ const generateCVLatexTemplate2_new = (cvData) => {
             const github = header.contact_info?.github?.value || '';
             const location = header.contact_info?.location?.value || '';
             const name = header.name || 'Name Not Provided';
+            const title = header.title || '';
 
             // Build contact sections conditionally
             const contactSections = [];
@@ -166,6 +167,7 @@ const generateCVLatexTemplate2_new = (cvData) => {
             return `
 \\begin{center}
     {\\Huge \\scshape ${escapeLaTeX(name)}} \\\\ \\vspace{1pt}
+    {\\Large ${escapeLaTeX(title)}} \\\\ \\vspace{1pt}
     ${location ? `${escapeLaTeX(location)} \\\\ \\vspace{1pt}` : ''}
     ${contactSections.length ? `\\small ${contactSections.join(' ~ ')}` : ''}
     \\vspace{-8pt}

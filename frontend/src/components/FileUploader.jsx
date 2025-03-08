@@ -19,6 +19,9 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     const [showApiInfo, setShowApiInfo] = useState(false);
     const [pId, setpId] = useState(null);
     const [isModelBeta, setIsModelBeta] = useState(false); // New state for tracking beta models
+    const [isTailoredResume, setIsTailoredResume] = useState(false);
+    const [jobTitle, setJobTitle] = useState('');
+    const [jobDescription, setJobDescription] = useState('');
 
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
@@ -113,13 +116,16 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
 
             // Step 2: Gemini Processing
             setProcessingStep('gemini');
-            setProcessingMessage('Getting sections and links from Gemini...');
+            setProcessingMessage('Getting sections and links...');
             try {
                 const geminicall = await axios.post(`${apiUrl}/convert-latex`, {
                     extractedData: extractedData,
                     template: template,
                     model: selectedModel,
-                    apiProvider: selectedApi
+                    apiProvider: selectedApi,
+                    isTailoredResume: isTailoredResume,
+                    jobTitle: jobTitle,
+                    jobDescription: jobDescription
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -231,10 +237,60 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 </div>
             </div> */}
 
-            {/* Header */}
-            <div className="flex items-center justify-center p-3 sm:p-4 border-b">
-                <h2 className="text-lg sm:text-xl font-semibold">Upload Files</h2>
+            {/* Header with Toggle */}
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b">
+                <div>
+                <h2 className="text-lg sm:text-xl font-semibold">Upload Resume</h2>
+
+                </div>
+                <div className="flex items-center">
+                    <span className="text-xs mr-2">Targeted Resume</span>
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={isTailoredResume}
+                            onChange={() => setIsTailoredResume(!isTailoredResume)}
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
             </div>
+
+            {/* Job details section - conditionally rendered */}
+            {isTailoredResume && (
+                <div className="p-3 sm:p-4 border-b space-y-3 ">
+                    <div className='flex items-center gap-1'>
+                    <h3 className="text-sm font-semibold text-gray-700">Job Details</h3>
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded ">BETA</span>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div>
+                            <label htmlFor="jobTitle" className="block text-xs font-medium text-gray-700 mb-1">Job Title</label>
+                            <input
+                                type="text"
+                                id="jobTitle"
+                                value={jobTitle}
+                                onChange={(e) => setJobTitle(e.target.value)}
+                                className="w-full p-2 border rounded-md text-sm"
+                                placeholder="e.g. Software Engineer"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="jobDescription" className="block text-xs font-medium text-gray-700 mb-1">Job Description</label>
+                            <textarea
+                                id="jobDescription"
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                                className="w-full p-2 border rounded-md text-sm"
+                                rows="4"
+                                placeholder="Leave blank for if no description is available"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Settings Panel - Always visible */}
             <div className="p-3 sm:p-4 border-b space-y-3 sm:space-y-4">
@@ -267,7 +323,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                         onChange={handleModelChange}
                         className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
                     >
-                        <option value="Qwen 32B">Qwen 32B </option>
+                        <option value="Qwen 32B">Qwen 32B (Reponse time : 1 MIN) </option>
                         <option value="Gemini 1.5 Flash">Gemini 1.5 Flash</option>
                         {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
                         <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option>
@@ -309,7 +365,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                         <option value="api_4">API 4</option>
                         <option value="api_5">API 5</option>
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Using API key from environment variables</p>
+                    {/* <p className="text-xs text-gray-500 mt-1">Using API key from environment variables</p> */}
                 </div>
             </div>
 
@@ -390,7 +446,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                                 onClick={handleUploadFile}
                                                 className="p-2 hover:bg-blue-100 rounded-full"
                                             >
-                                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                                 </svg>
                                             </button>
@@ -398,7 +454,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                                 onClick={handleDelete}
                                                 className="p-2 hover:bg-red-100 rounded-full"
                                             >
-                                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
@@ -407,7 +463,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                     {isUploaded && (
                                         <div className="flex space-x-2">
                                             <div className="p-2">
-                                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
@@ -415,7 +471,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                                 onClick={handleDelete}
                                                 className="p-2 hover:bg-red-100 rounded-full"
                                             >
-                                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
@@ -445,7 +501,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
             <div className="flex justify-center p-3 sm:p-4 border-t">
                 <button
                     className="px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    disabled={!selectedFile || isUploading || !isUploaded || isProcessing}
+                    disabled={!selectedFile || isUploading || !isUploaded || isProcessing || (isTailoredResume && !jobTitle)}
                     onClick={handleProcess}
                 >
                     {isProcessing ? (
