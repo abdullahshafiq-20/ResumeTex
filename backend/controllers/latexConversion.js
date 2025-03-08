@@ -457,6 +457,8 @@ export const ConvertLatex = async (req, res) => {
         
         // Generate the formatted LaTeX
         const email = parsedData.cv_template.sections.header.contact_info.email.value;
+        const name = parsedData.cv_template.sections.header.name;
+        const title = parsedData.cv_template.sections.header.title;
         console.log("email:", email);
         let formattedLatex;
         if (template === 'v2') {
@@ -467,7 +469,7 @@ export const ConvertLatex = async (req, res) => {
             formattedLatex = generateCVLatexTemplateV3(parsedData);
         }
         
-        res.json({ formattedLatex, email });
+        res.json({ formattedLatex, email, name, title});
     } catch (error) {
         console.error('LaTeX conversion error:', error);
         res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });

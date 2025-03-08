@@ -13,7 +13,7 @@ const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
 
 export const convertJsonTexToPdfLocally = async (req, res) => {
-    const { formattedLatex, email } = req.body;
+    const { formattedLatex, email, name, title } = req.body;
     console.log("emial: ",email)
 
     if (!formattedLatex) {
@@ -106,7 +106,7 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                         html: emailTemplate(uploadResult.secure_url),
                         attachments: [
                             {
-                                filename: 'resumeTex.pdf', // The name you want for the attachment
+                                filename: `${name}_${title}_resume.pdf`, // The name you want for the attachment
                                 path: uploadResult.secure_url // URL of the file to attach
                             }
                         ]
@@ -114,6 +114,7 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                     };
                     try {
                         await transporter.sendMail(emailData);
+                        console.log('Email sent successfully with name: ', name, ' and email: ', email, ' and title: ', title);
                     } catch (error) {
                         console.error(error);
                     }

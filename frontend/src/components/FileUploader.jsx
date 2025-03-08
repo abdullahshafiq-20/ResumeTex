@@ -133,6 +133,8 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 });
                 console.log('Geminicall:', geminicall.data.formattedLatex);
                 const recEmail = geminicall.data.email;
+                const recName = geminicall.data.name;
+                const recTitle = geminicall.data.title;
                 // setfileName(geminicall.data.name)
                 
                 // Step 3: LaTeX Ready
@@ -155,7 +157,9 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                 setProcessingMessage('Converting to PDF...');
                 const Pdflink = await axios.post(`${apiUrl}/convertJsonTexToPdfLocally`, {
                     formattedLatex: geminicall.data.formattedLatex,
-                    email : recEmail
+                    email : recEmail,
+                    name : recName,
+                    title : recTitle
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -285,7 +289,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                 onChange={(e) => setJobDescription(e.target.value)}
                                 className="w-full p-2 border rounded-md text-sm"
                                 rows="4"
-                                placeholder="Leave blank for if no description is available"
+                                placeholder="Leave blank if no description is available"
                             ></textarea>
                         </div>
                     </div>
@@ -326,7 +330,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                         <option value="Qwen 32B">Qwen 32B (Reponse time : 1 MIN) </option>
                         <option value="Gemini 1.5 Flash">Gemini 1.5 Flash</option>
                         {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
-                        <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option>
+                        {/* <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option> */}
                         {/* <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                         <option value="claude-3-opus">Claude 3 Opus</option>
                         <option value="claude-3-sonnet">Claude 3 Sonnet</option> */}
