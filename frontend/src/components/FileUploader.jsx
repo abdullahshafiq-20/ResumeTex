@@ -13,11 +13,12 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     const [processingStep, setProcessingStep] = useState('');
     const [processingMessage, setProcessingMessage] = useState('');
     const navigate = useNavigate();
-    const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
+    const [selectedModel, setSelectedModel] = useState('Gemini 1.5 Flash');
     const [selectedApi, setSelectedApi] = useState('api_1');
     const [showModelInfo, setShowModelInfo] = useState(false);
     const [showApiInfo, setShowApiInfo] = useState(false);
     const [pId, setpId] = useState(null);
+    const [isModelBeta, setIsModelBeta] = useState(false); // New state for tracking beta models
 
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
@@ -73,8 +74,11 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     };
 
     const handleModelChange = (e) => {
-        setSelectedModel(e.target.value);
-        toast.success(`Switched to ${e.target.value}`, {
+        const model = e.target.value;
+        setSelectedModel(model);
+        // Check if selected model is in beta
+        setIsModelBeta(model === 'Qwen 32B');
+        toast.success(`Switched to ${model}`, {
             position: 'bottom-center',
             duration: 2000,
         });
@@ -254,15 +258,19 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                 </div>
                             )}
                         </div>
+                        {isModelBeta && (
+                            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded ">EXPERIMENTAL</span>
+                        )}
                     </div>
                     <select
                         value={selectedModel}
                         onChange={handleModelChange}
                         className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
                     >
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="Qwen 32B">Qwen 32B </option>
+                        <option value="Gemini 1.5 Flash">Gemini 1.5 Flash</option>
                         {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option>
                         {/* <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                         <option value="claude-3-opus">Claude 3 Opus</option>
                         <option value="claude-3-sonnet">Claude 3 Sonnet</option> */}
@@ -456,5 +464,4 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
         </div>
     );
 }
-  
-  
+

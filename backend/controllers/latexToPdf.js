@@ -99,17 +99,17 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
 
 
                     // Return only the secure URL
-                    const emailData = {
-                        from: process.env.EMAIL,
-                        to: email,
-                        subject: `Your ResumeTex PDF is Ready`,
-                        html: emailTemplate(uploadResult.secure_url),
-                    };
-                    try {
-                        await transporter.sendMail(emailData);
-                    } catch (error) {
-                        console.error(error);
-                    }
+                    // const emailData = {
+                    //     from: process.env.EMAIL,
+                    //     to: email,
+                    //     subject: `Your ResumeTex PDF is Ready`,
+                    //     html: emailTemplate(uploadResult.secure_url),
+                    // };
+                    // try {
+                    //     await transporter.sendMail(emailData);
+                    // } catch (error) {
+                    //     console.error(error);
+                    // }
                     res.status(200).json({
                         pdfUrl: uploadResult.secure_url,
                         publicId: uploadResult.public_id,

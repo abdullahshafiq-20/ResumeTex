@@ -14,7 +14,7 @@
   "description": "",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "busboy": "^1.6.0",
     "child_process": "^1.0.2",
     "cloudinary": "^2.5.1",

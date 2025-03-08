@@ -4,46 +4,26 @@ import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
 import { generateCVLatexTemplate2_new } from '../utils/templateV2_new.js';
 import dotenv from 'dotenv';
 import { generateCVLatexTemplateV3 } from "../utils/templateV3.js";
+import axios from 'axios';
 dotenv.config();
 
-export const ConvertLatex = async (req, res) => {
-    const { extractedData, template, model: modelName, apiProvider } = req.body;
-    console.log("apiProvider", apiProvider);
-    console.log("model", modelName);
+function LatexPrompt (extractedData){
+  const data = JSON.stringify(extractedData);
+  return `As a senior HR data analyst specializing in ATS optimization, transform the following JSON CV data into a highly optimized, ATS-friendly format with emphasis on quantifiable achievements and industry-specific keywords:
 
-    let apikey;
-    // Select API key based on provider
-    switch(apiProvider) {
-        case 'api_1':
-            apikey = process.env.GEMINI_API_KEY_1;
-            break;
-        case 'api_2':
-            apikey = process.env.GEMINI_API_KEY_2;
-            break;
-        case 'api_3':
-            apikey = process.env.GEMINI_API_KEY_3;
-            break;
-        case 'api_4':
-            apikey = process.env.GEMINI_API_KEY_4;
-            break;
-        case 'api_5':
-            apikey = process.env.GEMINI_API_KEY_5;
-            break;
-        default:
-            return res.status(400).json({ error: 'Invalid API provider specified' });
-    }
+        ${data}
 
-    if (!apikey) {
-        return res.status(500).json({ error: 'API key not configured for specified provider' });
-    }
-
-    try {
-        const genAI = new GoogleGenerativeAI(apikey);
-        const model = genAI.getGenerativeModel({ model: modelName });
-
-        const LATEX_CONVERSION_PROMPT = `As a data analyst, analyze and structure the following JSON CV data:
-
-        ${JSON.stringify(extractedData)}
+        CRITICAL ATS OPTIMIZATION INSTRUCTIONS:
+        1. KEYWORD TARGETING: Embed industry-specific keywords at 3-5% density in summary and experience sections.
+        2. QUANTIFY RESULTS: Transform all achievements into metrics (↑35% revenue, $500K savings, 12 team members).
+        3. POWER VERBS: Lead each bullet with strong action verbs (Spearheaded, Orchestrated, Implemented).
+        4. ATS-COMPATIBLE FORMAT: Eliminate tables, columns, special characters, and complex formatting.
+        5. TECHNICAL SPECIFICITY: List precise versions of tools, technologies, and methodologies with proficiency levels.
+        6. COMPELLING SUMMARY: Craft a 3-line summary with years of experience, expertise, and unique value proposition.
+        7. STRATEGIC STRUCTURE: Use consistent formatting with logical progression and appropriate white space.
+        8. INDUSTRY TERMINOLOGY: Replace generic language with precise industry terms that match ATS algorithms.
+        9. REVERSE CHRONOLOGY: Present most recent experience first with standardized date formats (MMM YYYY).
+        10. VERIFICATION DATA: Include certification IDs, license numbers, and other verifiable credentials.
         
         Return a structured CV in this format:
         {
@@ -239,33 +219,139 @@ export const ConvertLatex = async (req, res) => {
             }
           }
         }
+          MOST IMPORTANT INSTRUCTIONS TO FOLLOW:
+          1.Extract and categorize all sections from input text.
+          2.Match links to corresponding sections/items.
+          3.Consume all the provided data in the structured CV. Do not respond with placeholders like "rest of the data...".
+          4.Ensure all content is ATS-friendly by avoiding excessive formatting, symbols, or images. Use clear, keyword-optimized descriptions relevant to the job industry.
+          5.Integrate numeric analytics wherever applicable (e.g., "Increased efficiency by 30%", "Managed a budget of $50K", "Led a team of 10 developers").
+          6.Do not include additional CV sections outside the ones defined in the sections object. If data exists for an undefined section, integrate it into the closest relevant category.
+          7.Ensure all dates follow the "MMM YYYY" format.
+          8.Preserve all URLs and links in their respective fields.
+          9.If descriptions are vague, enhance them while keeping the original meaning intact.
+          10.Utilize all provided data comprehensively while maintaining a professional, structured format.
+          11.KEYWORD OPTIMIZATION: For each achievement, identify and incorporate at least one industry-specific keyword.
+          12.ACTION VERB VARIETY: Use diverse, impactful action verbs at the beginning of each achievement bullet (e.g., "Spearheaded," "Implemented," "Orchestrated").
+          13.ACHIEVEMENT-FOCUSED: Transform responsibility statements into achievement statements with measurable outcomes.
+          14.TECHNICAL SPECIFICATION: Include specific versions, methodologies, and frameworks where applicable.
+          15.Just return the structured CV data in the specified format. Do not include any additional text or instructions.`;
+}
+
+export const ConvertLatex = async (req, res) => {
+    const { extractedData, template, model: modelName, apiProvider } = req.body;
+    console.log("apiProvider", apiProvider);
+    console.log("model", modelName);
+
+    let apiKey;
+    let latexContent;
+    let mn;
+    
+    try {
+        const LATEX_CONVERSION_PROMPT = LatexPrompt(extractedData);
         
-        Instructions:
-        1. Extract and categorize all sections from input text
-        2. Match links to corresponding sections/items
-        3. Consume all the provided data in the structured CV, dont repsond like "rest of the data....."
-        4. Dont include any additional CV sections in the sections object, if you dont have the data for a section, dont include it in the JSON and if there is section which is not in the sections object, ajdust this data in the sections i have defined above. 
-        5. Ensure all dates follow MMM YYYY format
-        6. Preserve all URLs and links in their respective fields
-        7. If you see there are some description which are not upto the mark you are open to modify them but make sure the meaning of the description is not changed.
-        8. Utilize all the data, it is vey important`;
+        // Determine which API to use based on the model
+        if (modelName === 'Qwen 32B') {
+            mn = "qwen/qwq-32b:free";
+            // Select OpenRouter API key based on provider
+            switch(apiProvider) {
+                case 'api_1':
+                    apiKey = process.env.OPENROUTER_API_KEY_1;
+                    break;
+                case 'api_2':
+                    apiKey = process.env.OPENROUTER_API_KEY_2;
+                    break;
+                case 'api_3':
+                    apiKey = process.env.OPENROUTER_API_KEY_3;
+                    break;
+                case 'api_4':
+                    apiKey = process.env.OPENROUTER_API_KEY_4;
+                    break;
+                case 'api_5':
+                    apiKey = process.env.OPENROUTER_API_KEY_5;
+                    break;
+                default:
+                    return res.status(400).json({ error: 'Invalid API provider specified' });
+            }
+            
+            if (!apiKey) {
+                return res.status(500).json({ error: 'OpenRouter API key not configured for specified provider' });
+            }
+            
+            // Call OpenRouter API
+            console.log("Calling OpenRouter API with Qwen model");
+            const openRouterResponse = await axios.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                {
+                    model: mn,
+                    messages: [
+                        {
+                            role: "user",
+                            content: LATEX_CONVERSION_PROMPT
+                        }
+                    ]
+                },
+                {
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/json",
+                    }
+                }
+            );
+            
+            latexContent = openRouterResponse.data.choices[0].message.content;
+            console.log("Response received from OpenRouter API");
+            
+        } else if (modelName === 'Gemini 1.5 Pro' || modelName === 'Gemini 1.5 Flash') {
+            if (modelName === 'Gemini 1.5 Pro') {
+                mn = "gemini-1.5-pro";
+            }
+            else if (modelName === 'Gemini 1.5 Flash') {
+                mn = "gemini-1.5-flash";
+            }
 
-        const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
-        console.log("calling gemini api")
-        const response = result.response;
-
-        // console.log("response:", response);
-
-        console.log("response from gemini api");
-        let latexContent = response.text();
-
-        console.log("latexContent:", latexContent);
+            // Select Gemini API key based on provider
+            switch(apiProvider) {
+                case 'api_1':
+                    apiKey = process.env.GEMINI_API_KEY_1;
+                    break;
+                case 'api_2':
+                    apiKey = process.env.GEMINI_API_KEY_2;
+                    break;
+                case 'api_3':
+                    apiKey = process.env.GEMINI_API_KEY_3;
+                    break;
+                case 'api_4':
+                    apiKey = process.env.GEMINI_API_KEY_4;
+                    break;
+                case 'api_5':
+                    apiKey = process.env.GEMINI_API_KEY_5;
+                    break;
+                default:
+                    return res.status(400).json({ error: 'Invalid API provider specified' });
+            }
+            
+            if (!apiKey) {
+                return res.status(500).json({ error: 'Gemini API key not configured for specified provider' });
+            }
+            
+            // Call Gemini API
+            console.log("Calling Gemini API with model:", mn);
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: mn});
+            const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
+            latexContent = result.response.text();
+            console.log("Response received from Gemini API");
+            
+        } else {
+            return res.status(400).json({ error: 'Unsupported model specified' });
+        }
         
+        console.log("Processing AI response");
         
         // Clean up the response - remove markdown code blocks and any extra whitespace
         latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
-                                 .replace(/```\n?/g, '')        // Remove closing ```
-                                 .trim();                       // Remove extra whitespace
+                               .replace(/```\n?/g, '')        // Remove closing ```
+                               .trim();                       // Remove extra whitespace
 
         let parsedData;
         try {
@@ -281,14 +367,11 @@ export const ConvertLatex = async (req, res) => {
         let formattedLatex;
         if (template === 'v2') {
             formattedLatex = generateCVLatexTemplate2_new(parsedData);
-
         } else if (template === 'v1') {
             formattedLatex = generateCVLatexTemplateV1(parsedData);
+        } else {
+            formattedLatex = generateCVLatexTemplateV3(parsedData);
         }
-        else {
-          formattedLatex = generateCVLatexTemplateV3(parsedData);
-        }
-        // console.log("formattedLatex:", formattedLatex);
         
         res.json({ formattedLatex, email });
     } catch (error) {
