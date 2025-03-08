@@ -106,7 +106,7 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                         html: emailTemplate(uploadResult.secure_url),
                         attachments: [
                             {
-                                filename: 'moiz_ali_resume.pdf', // The name you want for the attachment
+                                filename: 'resumeTex.pdf', // The name you want for the attachment
                                 path: uploadResult.secure_url // URL of the file to attach
                             }
                         ]
