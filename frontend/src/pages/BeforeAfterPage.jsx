@@ -106,6 +106,7 @@ const BeforeAfterPage = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen py-6 sm:py-10 px-3 sm:px-6 lg:px-8 flex items-center justify-center relative">
       {/* Enhanced Server Status Indicator */}
       <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex items-center gap-1.5 sm:gap-2">
@@ -254,7 +255,9 @@ const BeforeAfterPage = () => {
         <Footer />
       </div>
     </div>
+    </>
   );
+  
 };
 
 export default BeforeAfterPage;

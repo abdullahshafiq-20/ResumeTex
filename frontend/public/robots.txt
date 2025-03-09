@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://resume-tex.vercel.app/sitemap.xml
