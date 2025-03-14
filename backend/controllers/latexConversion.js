@@ -400,7 +400,7 @@ export const ConvertLatex = async (req, res) => {
                 mn = "gemini-1.5-pro";
             }
             else if (modelName === 'Gemini 1.5 Flash') {
-                mn = "gemini-1.5-flash";
+                mn = "gemini-2.0-flash";
             }
 
             // Select Gemini API key based on provider

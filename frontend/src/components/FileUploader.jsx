@@ -328,7 +328,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                         className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
                     >
                         <option value="Qwen 32B">Qwen 32B (Reponse time : 1 MIN) </option>
-                        <option value="Gemini 1.5 Flash">Gemini 1.5 Flash</option>
+                        <option value="Gemini 1.5 Flash">Gemini 2.0 Flash</option>
                         {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
                         {/* <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option> */}
                         {/* <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
