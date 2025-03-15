@@ -17,6 +17,7 @@ const BeforeAfterPage = () => {
   const [deploymentLog, setDeploymentLog] = useState({ type: "", message: "" });
   const navigate = useNavigate();
   const [count, setCount] = useState(0);
+  const [ disable , setDisable ] = useState(true);
 
   // Status styles configuration
   const statusConfig = {
@@ -238,10 +239,16 @@ const BeforeAfterPage = () => {
         <div className="flex flex-col items-center justify-center px-2 sm:px-4">
           <div className="w-full">
             <div className="w-full max-w-[500px] mx-auto mb-3 sm:mb-4 border border-yellow-300 rounded-lg px-4 sm:px-6 py-2 sm:py-3 bg-yellow-50 text-center">
-              <p className="text-xs sm:text-sm text-yellow-600">
+              {disable ? (
+                <p className="text-xs sm:text-sm text-yellow-600 ">
+                  The server is currently undergoing scheduled maintenance. We expect to complete the process shortly. We appreciate your patience and apologize for any inconvenience caused.
+                </p>
+              ) : (
+                <p className="text-xs sm:text-sm text-yellow-600">
                 Note: In some cases, the PDF may not be generated. If this
                 occurs, please try converting again.
               </p>
+              )}
             </div>
           </div>
 
@@ -249,6 +256,7 @@ const BeforeAfterPage = () => {
             onFileUpload={handleFileUpload}
             apiUrl={api}
             template={selectedTemplate}
+            disable={disable}
           />
         </div>
 

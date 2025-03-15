@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
-export default function FileUploader({ onFileUpload, apiUrl, template }) {
+export default function FileUploader({ onFileUpload, apiUrl, template, disable = false }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
@@ -24,6 +24,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     const [jobDescription, setJobDescription] = useState('');
 
     const handleFileSelect = (event) => {
+        if (disable) return;
         const file = event.target.files[0];
         if (file) {
             setSelectedFile(file);
@@ -34,7 +35,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     };
 
     const handleUploadFile = async () => {
-        if (!selectedFile) return;
+        if (disable || !selectedFile) return;
         
         setIsUploading(true);
         const formData = new FormData();
@@ -70,6 +71,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     };
 
     const handleDelete = () => {
+        if (disable) return;
         setSelectedFile(null);
         setUploadProgress(0);
         setIsUploading(false);
@@ -77,6 +79,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     };
 
     const handleModelChange = (e) => {
+        if (disable) return;
         const model = e.target.value;
         setSelectedModel(model);
         // Check if selected model is in beta
@@ -88,6 +91,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
     };
 
     const handleApiChange = (e) => {
+        if (disable) return;
         setSelectedApi(e.target.value);
         toast.success(`Switched to ${e.target.value}`, {
             position: 'bottom-center',
@@ -230,7 +234,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
 
 
     return (
-        <div className="w-full max-w-[500px] bg-white rounded-lg border ">
+        <div className={`w-full max-w-[500px] bg-white rounded-lg border ${disable ? 'opacity-50 pointer-events-none' : ''}`}>
             {/* Status Strip - Simplified to yellow only */}
             {/* <div className="h-6 rounded-t-lg flex items-center justify-end px-3 bg-yellow-400/20">
                 <div className="flex items-center space-x-2">
@@ -325,7 +329,8 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     <select
                         value={selectedModel}
                         onChange={handleModelChange}
-                        className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
+                        disabled={disable}
+                        className={`w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white ${disable ? 'cursor-not-allowed' : ''}`}
                     >
                         <option value="Qwen 32B">Qwen 32B (Reponse time : 1 MIN) </option>
                         <option value="Gemini 1.5 Flash">Gemini 2.0 Flash</option>
@@ -361,7 +366,8 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                     <select
                         value={selectedApi}
                         onChange={handleApiChange}
-                        className="w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white"
+                        disabled={disable}
+                        className={`w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white ${disable ? 'cursor-not-allowed' : ''}`}
                     >
                         <option value="api_1">API 1 (Default)</option>
                         <option value="api_2">API 2</option>
@@ -396,7 +402,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
                                 onChange={handleFileSelect}
                                 id="fileInput"
                                 accept=".pdf"
-                                disabled={!template}
+                                disabled={!template || disable}
                             />
                             <label
                                 htmlFor="fileInput"
@@ -505,7 +511,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template }) {
             <div className="flex justify-center p-3 sm:p-4 border-t">
                 <button
                     className="px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    disabled={!selectedFile || isUploading || !isUploaded || isProcessing || (isTailoredResume && !jobTitle)}
+                    disabled={!selectedFile || isUploading || !isUploaded || isProcessing || (isTailoredResume && !jobTitle) || disable}
                     onClick={handleProcess}
                 >
                     {isProcessing ? (
