@@ -112,12 +112,12 @@ export const convertJsonTexToPdfLocally = async (req, res) => {
                         ]
                         
                     };
-                    try {
-                        await transporter.sendMail(emailData);
-                        console.log('Email sent successfully with name: ', name, ' and email: ', email, ' and title: ', title);
-                    } catch (error) {
-                        console.error(error);
-                    }
+                    // try {
+                    //     await transporter.sendMail(emailData);
+                    //     console.log('Email sent successfully with name: ', name, ' and email: ', email, ' and title: ', title);
+                    // } catch (error) {
+                    //     console.error(error);
+                    // }
                     res.status(200).json({
                         pdfUrl: uploadResult.secure_url,
                         publicId: uploadResult.public_id,

@@ -1,0 +1,9 @@
+node_modules
+.env
+pdfs
+controllers/logic.js
+controllers/demo.json
+test.js
+test1.js
+config/prompts
+scripts
