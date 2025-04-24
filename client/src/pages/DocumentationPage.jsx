@@ -89,6 +89,83 @@ const DocumentationPage = () => {
           </div>
         </div>
 
+        {/* Privacy Policy - NEW SECTION */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Privacy Policy</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">Information Collection</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                When you use ResumeTex, we temporarily process your uploaded resume files to convert them to LaTeX format. 
+                We do not permanently store your resume content, personal information, or documents after processing is complete.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">How We Use Your Information</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Your resume content is only used to generate the LaTeX document you've requested. We use anonymized usage data 
+                to improve our service and conversion algorithms. We never share your personal information with third parties.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">AI Processing</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                ResumeTex uses AI models to process your resume content. Your data may be temporarily sent to our AI service 
+                providers to complete the conversion process, but is not retained by these services once processing is complete.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">Data Security</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                We implement industry-standard security measures to protect your data during processing. Files are transmitted 
+                using secure connections and are automatically deleted from our servers after processing or within 24 hours, 
+                whichever comes first.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">Cookies & Analytics</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                We use essential cookies to ensure the functionality of the website. We also use anonymous analytics to help us 
+                understand how users interact with our service and to improve user experience. These analytics do not identify 
+                individual users.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">Your Rights</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Since we don't permanently store your personal data, there's typically no need for data access or deletion requests. 
+                However, if you have any privacy concerns or questions about our data practices, please contact us at{" "}
+                <a href="mailto:resumetex.convertor@gmail.com" className="text-blue-600 hover:underline">
+                  resumetex.convertor@gmail.com
+                </a>.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm sm:text-base font-medium text-gray-800 mb-1">Policy Updates</h3>
+              <p className="text-xs sm:text-sm text-gray-600">
+                We may update this privacy policy occasionally to reflect changes in our practices or for other operational, 
+                legal, or regulatory reasons. Please review this policy periodically for any changes.
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 sm:p-4 rounded mt-4">
+              <div className="flex">
+                <InfoIcon className="text-blue-500 mr-2 flex-shrink-0" size={18} />
+                <p className="text-xs sm:text-sm text-blue-700">
+                  Last updated: April 24, 2025. By using ResumeTex, you agree to the terms outlined in this privacy policy.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Introduction */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex items-center mb-3 sm:mb-4">
@@ -295,7 +372,7 @@ const DocumentationPage = () => {
         </div>
 
         {/* Contact & Support */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-10">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Contact & Support</h2>
           <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             Encounter any issues or have questions? We're here to help!
@@ -319,6 +396,8 @@ const DocumentationPage = () => {
             </a>
           </div>
         </div>
+
+        
       </div>
       
       <Footer />
