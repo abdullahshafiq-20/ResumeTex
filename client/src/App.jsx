@@ -5,6 +5,10 @@ import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
 import { HelmetProvider } from 'react-helmet-async';
 import "./App.css";
+import PrivateRoute from "./utils/PrivateRoute";
+import AuthCallback from "./pages/AuthCallback";
+import LoginPage from "./pages/Login";
+import Dashbaord from "./pages/Dashbaord";
 
 // Lazy load components
 const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage"));
@@ -26,11 +30,22 @@ export default function App() {
         <div className="content-layer flex flex-col items-center justify-center min-h-screen">
           <Suspense fallback={<div className="loading">Loading...</div>}>
             <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={<BeforeAfterPage />} />
               <Route path="/response" element={<ResponsePage />} />
               <Route path="/bug-report" element={<BugReportPage />} />
               <Route path="/documentation" element={<DocumentationPage />} />
-              <Route path="/editor" element={<EditorPage />} />
+              <Route
+                    path="/editor"
+                    element={
+                      <PrivateRoute>
+                        <EditorPage />
+                      </PrivateRoute>
+                    }
+              />
+              <Route path="/dashboard" element={<PrivateRoute> <Dashbaord /> </PrivateRoute>} />
+
             </Routes>
           </Suspense>
         </div>
