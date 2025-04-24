@@ -8,10 +8,6 @@ import { texContentUpload } from "../controllers/texFileUpload.js"
 import { deleteFilesController } from '../controllers/deleteFile.js'
 import { convertJsonTexToPdfLocally, getCount } from '../controllers/latexToPdf.js'
 import { bugForm } from "../controllers/bugForm.js"
-import { googleAuth, googleCallback } from "../controllers/googleAuthController.js"
-import { sendEmail, sendEmailWithAttachment } from "../controllers/emailController.js"
-import { verifyToken } from "../middleware/auth.js"
-import { getJobs } from "../controllers/jobsController.js"
 
 const router = express.Router();
 
@@ -25,10 +21,6 @@ router.post('/delete-files', deleteFilesController)
 router.post('/convertJsonTexToPdfLocally', convertJsonTexToPdfLocally)
 router.post('/bugForm', bugForm)
 router.get('/getCount', getCount)
-router.get('/auth/google', googleAuth)
-router.get('/auth/google/callback', googleCallback)
-router.post('/send-email', verifyToken, sendEmail)
-router.get('/jobs', getJobs)
 
 
 

@@ -1,8 +1,8 @@
 // authController.js
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { User } from "../models/userSchema.js";
-import { getOAuthClient, generateAuthUrl } from "../utils/oauthUtils.js";
+import { User } from "../../models/userSchema.js";
+import { getOAuthClient, generateAuthUrl } from "../../utils/oauthUtils.js";
 dotenv.config();
 
 // Step 1: Redirect to Google OAuth

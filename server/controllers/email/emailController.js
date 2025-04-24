@@ -1,8 +1,8 @@
 // emailController.js
 import { google } from "googleapis";
 import dotenv from "dotenv";
-import { User } from "../models/userSchema.js";
-import { setupOAuthWithRefreshToken } from "../utils/oauthUtils.js";
+import { User } from "../../models/userSchema.js";
+import { setupOAuthWithRefreshToken } from "../../utils/oauthUtils.js";
 dotenv.config();
 
 // Controller to send email
