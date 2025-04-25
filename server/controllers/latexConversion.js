@@ -1,11 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getLatexPrompt, getLatexPromptJobTitle, getLatexPromptJobDescription } from '../services/promptServices.js';
 
-import { generateCVLatexTemplateV1 }  from "../utils/templateV1.js"
-import { generateCVLatexTemplateV2 }  from "../utils/templateV2.js"
 import { generateCVLatexTemplate2_new } from '../utils/templateV2_new.js';
 import dotenv from 'dotenv';
-import { generateCVLatexTemplateV3 } from "../utils/templateV3.js";
 import axios from 'axios';
 dotenv.config();
 
@@ -205,123 +202,15 @@ const CV_STRUCTURE = `{
         }`;
 
 
-export const ConvertLatex = async (req, res) => {
-    const { extractedData, template, model: modelName, apiProvider, isTailoredResume, jobTitle, jobDescription } = req.body;
-    console.log("apiProvider", apiProvider);
-    console.log("model", modelName);
-
-    let apiKey;
-    let latexContent;
-    let mn;
-    
+export const ConvertLatex = async (extractedData, jobTitle, apiKey) => {
+  let latexContent = '';
     try {
-
-        let LATEX_CONVERSION_PROMPT;
-        if(isTailoredResume && jobTitle && jobDescription){
-            LATEX_CONVERSION_PROMPT =await getLatexPromptJobDescription(extractedData, jobTitle, jobDescription, CV_STRUCTURE);
-        }else if(isTailoredResume && jobTitle){
-            LATEX_CONVERSION_PROMPT = await getLatexPromptJobTitle(extractedData, jobTitle, CV_STRUCTURE);
-        }else{
-        LATEX_CONVERSION_PROMPT = await getLatexPrompt(extractedData, CV_STRUCTURE);
-        }
-        
-        // Determine which API to use based on the model
-        if (modelName === 'Qwen 32B') {
-            mn = "qwen/qwen2.5-vl-32b-instruct:free";
-            // Select OpenRouter API key based on provider
-            switch(apiProvider) {
-                case 'api_1':
-                    apiKey = process.env.OPENROUTER_API_KEY_1;
-                    break;
-                case 'api_2':
-                    apiKey = process.env.OPENROUTER_API_KEY_2;
-                    break;
-                case 'api_3':
-                    apiKey = process.env.OPENROUTER_API_KEY_3;
-                    break;
-                case 'api_4':
-                    apiKey = process.env.OPENROUTER_API_KEY_4;
-                    break;
-                case 'api_5':
-                    apiKey = process.env.OPENROUTER_API_KEY_5;
-                    break;
-                default:
-                    return res.status(400).json({ error: 'Invalid API provider specified' });
-            }
-            
-            if (!apiKey) {
-                return res.status(500).json({ error: 'OpenRouter API key not configured for specified provider' });
-            }
-            
-            // Call OpenRouter API
-            console.log("Calling OpenRouter API with Qwen model");
-            const openRouterResponse = await axios.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                {
-                    model: mn,
-                    messages: [
-                        {
-                            role: "user",
-                            content: LATEX_CONVERSION_PROMPT
-                        }
-                    ]
-                },
-                {
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json",
-                    }
-                }
-            );
-            
-            latexContent = openRouterResponse.data.choices[0].message.content;
-            console.log("Response received from OpenRouter API");
-            
-        } else if (modelName === 'Gemini 1.5 Pro' || modelName === 'Gemini 1.5 Flash') {
-            if (modelName === 'Gemini 1.5 Pro') {
-                mn = "gemini-1.5-pro";
-            }
-            else if (modelName === 'Gemini 1.5 Flash') {
-                mn = "gemini-2.0-flash";
-            }
-
-            // Select Gemini API key based on provider
-            switch(apiProvider) {
-                case 'api_1':
-                    apiKey = process.env.GEMINI_API_KEY_1;
-                    break;
-                case 'api_2':
-                    apiKey = process.env.GEMINI_API_KEY_2;
-                    break;
-                case 'api_3':
-                    apiKey = process.env.GEMINI_API_KEY_3;
-                    break;
-                case 'api_4':
-                    apiKey = process.env.GEMINI_API_KEY_4;
-                    break;
-                case 'api_5':
-                    apiKey = process.env.GEMINI_API_KEY_5;
-                    break;
-                default:
-                    return res.status(400).json({ error: 'Invalid API provider specified' });
-            }
-            
-            if (!apiKey) {
-                return res.status(500).json({ error: 'Gemini API key not configured for specified provider' });
-            }
-            
-            // Call Gemini API
-            console.log("Calling Gemini API with model:", mn);
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: mn});
-            const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
-            latexContent = result.response.text();
-            console.log("Response received from Gemini API");
-            
-        } else {
-            return res.status(400).json({ error: 'Unsupported model specified' });
-        }
-        
+        const LATEX_CONVERSION_PROMPT = await getLatexPromptJobTitle(extractedData, jobTitle, CV_STRUCTURE);
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro"});
+        const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
+        latexContent = result.response.text();
+        console.log("Response received from Gemini API");
         console.log("Processing AI response");
         
         // Clean up the response - remove markdown code blocks and any extra whitespace
@@ -334,7 +223,7 @@ export const ConvertLatex = async (req, res) => {
             parsedData = JSON.parse(latexContent);
         } catch (parseError) {
             console.error('Failed to parse AI response:', latexContent);
-            return res.status(500).json({ error: 'Failed to parse AI response' });
+            return  { error: 'Failed to parse AI response' };
         }
         
         // Generate the formatted LaTeX
@@ -342,18 +231,14 @@ export const ConvertLatex = async (req, res) => {
         const name = parsedData.cv_template.sections.header.name;
         const title = parsedData.cv_template.sections.header.title;
         console.log("email:", email);
-        let formattedLatex;
-        if (template === 'v2') {
-            formattedLatex = generateCVLatexTemplate2_new(parsedData);
-        } else if (template === 'v1') {
-            formattedLatex = generateCVLatexTemplateV1(parsedData);
-        } else {
-            formattedLatex = generateCVLatexTemplateV3(parsedData);
-        }
+        const formattedLatex = generateCVLatexTemplate2_new(parsedData);
         
-        res.json({ formattedLatex, email, name, title});
+        console.log("Formatted LaTeX generated successfully");
+        return { formattedLatex, email, name, title };
+
+
     } catch (error) {
         console.error('LaTeX conversion error:', error);
-        res.status(500).json({ error: 'Failed to convert to LaTeX: ' + error.message });
+        return { error: 'LaTeX conversion failed' };
     }
 };

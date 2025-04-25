@@ -8,6 +8,7 @@ import routes from "./routes/routes.js";
 import authRoutes from "./routes/authRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import resumeRoutes from "./routes/resumeRoutes.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,6 +38,7 @@ app.use("/api", routes);
 app.use("/api", authRoutes);
 app.use("/api", emailRoutes);
 app.use("/api", jobRoutes);
+app.use("/api", resumeRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ status: 'ok' });

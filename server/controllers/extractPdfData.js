@@ -9,11 +9,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(__dirname, '../node_modules/pdfjs-dist/build/pdf.worker.js');
 
-export const extractPdfData = async (req, res) => {
+export const extractPdfData = async (pdfUrl) => {
     try {
-        const { pdfUrl } = req.body;
+        console.log("from extractpdf", pdfUrl)// Extract the PDF URL from the request body
         if (!pdfUrl) {
-            return res.status(400).json({ error: 'PDF URL is required' });
+            return { error: 'PDF URL is required' };
         }
 
         // Download PDF
@@ -83,11 +83,9 @@ export const extractPdfData = async (req, res) => {
         // const latexContent = await ConvertLatex(extractedData, template);
         // const link = await convertJsonTexToPdf(latexContent);
 
-        res.json({
-          extractedData
-        });
+        return { extractedData };
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Failed to process PDF' });
+        return { error: 'Internal Server Error' };
     }
 };

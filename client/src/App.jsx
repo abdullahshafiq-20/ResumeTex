@@ -9,6 +9,7 @@ import PrivateRoute from "./utils/PrivateRoute";
 import AuthCallback from "./pages/AuthCallback";
 import LoginPage from "./pages/Login";
 import Dashbaord from "./pages/Dashbaord";
+import TestPage from "./pages/TestPage";
 
 // Lazy load components
 const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage"));
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/response" element={<ResponsePage />} />
               <Route path="/bug-report" element={<BugReportPage />} />
               <Route path="/documentation" element={<DocumentationPage />} />
+              <Route path="/test" element={<TestPage />} />
               <Route
                     path="/editor"
                     element={
