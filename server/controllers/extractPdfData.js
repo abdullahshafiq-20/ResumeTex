@@ -1,5 +1,5 @@
 import pdfjsLib from "pdfjs-dist";
-import path from 'path';
+import path, { parse } from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import Count from '../models/countSchema.js';
@@ -89,3 +89,5 @@ export const extractPdfData = async (pdfUrl) => {
         return { error: 'Internal Server Error' };
     }
 };
+
+

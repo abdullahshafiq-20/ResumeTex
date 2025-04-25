@@ -7,7 +7,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white px-4">
+    <div className="flex flex-col items-center justify-center min-h-scre px-4">
       <h1 className="text-4xl font-bold mb-4">Welcome to ResumeTex</h1>
       <p className="mb-6 text-lg text-gray-400">Login to continue</p>
 

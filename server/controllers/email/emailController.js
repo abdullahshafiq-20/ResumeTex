@@ -1,7 +1,7 @@
 // emailController.js
 import { google } from "googleapis";
 import dotenv from "dotenv";
-import { User } from "../../models/userSchema.js";
+import { User, UserPreferences } from "../../models/userSchema.js";
 import { setupOAuthWithRefreshToken } from "../../utils/oauthUtils.js";
 dotenv.config();
 
@@ -136,3 +136,13 @@ ${attachmentBase64}
     return res.status(500).json({ error: 'Failed to send email with attachment', details: error.message });
   }
 };
+
+export const generteEmails = async (req, res) => {
+  try {
+    const { jobTitle, jobDescription } = req.body;
+
+    
+  } catch (error) {
+    
+  }
+}

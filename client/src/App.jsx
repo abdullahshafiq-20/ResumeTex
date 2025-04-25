@@ -24,11 +24,11 @@ export default function App() {
       <HelmetProvider>
       <Toaster />
       <Analytics />
-      <div className="app-container">
+      {/* <div className="app-container">
         <div className="background-layer">
           <Squares speed={0.1} squareSize={30} direction="diagonal" borderColor="rgba(0, 0, 0, 0.01)" hoverFillColor="#2563EB" />
         </div>
-        <div className="content-layer flex flex-col items-center justify-center min-h-screen">
+        <div className="content-layer flex flex-col items-center justify-center min-h-screen"> */}
           <Suspense fallback={<div className="loading">Loading...</div>}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
@@ -50,8 +50,8 @@ export default function App() {
 
             </Routes>
           </Suspense>
-        </div>
-      </div>
+        {/* </div>
+      </div> */}
       </HelmetProvider>
     </>
   );

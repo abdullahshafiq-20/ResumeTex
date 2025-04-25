@@ -1,6 +1,8 @@
 import { extractPdfData } from "../extractPdfData.js";
 import { ConvertLatex } from "../latexConversion.js";
 import { convertJsonTexToPdfLocally } from "../latexToPdf.js";
+import { User, UserPreferences } from "../../models/userSchema.js";
+
 
 
 
@@ -27,9 +29,14 @@ export const onboardResume = async (req, res) => {
 
         send(`Fetching data for : ${pref1}`, { step: "fetchingData", status: "started" });
         const apiKey1 = process.env.GEMINI_API_KEY_3;
-        const { formattedLatex, email, name, title } = await ConvertLatex(extractedData, pref1, apiKey1);
+        const { formattedLatex, email, name, title} = await ConvertLatex(extractedData, pref1, apiKey1);
         console.log("formattedLatex", formattedLatex)
         console.log("starting pdf conversion")
+
+        
+
+
+
         const { pdfUrl1, publicId1, pdfName1 } = await convertJsonTexToPdfLocally(formattedLatex);
         send(`Fetching data for : ${pref1}`, { step: "fetchingData", status: "completed", data: { pdfUrl: pdfUrl1} });
 
@@ -53,7 +60,9 @@ export const onboardResume = async (req, res) => {
 
     } catch (error) {
         console.error('Error in onboardResume:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.write(`event: error\n`);
+        res.write(`data: ${JSON.stringify({ error: 'Internal Server Error' })}\n\n`);
+        res.end(); // Close the connection after sending the error
         
     }
 }

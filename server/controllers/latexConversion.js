@@ -230,11 +230,14 @@ export const ConvertLatex = async (extractedData, jobTitle, apiKey) => {
         const email = parsedData.cv_template.sections.header.contact_info.email.value;
         const name = parsedData.cv_template.sections.header.name;
         const title = parsedData.cv_template.sections.header.title;
+        const summary = parsedData.cv_template.sections.summary.content;
+        const skills = parsedData.cv_template.sections.skills.categories;
+        const projects = parsedData.cv_template.sections.projects.items;
         console.log("email:", email);
         const formattedLatex = generateCVLatexTemplate2_new(parsedData);
         
         console.log("Formatted LaTeX generated successfully");
-        return { formattedLatex, email, name, title };
+        return { formattedLatex, email, name, title, summary, skills, projects };
 
 
     } catch (error) {
