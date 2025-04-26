@@ -202,6 +202,8 @@ const CV_STRUCTURE = `{
         }`;
 
 
+
+
 export const ConvertLatex = async (extractedData, jobTitle, apiKey) => {
   let latexContent = '';
     try {
@@ -230,9 +232,17 @@ export const ConvertLatex = async (extractedData, jobTitle, apiKey) => {
         const email = parsedData.cv_template.sections.header.contact_info.email.value;
         const name = parsedData.cv_template.sections.header.name;
         const title = parsedData.cv_template.sections.header.title;
-        const summary = parsedData.cv_template.sections.summary.content;
-        const skills = parsedData.cv_template.sections.skills.categories;
-        const projects = parsedData.cv_template.sections.projects.items;
+        const summary = parsedData?.cv_template?.sections?.summary?.content || '';
+
+        // Skills with type checking and fallback
+        const skills = Array.isArray(parsedData?.cv_template?.sections?.skills?.categories) 
+          ? parsedData.cv_template.sections.skills.categories 
+          : [];
+        
+        // Projects with type checking and fallback
+        const projects = Array.isArray(parsedData?.cv_template?.sections?.projects?.items) 
+          ? parsedData.cv_template.sections.projects.items 
+          : [];
         console.log("email:", email);
         const formattedLatex = generateCVLatexTemplate2_new(parsedData);
         

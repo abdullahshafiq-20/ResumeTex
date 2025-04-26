@@ -66,3 +66,36 @@ const userPrefrencesSchema = new mongoose.Schema({
     }
 });
 export const UserPreferences = mongoose.model("UserPreferences", userPrefrencesSchema);
+
+const emailSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    to: {
+        type: String,
+        required: true
+    },
+    subject: {
+        type: String,
+        required: true
+    },
+    body: {
+        type: String,
+        required: true
+    },
+    attachment: {
+        type: String,
+        required: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+export const Email = mongoose.model("Email", emailSchema);

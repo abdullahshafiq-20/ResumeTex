@@ -28,10 +28,47 @@ export const onboardResume = async (req, res) => {
         send("Extracting data", { step: "extractpdf", status: "completed", data: extractedData });
 
         send(`Fetching data for : ${pref1}`, { step: "fetchingData", status: "started" });
-        const apiKey1 = process.env.GEMINI_API_KEY_3;
-        const { formattedLatex, email, name, title} = await ConvertLatex(extractedData, pref1, apiKey1);
+        const apiKey1 = process.env.GEMINI_API_KEY_2;
+        const { formattedLatex, email, name, title, summary, skills, projects } = await ConvertLatex(extractedData, pref1, apiKey1);
         console.log("formattedLatex", formattedLatex)
         console.log("starting pdf conversion")
+
+        const user = await User.findOne({ email: email });
+        
+        if (user) {
+            // Process the skills data - extract all skill items and flatten into a single array
+            const flattenedSkills = Array.isArray(skills) 
+                ? skills.flatMap(category => Array.isArray(category.items) ? category.items : [])
+                : [];
+            
+            // For projects, extract simplified data or convert to strings
+            const simplifiedProjects = Array.isArray(projects)
+                ? projects.map(project => project.title || project.name || JSON.stringify(project))
+                : [];
+            
+            // Update or create user preferences with the extracted data
+            const userPreferences = await UserPreferences.findOneAndUpdate(
+                { userId: user._id },
+                { 
+                    $set: { 
+                        preferences: pref1,
+                        summary: summary || "",
+                        skills: flattenedSkills,  // Flat array of strings
+                        projects: simplifiedProjects, // Simplified projects data
+                        updatedAt: Date.now()
+                    } 
+                },
+                { new: true, upsert: true }
+            );
+            
+            console.log(`Saved user preferences for ${email}:`, {
+                summary: summary ? summary.substring(0, 50) + "..." : "None provided",
+                skills: `${flattenedSkills.length} skills saved`,
+                projects: `${simplifiedProjects.length} projects saved`
+            });
+        } else {
+            console.log(`User with email ${email} not found in database`);
+        }
 
         
 
