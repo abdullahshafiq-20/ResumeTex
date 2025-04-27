@@ -18,7 +18,7 @@ export const onboardResume = async (req, res) => {
         res.write(`data: ${JSON.stringify(data)}\n\n`);
       };
     try {
-        const { pdfUrl , pref1} = req.query; // Extract the PDF URL from the request body
+        const { pdfUrl , pref1, pref2, pref3} = req.query; // Extract the PDF URL from the request body
         if (!pdfUrl) {
             return res.status(400).json({ error: 'PDF URL is required' });
         }
@@ -27,8 +27,8 @@ export const onboardResume = async (req, res) => {
         const { extractedData } = await extractPdfData(pdfUrl);
         send("Extracting data", { step: "extractpdf", status: "completed", data: extractedData });
 
-        send(`Fetching data for : ${pref1}`, { step: "fetchingData", status: "started" });
-        const apiKey1 = process.env.GEMINI_API_KEY_2;
+        send(`Fetching data for : ${pref1}`, { step: `FetchingData ${pref1}`, status: "started" });
+        const apiKey1 = process.env.GEMINI_API_KEY_1;
         const { formattedLatex, email, name, title, summary, skills, projects } = await ConvertLatex(extractedData, pref1, apiKey1);
         console.log("formattedLatex", formattedLatex)
         console.log("starting pdf conversion")
@@ -70,30 +70,41 @@ export const onboardResume = async (req, res) => {
             console.log(`User with email ${email} not found in database`);
         }
 
+        const pdf1 = await convertJsonTexToPdfLocally(formattedLatex);
+        const pdfUrl1 = pdf1.pdfUrl;
+        const publicId1 = pdf1.publicId;
+        const pdfName1 = pdf1.pdfName;
+        send(`Fetching data for : ${pref1}`, {step: `FetchingData ${pref1}`, status: "completed", data: { pdfUrl: pdfUrl1} });
+
         
 
+        send(`Fetching data for : ${pref2}`, { step: `FetchingData ${pref2}`, status: "started" });
+        const apiKey2 = process.env.GEMINI_API_KEY_5;
+        const resposne2 = await ConvertLatex(extractedData, pref2, apiKey2);
+        const formattedLatex2 = resposne2.formattedLatex;
+        console.log("resposne2", resposne2)
+        const pdf = await convertJsonTexToPdfLocally(formattedLatex2);
+        console.log("pdf", pdf)
+        const pdfUrl2 = pdf.pdfUrl;
+        const publicId2 = pdf.publicId;
+        const pdfName2 = pdf.pdfName;
+        send(`Fetching data for : ${pref2}`, { step: `FetchingData ${pref2}` , status: "completed", data: { pdfUrl: pdfUrl2} });
 
-
-        const { pdfUrl1, publicId1, pdfName1 } = await convertJsonTexToPdfLocally(formattedLatex);
-        send(`Fetching data for : ${pref1}`, { step: "fetchingData", status: "completed", data: { pdfUrl: pdfUrl1} });
-
-        // send(`Fetching data for : ${pref2}`, { step: "fetchingData", status: "started" });
-        // const apiKey2 = process.env.GEMINI_API_KEY_2;
-        // const { formattedLatex2, email2, name2, title2 } = await ConvertLatex(extractedData, pref2, apiKey2);
-        // const { pdfUrl2, publicId2, pdfName2 } = await convertJsonTexToPdfLocally(formattedLatex2);
-        // send(`Fetching data for : ${pref2}`, { step: "fetchingData", status: "completed", data: { pdfUrl: pdfUrl2} });
-
-        // send(`Fetching data for : ${pref3}`, { step: "fetchingData", status: "started" });
-        // const apiKey3 = process.env.GEMINI_API_KEY_3;
-        // const { formattedLatex3, email3, name3, title3 } = await ConvertLatex(extractedData, pref3, apiKey3);
-        // const { pdfUrl3, publicId3, pdfName3 } = await convertJsonTexToPdfLocally(formattedLatex3);
-        // send(`Fetching data for : ${pref3}`, { step: "fetchingData", status: "completed", data: { pdfUrl: pdfUrl3} });
+        send(`Fetching data for : ${pref3}`, { step: `FetchingData ${pref3}`, status: "started" });
+        const apiKey3 = process.env.GEMINI_API_KEY_4;
+        const resposne3 = await ConvertLatex(extractedData, pref3, apiKey3);
+        const formattedLatex3 = resposne3.formattedLatex;
+        const pdf3 = await convertJsonTexToPdfLocally(formattedLatex3);
+        const pdfUrl3 = pdf3.pdfUrl;
+        const publicId3 = pdf3.publicId;
+        const pdfName3 = pdf3.pdfName;
+        send(`Fetching data for : ${pref3}`, { step: `FetchingData ${pref3}`, status: "completed", data: { pdfUrl: pdfUrl3} });
 
         res.write(`event: complete\n`);
-        res.write(`data: ${JSON.stringify({ pdfUrl1 })}\n\n`);
+        res.write(`data: ${JSON.stringify({ pdfUrl1, pdfUrl2, pdfUrl3 })}\n\n`);
         res.end(); // Close the connection after sending the final data
         console.log("Response sent to client");
-        // res.json({ extractedData });
+        // res.json({ pref1, pref2, pref3 });
 
     } catch (error) {
         console.error('Error in onboardResume:', error);

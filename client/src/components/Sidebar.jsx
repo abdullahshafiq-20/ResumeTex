@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from "framer-motion";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
@@ -7,7 +8,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   // Navigation menu items
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'My Resumes', href: '/resumes', icon: DocumentIcon },
+    { name: 'My Resumes', href: '/my-resume', icon: DocumentIcon },
     { name: 'Templates', href: '/templates', icon: TemplateIcon },
     { name: 'Profile', href: '/profile', icon: UserIcon },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },
@@ -16,60 +17,105 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <>
       {/* Mobile sidebar overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity lg:hidden"
-          onClick={toggleSidebar}
-        ></div>
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
+            onClick={toggleSidebar}
+          ></motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-blue-800 overflow-y-auto transition duration-300 transform lg:translate-x-0 lg:static lg:inset-0 ${
-          isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
-        }`}
+      <motion.div
+        className="fixed inset-y-0 left-0 z-30 w-64 lg:w-64 overflow-y-auto lg:relative lg:inset-auto"
+        initial={{ x: -280 }}
+        animate={{ 
+          x: isOpen || window.innerWidth >= 1024 ? 0 : -280 
+        }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 400, 
+          damping: 40 
+        }}
       >
-        <div className="flex items-center justify-center mt-8">
-          <div className="flex items-center">
-            <span className="text-white text-2xl font-semibold">Resume Builder</span>
+        <div className="h-full rounded-r-xl border-r border-gray-200/60 bg-white/80 relative">
+          {/* Background with blurred blobs - similar to navbar */}
+          <div className="absolute inset-0 overflow-hidden rounded-r-xl">
+            <div className="absolute top-0 left-0 w-40 h-40 rounded-full bg-blue-300/20 blur-3xl transform translate-x-[-30%] translate-y-[-30%]"></div>
+            <div className="absolute bottom-0 right-10 w-32 h-32 rounded-full bg-blue-400/20 blur-2xl"></div>
+            <div className="absolute top-1/3 left-1/4 w-24 h-24 rounded-full bg-indigo-300/20 blur-2xl"></div>
+            
+            {/* Backdrop overlay */}
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-md"></div>
           </div>
-        </div>
 
-        <nav className="mt-10">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center px-6 py-3 mt-1 text-lg ${
-                  isActive
-                    ? 'bg-blue-700 text-white border-l-4 border-white'
-                    : 'text-blue-100 hover:bg-blue-700'
-                }`}
-              >
-                <item.icon className="h-6 w-6 mr-3" />
-                {item.name}
+          {/* Content */}
+          <div className="relative flex flex-col h-full py-6 px-4">
+            {/* Brand Logo */}
+            <div className="flex items-center justify-center mb-8">
+              <Link to="/dashboard" className="flex items-center space-x-2">
+                <div className="bg-[#2563EB] rounded-md flex items-center justify-center text-white font-bold text-xl h-10 w-10">
+                  R
+                </div>
+                <span className="font-semibold text-lg">ResumeWizard</span>
               </Link>
-            );
-          })}
-        </nav>
+            </div>
+            
+            <nav className="flex-1 space-y-1">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <motion.div
+                    key={item.name}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link
+                      to={item.href}
+                      className={`flex items-center px-4 py-2.5 rounded-md transition-all ${
+                        isActive
+                          ? 'bg-blue-50/80 text-[#2563EB] font-medium'
+                          : 'text-gray-600 hover:bg-blue-50/60 hover:text-[#2563EB]'
+                      }`}
+                    >
+                      <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-[#2563EB]' : 'text-gray-500'}`} />
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </nav>
 
-        <div className="absolute bottom-0 w-full mb-6">
-          <Link
-            to="/logout"
-            className="flex items-center px-6 py-3 text-lg text-blue-100 hover:bg-blue-700"
-          >
-            <LogoutIcon className="h-6 w-6 mr-3" />
-            Logout
-          </Link>
+            <div className="pt-2 mt-6 border-t border-gray-200/60">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Link
+                  to="/logout"
+                  className="flex items-center px-4 py-2.5 rounded-md text-gray-600 hover:bg-red-50/60 hover:text-red-600 transition-all"
+                >
+                  <LogoutIcon className="h-5 w-5 mr-3 text-gray-500" />
+                  Logout
+                </Link>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Subtle shadow on right edge */}
+          <div className="absolute inset-y-0 right-0 w-1 bg-gradient-to-r from-transparent to-gray-200/50"></div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };
 
-// Icon components
+// Icon components remain the same
 const HomeIcon = (props) => (
   <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

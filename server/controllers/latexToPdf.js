@@ -100,9 +100,9 @@ export const convertJsonTexToPdfLocally = async (formattedLatex) => {
 
                     // Resolve with the result
                     resolve({
-                        pdfUrl1: uploadResult.secure_url,
-                        publicId1: uploadResult.public_id,
-                        pdfName1: uploadResult.original_filename
+                        pdfUrl: uploadResult.secure_url,
+                        publicId: uploadResult.public_id,
+                        pdfName: uploadResult.original_filename
                     });
                 } catch (error) {
                     console.error('Upload error:', error);

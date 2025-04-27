@@ -1,15 +1,18 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Squares from "./components/background/Squares";
-import { Toaster } from 'react-hot-toast';
-import { Analytics } from '@vercel/analytics/react';
-import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/react";
+import { HelmetProvider } from "react-helmet-async";
 import "./App.css";
 import PrivateRoute from "./utils/PrivateRoute";
 import AuthCallback from "./pages/AuthCallback";
 import LoginPage from "./pages/Login";
 import Dashbaord from "./pages/Dashbaord";
 import TestPage from "./pages/TestPage";
+import OnBoardPage from "./pages/OnBoardPage";
+import MyResume from "./pages/MyResume";
+import DashboardLayout from "./layouts/DashboardLayout";
 
 // Lazy load components
 const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage"));
@@ -22,36 +25,37 @@ export default function App() {
   return (
     <>
       <HelmetProvider>
-      <Toaster />
-      <Analytics />
-      {/* <div className="app-container">
-        <div className="background-layer">
-          <Squares speed={0.1} squareSize={30} direction="diagonal" borderColor="rgba(0, 0, 0, 0.01)" hoverFillColor="#2563EB" />
-        </div>
-        <div className="content-layer flex flex-col items-center justify-center min-h-screen"> */}
-          <Suspense fallback={<div className="loading">Loading...</div>}>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/" element={<BeforeAfterPage />} />
-              <Route path="/response" element={<ResponsePage />} />
-              <Route path="/bug-report" element={<BugReportPage />} />
-              <Route path="/documentation" element={<DocumentationPage />} />
-              <Route path="/test" element={<TestPage />} />
-              <Route
-                    path="/editor"
-                    element={
-                      <PrivateRoute>
-                        <EditorPage />
-                      </PrivateRoute>
-                    }
-              />
-              <Route path="/dashboard" element={<PrivateRoute> <Dashbaord /> </PrivateRoute>} />
+        <Toaster />
+        <Analytics />
+        <Suspense fallback={<div className="loading">Loading...</div>}>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/" element={<BeforeAfterPage />} />
+            <Route path="/response" element={<ResponsePage />} />
+            <Route path="/bug-report" element={<BugReportPage />} />
+            <Route path="/documentation" element={<DocumentationPage />} />
+            <Route path="/test" element={<TestPage />} />
+            <Route path="/onboard" element={<PrivateRoute><OnBoardPage /></PrivateRoute>} />
+            
+            {/* Protected routes with Dashboard layout */}
+            <Route 
+              path="/"
+              element={
+                <PrivateRoute>
+                  <DashboardLayout />
+                </PrivateRoute>
+              }
+            >
+              <Route path="dashboard" element={<Dashbaord />} />
+              <Route path="my-resume" element={<MyResume />} />
+              <Route path="editor" element={<EditorPage />} />
+              {/* Add more dashboard routes here */}
+            </Route>
 
-            </Routes>
-          </Suspense>
-        {/* </div>
-      </div> */}
+          </Routes>
+        </Suspense>
       </HelmetProvider>
     </>
   );

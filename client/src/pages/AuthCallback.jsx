@@ -15,7 +15,7 @@ const AuthCallback = () => {
       console.log("Redirecting to dashboard...");
   
       setTimeout(() => {
-        navigate("/dashboard", { replace: true });
+        navigate("/onboard", { replace: true });
       }, 100); // Delay to ensure token is written
     } else {
       navigate("/", { replace: true });
