@@ -1,7 +1,8 @@
 import { extractPdfData } from "../extractPdfData.js";
 import { ConvertLatex } from "../latexConversion.js";
 import { convertJsonTexToPdfLocally } from "../latexToPdf.js";
-import { User, UserPreferences } from "../../models/userSchema.js";
+import { User, UserPreferences, UserResume
+ } from "../../models/userSchema.js";
 
 
 
@@ -16,9 +17,9 @@ export const onboardResume = async (req, res) => {
     const send = (event, data) => {
         res.write(`event: ${event}\n`);
         res.write(`data: ${JSON.stringify(data)}\n\n`);
-      };
+    };
     try {
-        const { pdfUrl , pref1, pref2, pref3} = req.query; // Extract the PDF URL from the request body
+        const { pdfUrl, pref1, pref2, pref3 } = req.query; // Extract the PDF URL from the request body
         if (!pdfUrl) {
             return res.status(400).json({ error: 'PDF URL is required' });
         }
@@ -34,33 +35,33 @@ export const onboardResume = async (req, res) => {
         console.log("starting pdf conversion")
 
         const user = await User.findOne({ email: email });
-        
+
         if (user) {
             // Process the skills data - extract all skill items and flatten into a single array
-            const flattenedSkills = Array.isArray(skills) 
+            const flattenedSkills = Array.isArray(skills)
                 ? skills.flatMap(category => Array.isArray(category.items) ? category.items : [])
                 : [];
-            
+
             // For projects, extract simplified data or convert to strings
             const simplifiedProjects = Array.isArray(projects)
                 ? projects.map(project => project.title || project.name || JSON.stringify(project))
                 : [];
-            
+
             // Update or create user preferences with the extracted data
             const userPreferences = await UserPreferences.findOneAndUpdate(
                 { userId: user._id },
-                { 
-                    $set: { 
+                {
+                    $set: {
                         preferences: pref1,
                         summary: summary || "",
                         skills: flattenedSkills,  // Flat array of strings
                         projects: simplifiedProjects, // Simplified projects data
                         updatedAt: Date.now()
-                    } 
+                    }
                 },
                 { new: true, upsert: true }
             );
-            
+
             console.log(`Saved user preferences for ${email}:`, {
                 summary: summary ? summary.substring(0, 50) + "..." : "None provided",
                 skills: `${flattenedSkills.length} skills saved`,
@@ -74,9 +75,9 @@ export const onboardResume = async (req, res) => {
         const pdfUrl1 = pdf1.pdfUrl;
         const publicId1 = pdf1.publicId;
         const pdfName1 = pdf1.pdfName;
-        send(`Fetching data for : ${pref1}`, {step: `FetchingData ${pref1}`, status: "completed", data: { pdfUrl: pdfUrl1} });
+        send(`Fetching data for : ${pref1}`, { step: `FetchingData ${pref1}`, status: "completed", data: { pdfUrl: pdfUrl1 } });
 
-        
+
 
         send(`Fetching data for : ${pref2}`, { step: `FetchingData ${pref2}`, status: "started" });
         const apiKey2 = process.env.GEMINI_API_KEY_5;
@@ -88,7 +89,7 @@ export const onboardResume = async (req, res) => {
         const pdfUrl2 = pdf.pdfUrl;
         const publicId2 = pdf.publicId;
         const pdfName2 = pdf.pdfName;
-        send(`Fetching data for : ${pref2}`, { step: `FetchingData ${pref2}` , status: "completed", data: { pdfUrl: pdfUrl2} });
+        send(`Fetching data for : ${pref2}`, { step: `FetchingData ${pref2}`, status: "completed", data: { pdfUrl: pdfUrl2 } });
 
         send(`Fetching data for : ${pref3}`, { step: `FetchingData ${pref3}`, status: "started" });
         const apiKey3 = process.env.GEMINI_API_KEY_4;
@@ -98,10 +99,18 @@ export const onboardResume = async (req, res) => {
         const pdfUrl3 = pdf3.pdfUrl;
         const publicId3 = pdf3.publicId;
         const pdfName3 = pdf3.pdfName;
-        send(`Fetching data for : ${pref3}`, { step: `FetchingData ${pref3}`, status: "completed", data: { pdfUrl: pdfUrl3} });
+        send(`Fetching data for : ${pref3}`, { step: `FetchingData ${pref3}`, status: "completed", data: { pdfUrl: pdfUrl3 } });
+
+
+        const updateOnborad = await User.findOneAndUpdate({ userId: user._id }, { $set: { onboarded: true } }, { new: true });
+
+        const userResume1 = await UserResume.findOneAndUpdate({ userId: user._id }, { $set: { resume: pdfUrl1, resume_title: pdfName1 } }, { new: true });
+        const userResume2 = await UserResume.findOneAndUpdate({ userId: user._id }, { $set: { resume: pdfUrl2, resume_title: pdfName2 } }, { new: true });
+        const userResume3 = await UserResume.findOneAndUpdate({ userId: user._id }, { $set: { resume: pdfUrl3, resume_title: pdfName3 } }, { new: true });
+
 
         res.write(`event: complete\n`);
-        res.write(`data: ${JSON.stringify({ pdfUrl1, pdfUrl2, pdfUrl3 })}\n\n`);
+        res.write(`data: ${JSON.stringify({ pdfUrl1, pdfUrl2, pdfUrl3, updateOnborad, userResume1, userResume2, userResume3 })}\n\n`);
         res.end(); // Close the connection after sending the final data
         console.log("Response sent to client");
         // res.json({ pref1, pref2, pref3 });
@@ -111,6 +120,23 @@ export const onboardResume = async (req, res) => {
         res.write(`event: error\n`);
         res.write(`data: ${JSON.stringify({ error: 'Internal Server Error' })}\n\n`);
         res.end(); // Close the connection after sending the error
-        
+
     }
+}
+
+export const getUserResume = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const userResume = await UserResume.find({
+            userId: userId
+        });
+        if (!userResume) {
+            return res.status(404).json({ message: 'User resume not found' });
+        }
+        res.status(200).json(userResume);
+    } catch (error) {
+        console.error('Error fetching user resume:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
 }

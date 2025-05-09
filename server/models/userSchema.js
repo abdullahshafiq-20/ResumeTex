@@ -99,3 +99,38 @@ const emailSchema = new mongoose.Schema({
     }
 });
 export const Email = mongoose.model("Email", emailSchema);
+
+
+const userResumeSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    resume_link: {
+        type: String,
+        required: true
+    },
+    resume_title: {
+        type: String,
+        required: true
+    },
+    file_type: {
+        type: String,
+        enum: ['pdf', 'tex', 'docx', 'other'],
+        default: 'pdf'
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+export const UserResume = mongoose.model("UserResume", userResumeSchema);

@@ -14,6 +14,7 @@ const OnBoardPage = () => {
   const navigate = useNavigate();
   const eventSourceRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [onboarded, setOnboarded] = useState(false);
   
   // User data states
   const [userData, setUserData] = useState({
@@ -74,6 +75,14 @@ const OnBoardPage = () => {
             Authorization: `Bearer ${token}`
           }
         });
+
+        const onboarded = response.data.onboarded;
+        setOnboarded(onboarded);
+
+        if (onboarded) {
+          navigate("/dashboard");
+          return;
+        }
         
         if (response.data) {
           setUserData({
@@ -265,6 +274,7 @@ const OnBoardPage = () => {
           pdfUrl2: data.pdfUrl2 || prev.pdfUrl2,
           pdfUrl3: data.pdfUrl3 || prev.pdfUrl3,
         }));
+        console.log(data);
         setProcessStatus('All resumes have been created successfully!');
         setProcessComplete(true);
         setIsProcessing(false);

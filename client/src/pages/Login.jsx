@@ -7,6 +7,7 @@ export default function LoginPage() {
   const handleLogin = () => {
     // Redirect to your backend Google OAuth endpoint
     window.location.href = "http://localhost:3000/api/auth/google";
+    
   };
 
   return (

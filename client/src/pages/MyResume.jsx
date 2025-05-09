@@ -1,48 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, PencilLine, Download, Trash2, MoreVertical, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext'; // Adjust the import path as necessary
+import api from '../utils/api';
 
 const MyResume = () => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { getUserId, isAuthenticated, loading: authLoading } = useAuth();
 
-  // Sample data - replace with your API fetch call
+
+  // Fetch resumes from API
   useEffect(() => {
-    // Simulate fetching resume data from API
-    setTimeout(() => {
-      setResumes([
-        {
-          id: 1,
-          name: 'My Professional Resume',
-          pdfUrl: 'https://example.com/resume1.pdf',
-          size: '256 KB',
-          lastModified: '2025-04-01',
-          tags: ['Professional', 'Technical']
-        },
-        {
-          id: 2,
-          name: 'Academic CV',
-          pdfUrl: 'https://example.com/resume2.pdf',
-          size: '412 KB',
-          lastModified: '2025-03-15',
-          tags: ['Academic', 'Research']
-        },
-        {
-          id: 3,
-          name: 'Simple One-Pager',
-          pdfUrl: 'https://example.com/resume3.pdf',
-          size: '128 KB',
-          lastModified: '2025-02-20',
-          tags: ['Simple', 'Brief']
+    const fetchResumes = async () => {
+
+      if (authLoading) return; // Wait for auth loading to finish
+      if (!isAuthenticated) {
+        console.error("User is not authenticated");
+        return;
+      }
+      try {
+        // Assuming you have the userId stored or available
+        // You might need to get this from authentication context or localStorage
+        const userId = getUserId();
+        if (!userId) {
+          console.error("User ID not found");
+          return;
         }
-      ]);
-      setLoading(false);
-    }, 1000);
+        const response = await api.get(`/resume/${userId}`);
+        setResumes(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching resumes:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchResumes();
   }, []);
 
-  const handleView = (resumeId, pdfUrl) => {
+  const handleView = (resumeId, resumeLink) => {
     console.log(`Viewing resume ${resumeId}`);
-    window.open(pdfUrl, '_blank');
+    // Use the actual backend URL for viewing
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    window.open(`${baseUrl}${resumeLink}`, '_blank');
   };
 
   const handleEdit = (resumeId) => {
@@ -50,23 +51,39 @@ const MyResume = () => {
     // Implement edit functionality
   };
 
-  const handleDownload = (resumeId, pdfUrl) => {
+  const handleDownload = (resumeId, resumeLink) => {
     console.log(`Downloading resume ${resumeId}`);
+    // Use the actual backend URL for downloading
+    const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const url = `${baseUrl}${resumeLink}`;
+    const filename = resumeLink.split('/').pop();
+    
     // Create an anchor element and trigger download
     const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `resume-${resumeId}.pdf`;
+    link.href = url;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const handleDelete = (resumeId) => {
+  const handleDelete = async (resumeId) => {
     console.log(`Deleting resume ${resumeId}`);
     // Implement delete functionality with confirmation
     if (window.confirm('Are you sure you want to delete this resume?')) {
-      setResumes(resumes.filter(resume => resume.id !== resumeId));
+      try {
+        await api.delete(`/resume/${resumeId}`);
+        setResumes(resumes.filter(resume => resume._id !== resumeId));
+      } catch (error) {
+        console.error("Error deleting resume:", error);
+        alert("Failed to delete resume. Please try again.");
+      }
     }
+  };
+
+  // Get the file icon based on file type
+  const getFileIcon = (fileType) => {
+    return <FileText className={`h-6 w-6 ${fileType === 'pdf' ? 'text-red-500' : 'text-blue-500'}`} strokeWidth={2} />;
   };
 
   // Animation variants for framer-motion
@@ -109,6 +126,12 @@ const MyResume = () => {
     );
   }
 
+  // Format date function
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
   return (
     <>
       <motion.h2 
@@ -128,47 +151,39 @@ const MyResume = () => {
       >
         {resumes.map((resume) => (
           <motion.div 
-            key={resume.id} 
+            key={resume._id} 
             className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden"
             variants={itemVariants}
             whileHover="hover"
           >
-            {/* PDF Tag with Name - No Preview */}
+            {/* File Tag with Name */}
             <div className="bg-gray-50 flex items-center p-4 border-b border-gray-100">
-              <div className="bg-red-100 p-2 rounded-lg mr-3">
-                <FileText className="h-6 w-6 text-red-500" strokeWidth={2} />
+              <div className={`bg-${resume.file_type === 'pdf' ? 'red' : 'blue'}-100 p-2 rounded-lg mr-3`}>
+                {getFileIcon(resume.file_type)}
               </div>
               <div className="flex-1 truncate">
-                <h3 className="font-medium text-base text-gray-800 truncate" title={resume.name}>
-                  {resume.name}
+                <h3 className="font-medium text-base text-gray-800 truncate" title={resume.resume_title}>
+                  {resume.resume_title}
                 </h3>
-                <p className="text-xs text-gray-500">PDF Document</p>
+                <p className="text-xs text-gray-500">{resume.file_type.toUpperCase()} Document</p>
               </div>
             </div>
             
             {/* Card Content */}
             <div className="p-4">              
               <div className="flex justify-between text-sm text-gray-500 mb-3">
-                <span>{resume.size}</span>
-                <span>Modified: {resume.lastModified}</span>
+                <span>{resume.file_type.toUpperCase()}</span>
+                <span>Modified: {formatDate(resume.updatedAt)}</span>
               </div>
               
-              <div className="mb-4 flex flex-wrap">
-                {resume.tags.map((tag, index) => (
-                  <motion.span 
-                    key={index} 
-                    className="inline-block bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded mr-1 mb-1"
-                    whileHover={{ scale: 1.05, backgroundColor: "#e5e7eb" }}
-                  >
-                    {tag}
-                  </motion.span>
-                ))}
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">{resume.description}</p>
               </div>
               
               {/* Action Buttons */}
               <div className="flex items-center justify-between">
                 <motion.button 
-                  onClick={() => handleView(resume.id, resume.pdfUrl)}
+                  onClick={() => handleView(resume._id, resume.resume_link)}
                   className="flex items-center px-3 py-1.5 text-sm border border-blue-600 text-blue-600 rounded-md"
                   whileHover={{ backgroundColor: "#ebf5ff" }}
                   whileTap={{ scale: 0.95 }}
@@ -177,7 +192,7 @@ const MyResume = () => {
                 </motion.button>
                 
                 <motion.button 
-                  onClick={() => handleEdit(resume.id)}
+                  onClick={() => handleEdit(resume._id)}
                   className="flex items-center px-3 py-1.5 text-sm border border-gray-500 text-gray-600 rounded-md"
                   whileHover={{ backgroundColor: "#f9fafb" }}
                   whileTap={{ scale: 0.95 }}
@@ -204,13 +219,13 @@ const MyResume = () => {
                   >
                     <div className="py-1">
                       <button
-                        onClick={() => handleDownload(resume.id, resume.pdfUrl)}
+                        onClick={() => handleDownload(resume._id, resume.resume_link)}
                         className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left flex items-center"
                       >
                         <Download className="mr-2 h-4 w-4" /> Download
                       </button>
                       <button
-                        onClick={() => handleDelete(resume.id)}
+                        onClick={() => handleDelete(resume._id)}
                         className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left flex items-center"
                       >
                         <Trash2 className="mr-2 h-4 w-4" /> Delete

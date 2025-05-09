@@ -1,0 +1,89 @@
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { jwtDecode } from "jwt-decode"; // Make sure to install this: npm install jwt-decode
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check for token in localStorage on initial load
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Decode token to get user data
+          const decoded = jwtDecode(token);
+          
+          // Check if token is expired
+          const currentTime = Date.now() / 1000;
+          if (decoded.exp && decoded.exp < currentTime) {
+            // Token expired, log out user
+            logoutUser();
+          } else {
+            setUser(decoded);
+            setIsAuthenticated(true);
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          logoutUser();
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  // Login user and store token
+  const loginUser = (token) => {
+    localStorage.setItem('token', token);
+    const decoded = jwtDecode(token);
+    setUser(decoded);
+    setIsAuthenticated(true);
+  };
+
+  // Logout user and remove token
+  const logoutUser = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  // Get the auth token
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  // Get the user ID from decoded token
+  const getUserId = () => {
+    return user ? user.id || user._id || user.userId : null;
+  };
+
+  return (
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        isAuthenticated, 
+        loading,
+        loginUser,
+        logoutUser,
+        getToken,
+        getUserId
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Custom hook to use the auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
