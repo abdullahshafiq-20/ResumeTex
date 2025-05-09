@@ -234,7 +234,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
 
 
     return (
-        <div className={`w-full max-w-[500px] bg-white rounded-lg border ${disable ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className={`w-full  bg-white rounded-lg border ${disable ? 'opacity-50 pointer-events-none' : ''}`}>
             {/* Status Strip - Simplified to yellow only */}
             {/* <div className="h-6 rounded-t-lg flex items-center justify-end px-3 bg-yellow-400/20">
                 <div className="flex items-center space-x-2">
@@ -383,7 +383,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
             <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                 {/* Upload Area */}
                 {!selectedFile && (
-                    <div className={`border-2 border-dashed ${template ? 'border-gray-200' : 'border-gray-200 opacity-50'} rounded-lg p-2`}>
+                    <div className={`border-2 border-dashed border-blue-400 ${template ? 'border-gray-200' : 'border-gray-200 opacity-50'} rounded-lg p-2`}>
                         <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 py-4">
                             <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path

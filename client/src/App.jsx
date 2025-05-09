@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { HelmetProvider } from "react-helmet-async";
 import "./App.css";
 import PrivateRoute from "./utils/PrivateRoute";
-import AuthCallback from "./pages/AuthCallback";
+import AuthCallback from "./utils/AuthCallback";
 import LoginPage from "./pages/Login";
 import Dashbaord from "./pages/Dashbaord";
 import TestPage from "./pages/TestPage";
