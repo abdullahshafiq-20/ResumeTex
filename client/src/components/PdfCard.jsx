@@ -25,7 +25,7 @@ const PDFCard = ({
   };
 
   return (
-    <div className="relative w-[230px] max-w-[230px] bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="relative w-[230px] max-w-[230px]  bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-200">
       {/* A4 paper ratio wrapper */}
       <div className="relative" style={{ paddingTop: '141.4%' }}> {/* A4 ratio (1:1.414) */}
         {/* Document content */}

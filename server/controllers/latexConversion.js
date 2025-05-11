@@ -209,7 +209,7 @@ export const ConvertLatex = async (extractedData, jobTitle, apiKey) => {
     try {
         const LATEX_CONVERSION_PROMPT = await getLatexPromptJobTitle(extractedData, jobTitle, CV_STRUCTURE);
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro"});
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash"});
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
         latexContent = result.response.text();
         console.log("Response received from Gemini API");
