@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import api from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function FileUploader({
   onFileUpload,
@@ -27,6 +29,7 @@ export default function FileUploader({
   // Remove isTailoredResume state
   const [resumeTitle, setResumeTitle] = useState(""); // New state for resume title
   // Remove jobDescription state
+  const { getUserId, isAuthenticated } = useAuth();
 
   const handleFileSelect = (event) => {
     if (disable) return;
@@ -47,7 +50,7 @@ export default function FileUploader({
     formData.append("resume", selectedFile);
 
     try {
-      const response = await axios.post(`${apiUrl}/upload-pdf`, formData, {
+      const response = await api.post(`${apiUrl}/upload-pdf`, formData, {
         headers: {
           "Content-Type": "application/pdf",
         },
@@ -104,6 +107,32 @@ export default function FileUploader({
     });
   };
 
+  const handleResumeUpload = async () => {
+    try {
+      const pdfurl = "https://example.com/resume.pdf"; // Replace with the actual resume URL
+      const resumeTitle = "My Resume"; // Replace with the actual resume title
+      const userId = getUserId()
+      console.log("User ID:", userId);
+      const repsone = await api.post(`${apiUrl}/addresume?userId=${userId}`, {
+        resume: pdfurl,
+        resume_title: resumeTitle,
+        file_type: "pdf",
+      });
+      if (repsone.status === 200) {
+        console.log("Resume uploaded successfully");
+      }
+      const data = repsone.data;
+      console.log("Resume data:", data);
+      
+    } catch (error) {
+      console.error("Error uploading resume:", error);
+      toast.error("Error uploading resume. Please try again.", {
+        position: "bottom-center",
+        duration: 3000,
+      });
+    }
+  }
+
   const handleProcess = async () => {
     setIsProcessing(true);
     try {
@@ -111,9 +140,6 @@ export default function FileUploader({
       setProcessingStep("processing");
       setProcessingMessage("Processing your resume...");
       
-      const response = await axios.get(
-        `${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}`,
-      );
       
       // Since onboard-resume is an SSE endpoint, handle the response differently
       const source = new EventSource(`${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}`);
@@ -123,7 +149,7 @@ export default function FileUploader({
         setProcessingMessage("Extracting data from PDF...");
       });
       
-      source.addEventListener(`Fetching data for : ${template}`, (event) => {
+      source.addEventListener(`Fetching data for : ${resumeTitle}`, (event) => {
         const data = JSON.parse(event.data);
         setProcessingMessage("Converting to LaTeX format...");
       });
@@ -133,6 +159,7 @@ export default function FileUploader({
         setProcessingStep("complete");
         setProcessingMessage("Process complete!");
         source.close();
+        setIsProcessing(false);
         
         // Call onFileUpload with the response data
         onFileUpload({
@@ -543,6 +570,9 @@ export default function FileUploader({
           ) : (
             "Process"
           )}
+        </button>
+        <button onClick={handleResumeUpload} className="ml-2 px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          add resume 
         </button>
       </div>
     </div>
