@@ -3,15 +3,22 @@ import { motion } from "framer-motion";
 import FileUploader from "../components/FileUploader";
 import PDFCard from "../components/PdfCard";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
+import { use } from "react";
+import api from "../utils/api";
 
 const MyResume = () => {
   // Demo data for resumes
-  const api = import.meta.env.VITE_API_URL;
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const { getUserId } = useAuth();
   const [responsedPdf, setResponsedPdf] = useState({
     pdfUrl: "",
     publicId: "",
     pdfName: "",
   });
+  const [resumes, setResumes] = useState([]);
   const handleFileUpload = (data) => {
     const { pdfUrl, publicId, pdfName } = data?.data || {};
     setUploadedFile({ pdfUrl, publicId, pdfName });
@@ -65,6 +72,23 @@ const MyResume = () => {
       day: "numeric",
     });
   };
+      const fetchResumes = async () => {
+      try {
+        const userId = getUserId();
+        const data = await api.get(`${apiUrl}/resume/${userId}`);
+        const resumes = data.data;
+        setResumes(resumes);
+        console.log("Fetched resumes:", resumes);
+      } catch (error) {
+        console.error("Error fetching resumes:", error);
+      }
+    };
+
+  useEffect(() => {
+
+    fetchResumes();
+    // Cleanup function to reset the stat
+  }, [apiUrl]);
 
   // Animation variants for framer-motion
   const containerVariants = {
@@ -110,7 +134,7 @@ const MyResume = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <FileUploader
-          apiUrl={api}
+          apiUrl={apiUrl}
           template="v2"
           onFileUpload={(data) => console.log("File uploaded:", data)}
         />
@@ -122,16 +146,16 @@ const MyResume = () => {
         initial="hidden"
         animate="visible"
       >
-        {demoResumes.map((resume) => (
+        {resumes.map((resume) => (
           <motion.div
             key={resume._id}
             variants={itemVariants}
             whileHover="hover"
           >
             <PDFCard
-              pdfUrl={resume.pdfUrl}
-              imageUrl={resume.imageUrl}
-              title={resume.title}
+              pdfUrl={resume.resume_link}
+              imageUrl={resume.thumbnail}
+              title={resume.resume_title}
               owner={`Modified: ${formatDate(resume.updatedAt)}`}
             />
           </motion.div>

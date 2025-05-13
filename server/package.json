@@ -15,6 +15,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.8.2",
+    "bcrypt": "^6.0.0",
     "busboy": "^1.6.0",
     "canvas": "^3.1.0",
     "cheerio": "^1.0.0",

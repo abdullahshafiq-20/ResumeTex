@@ -20,6 +20,7 @@ const ResponsePage = lazy(() => import("./pages/ResponsePage"));
 const BugReportPage = lazy(() => import("./pages/BugReportPage"));
 const DocumentationPage = lazy(() => import("./pages/DocumentationPage"));
 const EditorPage = lazy(() => import("./pages/EditorPage"));
+const PostsPage = lazy(() => import("./pages/PostsPage"));
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="dashboard" element={<Dashbaord />} />
               <Route path="my-resume" element={<MyResume />} />
               <Route path="editor" element={<EditorPage />} />
+              <Route path="posts" element={<PostsPage />} />
               {/* Add more dashboard routes here */}
             </Route>
 

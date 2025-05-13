@@ -9,7 +9,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'My Resumes', href: '/my-resume', icon: DocumentIcon },
-    { name: 'Templates', href: '/templates', icon: TemplateIcon },
+    { name: 'Posts', href: '/posts', icon: TemplateIcon },
     { name: 'Profile', href: '/profile', icon: UserIcon },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];

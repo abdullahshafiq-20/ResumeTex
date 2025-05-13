@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { User } from "../../models/userSchema.js";
 import { getOAuthClient, generateAuthUrl } from "../../utils/oauthUtils.js";
+import bcrypt from "bcrypt";
 dotenv.config();
 
 // Step 1: Redirect to Google OAuth
@@ -101,3 +102,58 @@ export const logoutUser = async (req, res) => {
     return res.status(500).json({ error: 'Failed to log out' });
   }
 };
+
+
+export const validateUser = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const user = await User.findOne({ email });
+    if (user.subscribed) {
+      return res.status(200).json({ message: "User is subscribed" });
+    }
+    
+  } catch (error) {
+    console.error("Error validating user:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const validateUserSecret = async (req, res) => {
+  try {
+    const { secret } = req.body;
+    
+    // Find users with a secret field (we'll check each one)
+    const users = await User.find({ secret: { $exists: true } });
+    
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users with secret found" });
+    }
+
+    // Check each user's secret
+    for (const user of users) {
+      // Compare the provided secret with the stored hashed secret
+      const isMatch = await bcrypt.compare(secret, user.secret);
+      
+      if (isMatch) {
+        if (user.subscribed) {
+          return res.status(200).json({ 
+            message: "User is subscribed", 
+            success: true,
+            user: { email: user.email, name: user.name } 
+          });
+        } else {
+          return res.status(403).json({ 
+            message: "User found but not subscribed", 
+            success: false 
+          });
+        }
+      }
+    }
+    
+    // If we get here, no user matched the secret
+    return res.status(401).json({ message: "Invalid secret", success: false });
+  } catch (error) {
+    console.error("Error validating user:", error);
+    return res.status(500).json({ message: "Internal server error", success: false });
+  }
+}

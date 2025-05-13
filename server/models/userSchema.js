@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    subscribed: {
+        type: Boolean,
+        default: false
+    },
     picture: {
         type: String,
         required: true
@@ -17,6 +21,10 @@ const userSchema = new mongoose.Schema({
     googleRefreshToken: {
         type: String,
         required: true
+    },
+    secret: {
+        type: String,
+        default: null
     },
     onboarded: {
         type: Boolean,
@@ -114,6 +122,10 @@ const userResumeSchema = new mongoose.Schema({
     resume_title: {
         type: String,
         required: true
+    },
+    thumbnail: {
+        type: String,
+        default: ''
     },
     file_type: {
         type: String,

@@ -113,7 +113,8 @@ export default function FileUploader({
       const resumeTitle = "My Resume"; // Replace with the actual resume title
       const userId = getUserId()
       console.log("User ID:", userId);
-      const repsone = await api.post(`${apiUrl}/addresume?userId=${userId}`, {
+      const repsone = await api.post(`${apiUrl}/addresume`, {
+        userId: userId,
         resume: pdfurl,
         resume_title: resumeTitle,
         file_type: "pdf",
@@ -153,6 +154,11 @@ export default function FileUploader({
         const data = JSON.parse(event.data);
         setProcessingMessage("Converting to LaTeX format...");
       });
+
+      source.addEventListener('Adding resume to user', (event) => {
+        const data = JSON.parse(event.data);
+        setProcessingMessage("Adding resume to user...");
+      });
       
       source.addEventListener('complete', (event) => {
         const data = JSON.parse(event.data);
@@ -171,6 +177,8 @@ export default function FileUploader({
           },
         });
       });
+
+
       
       source.addEventListener('error', (event) => {
         const data = JSON.parse(event.data);
@@ -182,6 +190,8 @@ export default function FileUploader({
         source.close();
         setIsProcessing(false);
       });
+
+
       
     } catch (error) {
       console.error("Processing failed:", error);
@@ -570,9 +580,6 @@ export default function FileUploader({
           ) : (
             "Process"
           )}
-        </button>
-        <button onClick={handleResumeUpload} className="ml-2 px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-          add resume 
         </button>
       </div>
     </div>

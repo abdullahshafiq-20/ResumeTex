@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
+import extensionRoutes from "./routes/extensionRoutes.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,7 +17,10 @@ app.use(cors({
   origin: [
     'https://resume-tex.vercel.app',
     'http://localhost:5173',
-    'https://resumeconvertorlatex.onrender.com'
+    'https://resumeconvertorlatex.onrender.com',
+    "http://127.0.0.1:5500",
+    "chrome-extension://nmkjfhiijcdmegliknehipcaabmlmoaj",
+    "https://www.linkedin.com"
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -39,6 +43,7 @@ app.use("/api", authRoutes);
 app.use("/api", emailRoutes);
 app.use("/api", jobRoutes);
 app.use("/api", resumeRoutes);
+app.use("/api", extensionRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ status: 'ok' });

@@ -33,7 +33,7 @@ export const onboardResume = async (req, res) => {
 
 
         send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "started" });
-        const apiKey1 = process.env.GEMINI_API_KEY_3;
+        const apiKey1 = process.env.GEMINI_API_KEY_1;
         const { formattedLatex, email, name, title, summary, skills, projects } = await ConvertLatex(extractedData, pref, apiKey1);
         send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "completed", data: { formattedLatex, email, name, title, summary, skills, projects } });
 
@@ -87,17 +87,33 @@ export const onboardResume = async (req, res) => {
         const pdf = await convertJsonTexToPdfLocally(formattedLatex);
         const publicId = pdf.publicId;
         const pdfName = pdf.pdfName;
-        send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "completed", data: { pdfUrl: pdfUrl } });
+        send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "completed", data: { pdfUrl: pdf.pdfUrl } });
 
 
 
         const updateOnborad = await User.findOneAndUpdate({ userId: user._id }, { $set: { onboarded: true } }, { new: true });
 
-        const userResume = await UserResume.findOneAndUpdate({ userId: user._id }, { $set: { resume: pdfUrl, resume_title: pdfName } }, { new: true });
+
+        const thumbnail = await pdfToImage(pdf.pdfUrl);
+        const { imageUrl, publicId: thumbnailPublicId, size, format } = thumbnail;
+
+        send(`Adding resume to user`, { step: `Adding resume to user`, status: "started" });
+        const userResume = await UserResume.create({
+            userId: user._id,
+            resume_link: pdf.pdfUrl,
+            resume_title: pref,
+            thumbnail: imageUrl,
+            file_type: 'pdf',
+            description: '',
+            updatedAt: new Date(),
+            createdAt: new Date()
+        })
+        send(`Adding resume to user`, { step: `Adding resume to user`, status: "completed", data: { pdfUrl: pdf.pdfUrl } });
+        console.log("userResume", userResume)
 
 
         res.write(`event: complete\n`);
-        res.write(`data: ${JSON.stringify({ pdfUrl, updateOnborad, userResume })}\n\n`);
+        res.write(`data: ${JSON.stringify({ pdfUrl: pdf.pdfUrl , updateOnborad, userResume })}\n\n`);
         res.end(); // Close the connection after sending the final data
         console.log("Response sent to client");
         // res.json({ pref1, pref2, pref3 });
@@ -130,33 +146,50 @@ export const getUserResume = async (req, res) => {
 
 export const addResume = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { resume, resume_title } = req.body;
-        const userResume = await UserResume.findOneAndUpdate(
-            { userId: userId }, { $set: {  userId: userId , resume_link: resume, resume_title: resume_title } }, { new: true }
-        );
-        if (!userResume) {
-            return res.status(404).json({ message: 'User resume not found' });
+        const { userId, resume, resume_title } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
         }
+        const thubmnail = await pdfToImage(resume);
+        if (!thubmnail) {  
+            return res.status(400).json({ message: 'Thumbnail generation failed' });
+        }
+        const { imageUrl, publicId, size, format } = thubmnail;
+
+
+        const userResume = await UserResume.create(
+            {
+                userId: userId,
+                resume_link: resume,
+                resume_title: resume_title,
+                thumbnail: imageUrl,
+                file_type: 'pdf',
+                description: '',
+                updatedAt: new Date(),
+                createdAt: new Date()
+            },
+        );
+
+
         res.status(200).json(userResume);
     } catch (error) {
-        console.error('Error fetching user resume:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error updating user resume:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 
 
 function bytesToMB(bytes) {
     return (bytes / 1048576).toFixed(2) + " MB";
 }
 
-export const convertPdfToImage = async (req, res) => {
-    try {
-        const { pdfUrl } = req.query;
 
+
+export const pdfToImage = async (pdfUrl) => {
+    try {
         if (!pdfUrl) {
-            return res.status(400).json({ error: 'PDF URL is required' });
+            throw new Error('PDF URL is required');
         }
 
         console.log('Starting PDF to image conversion');
@@ -185,7 +218,6 @@ export const convertPdfToImage = async (req, res) => {
                     resource_type: "image",
                     folder: 'resume_thumbnails',
                     format: 'png',
-                    // For PDFs, Cloudinary will automatically use the first page
                 },
                 (error, result) => {
                     if (error) {
@@ -200,17 +232,34 @@ export const convertPdfToImage = async (req, res) => {
             uploadStream.end(Buffer.from(singlePagePdfBytes));
         });
 
-        console.log('Process completed successfully');
-        res.status(200).json({
+        console.log('PDF to image conversion completed successfully');
+        return {
             pdfUrl: pdfUrl,
             imageUrl: result.secure_url,
             publicId: result.public_id,
             size: bytesToMB(result.bytes),
             format: result.format,
-        });
+        };
 
     } catch (error) {
-        console.error('Error in convertPdfToImage:', error);
+        console.error('Error in pdfToImage:', error);
+        throw error;
+    }
+};
+
+export const convertPdfToImage = async (req, res) => {
+    try {
+        const { pdfUrl } = req.query;
+        
+        if (!pdfUrl) {
+            return res.status(400).json({ error: 'PDF URL is required' });
+        }
+        
+        const result = await pdfToImage(pdfUrl);
+        res.status(200).json(result);
+        
+    } catch (error) {
+        console.error('Error in convertPdfToImage controller:', error);
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
