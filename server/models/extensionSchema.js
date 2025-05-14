@@ -30,6 +30,16 @@ const LinkedInPostSchema = new Schema({
     default: [],
     description: 'Email addresses found in the post content'
   },
+  jobTitle: {
+    type: String,
+    default: "ex: Software Engineer",
+    description: 'Job title extracted from the post'
+  },
+  extractedHashtags: {
+    type: [String],
+    default: [],
+    description: 'Hashtags found in the post content'
+  },
   timestamp: {
     type: Date,
     default: Date.now,

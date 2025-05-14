@@ -10,7 +10,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'My Resumes', href: '/my-resume', icon: DocumentIcon },
     { name: 'Posts', href: '/posts', icon: TemplateIcon },
-    { name: 'Profile', href: '/profile', icon: UserIcon },
+    { name: 'Email', href: '/email', icon: UserIcon },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
 

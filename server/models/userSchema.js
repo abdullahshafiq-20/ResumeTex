@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isExtensionConnected: {
+        type: Boolean,
+        default: false
+    },
     picture: {
         type: String,
         required: true

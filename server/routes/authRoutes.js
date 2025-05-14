@@ -1,5 +1,5 @@
 import express from "express";
-import { googleAuth, googleCallback, getUserProfile, validateUser, validateUserSecret } from "../controllers/googleOAuth/googleAuthController.js";
+import { googleAuth, googleCallback, getUserProfile, validateUser, validateUserSecret, getConnectionStatus } from "../controllers/googleOAuth/googleAuthController.js";
 import { verifyToken } from "../middleware/auth.js";
 
 const authRoutes = express.Router();
@@ -12,6 +12,7 @@ authRoutes.get("/auth/user", verifyToken, (req, res) => {
 authRoutes.get("/user", verifyToken, getUserProfile);
 authRoutes.post("/validate", validateUser);
 authRoutes.post("/validateSecret", validateUserSecret);
+authRoutes.get("/connectionStatus", verifyToken, getConnectionStatus);
 
 
 

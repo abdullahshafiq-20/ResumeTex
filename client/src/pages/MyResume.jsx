@@ -4,6 +4,7 @@ import FileUploader from "../components/FileUploader";
 import PDFCard from "../components/PdfCard";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useResumes } from "../context/ResumeContext";
 import { useEffect } from "react";
 import { use } from "react";
 import api from "../utils/api";
@@ -11,18 +12,9 @@ import api from "../utils/api";
 const MyResume = () => {
   // Demo data for resumes
 
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const { getUserId } = useAuth();
-  const [responsedPdf, setResponsedPdf] = useState({
-    pdfUrl: "",
-    publicId: "",
-    pdfName: "",
-  });
-  const [resumes, setResumes] = useState([]);
-  const handleFileUpload = (data) => {
-    const { pdfUrl, publicId, pdfName } = data?.data || {};
-    setUploadedFile({ pdfUrl, publicId, pdfName });
-  };
+  const { resumes } = useResumes();
+
+  console.log("Resumes from context:", resumes);
 
   const demoResumes = [
     {
@@ -72,25 +64,7 @@ const MyResume = () => {
       day: "numeric",
     });
   };
-      const fetchResumes = async () => {
-      try {
-        const userId = getUserId();
-        const data = await api.get(`${apiUrl}/resume/${userId}`);
-        const resumes = data.data;
-        setResumes(resumes);
-        console.log("Fetched resumes:", resumes);
-      } catch (error) {
-        console.error("Error fetching resumes:", error);
-      }
-    };
 
-  useEffect(() => {
-
-    fetchResumes();
-    // Cleanup function to reset the stat
-  }, [apiUrl]);
-
-  // Animation variants for framer-motion
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -134,7 +108,7 @@ const MyResume = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <FileUploader
-          apiUrl={apiUrl}
+          apiUrl={api}
           template="v2"
           onFileUpload={(data) => console.log("File uploaded:", data)}
         />

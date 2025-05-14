@@ -1,29 +1,33 @@
 import { User, UserPreferences } from "../../models/userSchema.js";
 import { extensionSchema } from "../../models/extensionSchema.js";
 import bcrypt from "bcrypt";
+import axios from "axios";
 
 
 function extractContentInfo(content) {
-  // Regular expression for URLs
-  // This matches most common URL formats including http, https, ftp, and www prefixes
-  const urlRegex = /(?:https?|ftp):\/\/[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?|www\.[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi;
-  
-  // Regular expression for email addresses
-  const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
-  
-  // Extract URLs and emails
-  const extractedUrls = content.match(urlRegex) || [];
-  const extractedEmails = content.match(emailRegex) || [];
-  
-  // Remove duplicates using Set
-  const uniqueUrls = [...new Set(extractedUrls)];
-  const uniqueEmails = [...new Set(extractedEmails)];
-  
-  return {
-    content,
-    extractedUrls: uniqueUrls,
-    extractedEmails: uniqueEmails
-  };
+    // Regular expression for URLs
+    // This matches most common URL formats including http, https, ftp, and www prefixes
+    const urlRegex = /(?:https?|ftp):\/\/[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?|www\.[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi;
+
+    // Regular expression for email addresses
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
+
+    // Extract URLs and emails
+    const extractedUrls = content.match(urlRegex) || [];
+    const extractedEmails = content.match(emailRegex) || [];
+
+    // Remove duplicates using Set
+    const uniqueUrls = [...new Set(extractedUrls)];
+    const uniqueEmails = [...new Set(extractedEmails)];
+
+    return {
+        content,
+        extractedUrls: uniqueUrls,
+        extractedEmails: uniqueEmails
+    };
+}
+
+const getJobTitle = async (content) => {
 }
 
 
@@ -31,38 +35,68 @@ function extractContentInfo(content) {
 export const savePost = async (req, res) => {
     try {
         const { content, email } = req.body;
-        
-        // Use findOne instead of find to get a single user document
-        const { extractedUrls, extractedEmails } = extractContentInfo(content);
         const timestamp = new Date().toISOString();
-        const user = await User.findOne({ email: email }); 
-        
+
+        // Find user and check if exists
+        const user = await User.findOne({ email: email });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        
-        const userid = user._id; // Now this will work correctly
-        
-        const data = await extensionSchema.create({
-            userId: userid, // This is now properly defined
-            content: content,
-            extractedUrls: extractedUrls,
-            extractedEmails: extractedEmails,
-            timestamp: timestamp
-        });
-        
+
+        const userid = user._id;
+        let data; // Declare data variable in outer scope
+
+        // Use external API to extract information
+        try {
+            const response = await axios.post("https://jobtitle-extarction-model-nlp.vercel.app/extract/", {
+                content: content
+            }, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (response.status === 200) {
+                console.log("Using external API");
+                const { extracted_urls, extracted_emails, extracted_hashtags, job_title } = response.data;
+                data = await extensionSchema.create({
+                    userId: userid,
+                    content: content,
+                    extractedUrls: extracted_urls,
+                    extractedEmails: extracted_emails,
+                    jobTitle: job_title,
+                    extractedHashtags: extracted_hashtags,
+                    timestamp: timestamp
+                });
+
+                console.log("Data saved successfully:", data);
+            } else {
+                throw new Error("API returned non-200 status");
+            }
+        } catch (apiError) {
+            console.error("Using locally stored function:", apiError.message);
+            const { extractedUrls, extractedEmails } = extractContentInfo(content);
+            data = await extensionSchema.create({
+                userId: userid,
+                content: content,
+                extractedUrls: extractedUrls,
+                extractedEmails: extractedEmails,
+                timestamp: timestamp
+            });
+        }
+
         // Return success response
-        return res.status(201).json({ 
-            success: true, 
-            message: "Post saved successfully", 
-            data: data 
+        return res.status(201).json({
+            success: true,
+            message: "Post saved successfully",
+            data: data
         });
     } catch (error) {
         console.error("Error saving post:", error);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Failed to save post", 
-            error: error.message 
+        return res.status(500).json({
+            success: false,
+            message: "Failed to save post",
+            error: error.message
         });
     }
 }
@@ -70,7 +104,7 @@ export const savePost = async (req, res) => {
 export const createSecret = async (req, res) => {
     try {
         const { email } = req.body;
-        
+
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (!existingUser) {
@@ -83,7 +117,7 @@ export const createSecret = async (req, res) => {
         // Generate new secret regardless of whether user had one before
         const newSecret = createExtensionSecret(email);
         const hashedSecret = await bcrypt.hash(newSecret, 10);
-        
+
         const updatedUser = await User.findOneAndUpdate(
             { email },
             { secret: hashedSecret },
@@ -99,10 +133,10 @@ export const createSecret = async (req, res) => {
     }
     catch (error) {
         console.error("Error creating secret:", error);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Failed to create secret", 
-            error: error.message 
+        return res.status(500).json({
+            success: false,
+            message: "Failed to create secret",
+            error: error.message
         });
     }
 }
@@ -122,19 +156,19 @@ export const getPosts = async (req, res) => {
         if (!posts) {
             return res.status(404).json({ message: "No posts found" });
         }
-        return res.status(200).json({ 
-            success: true, 
-            message: "Posts retrieved successfully", 
-            data: posts 
+        return res.status(200).json({
+            success: true,
+            message: "Posts retrieved successfully",
+            data: posts
         });
-        
+
     } catch (error) {
-        
+
         console.error("Error retrieving posts:", error);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Failed to retrieve posts", 
-            error: error.message 
+        return res.status(500).json({
+            success: false,
+            message: "Failed to retrieve posts",
+            error: error.message
         });
     }
 }

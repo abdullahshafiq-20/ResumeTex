@@ -1,6 +1,8 @@
 // emailController.js
 import { google } from "googleapis";
 import dotenv from "dotenv";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { User, UserPreferences, Email } from "../../models/userSchema.js";
 import { setupOAuthWithRefreshToken } from "../../utils/oauthUtils.js";
 import { generateEmailTemplate } from "../../utils/emailGenerator.js";
@@ -19,10 +21,68 @@ const PROMPT = `
 `
 
 // Controller to send email
+// export const sendEmail = async (req, res) => {
+//   try {
+//     const { to, subject, message, attachement} = req.body;
+//     const userId = req.user.id; // Assuming you have user ID from auth middleware
+    
+//     // Get user from database with tokens
+//     const user = await User.findById(userId);
+    
+//     if (!user || !user.googleRefreshToken) {
+//       return res.status(401).json({ error: 'User not authenticated with Google' });
+//     }
+    
+//     // Set up OAuth2 client with user's refresh token
+//     const auth = setupOAuthWithRefreshToken(user.googleRefreshToken);
+    
+//     // Create Gmail API client
+//     const gmail = google.gmail({ version: 'v1', auth });
+    
+//     // Encode email content
+//     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+//     const messageParts = [
+//       `From: ${user.email}`,
+//       `To: ${to}`,
+//       `Subject: ${utf8Subject}`,
+//       'MIME-Version: 1.0',
+//       'Content-Type: text/html; charset=utf-8',
+//       'Content-Transfer-Encoding: 7bit',
+//       '',
+//       message,
+//       attachement ? `Attachement: ${attachement}` : ''
+//     ];
+//     const emailContent = messageParts.join('\n');
+    
+//     // Encode the email to base64url format
+//     const encodedMessage = Buffer.from(emailContent)
+//       .toString('base64')
+//       .replace(/\+/g, '-')
+//       .replace(/\//g, '_')
+//       .replace(/=+$/, '');
+    
+//     // Send the email
+//     const result = await gmail.users.messages.send({
+//       userId: 'me',
+//       requestBody: {
+//         raw: encodedMessage
+//       }
+//     });
+    
+//     return res.status(200).json({ success: true, messageId: result.data.id });
+//   } catch (error) {
+//     console.error('Send email error:', error);
+//     return res.status(500).json({ error: 'Failed to send email', details: error.message });
+//   }
+// };
 export const sendEmail = async (req, res) => {
   try {
-    const { to, subject, message } = req.body;
-    const userId = req.user.id; // Assuming you have user ID from auth middleware
+    // Check both spellings to handle potential mismatch
+    const { to, subject, message, attachment, attachement } = req.body;
+    const pdfUrl = attachment || attachement; // Handle both spellings
+    const userId = req.user.id;
+    
+    console.log('Email request received:', { to, subject, hasAttachment: !!pdfUrl });
     
     // Get user from database with tokens
     const user = await User.findById(userId);
@@ -37,19 +97,90 @@ export const sendEmail = async (req, res) => {
     // Create Gmail API client
     const gmail = google.gmail({ version: 'v1', auth });
     
+    // Generate a boundary string for multipart message
+    const boundary = `boundary-${uuidv4()}`;
+    
     // Encode email content
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
-    const messageParts = [
+    
+    // Start with email headers
+    let messageParts = [
       `From: ${user.email}`,
       `To: ${to}`,
       `Subject: ${utf8Subject}`,
       'MIME-Version: 1.0',
+      `Content-Type: multipart/mixed; boundary=${boundary}`,
+      '',
+      `--${boundary}`,
       'Content-Type: text/html; charset=utf-8',
       'Content-Transfer-Encoding: 7bit',
       '',
-      message
+      message,
+      ''
     ];
-    const emailContent = messageParts.join('\n');
+    
+    // Add attachment if provided
+    if (pdfUrl) {
+      try {
+        console.log('Downloading attachment from URL:', pdfUrl);
+        
+        // Download the PDF from the URL with improved options
+        const response = await axios.get(pdfUrl, { 
+          responseType: 'arraybuffer',
+          headers: {
+            'Accept': 'application/pdf, application/octet-stream'
+          },
+          maxContentLength: 10485760 // 10MB max
+        });
+        
+        console.log('Download successful, data size:', response.data.length, 'bytes');
+        
+        // Get filename from URL or use default
+        const fileName = pdfUrl.split('/').pop() || 'document.pdf';
+        
+        // Encode the PDF data as base64
+        const pdfBase64 = Buffer.from(response.data).toString('base64');
+        
+        // Split into chunks of 76 characters (more reliable than regex)
+        const chunks = [];
+        for (let i = 0; i < pdfBase64.length; i += 76) {
+          chunks.push(pdfBase64.substring(i, i + 76));
+        }
+        const pdfEncoded = chunks.join('\r\n');
+        
+        console.log('Attachment prepared with filename:', fileName);
+        
+        // Add attachment part to email
+        messageParts = messageParts.concat([
+          `--${boundary}`,
+          'Content-Type: application/pdf',
+          'Content-Transfer-Encoding: base64',
+          `Content-Disposition: attachment; filename="${fileName}"`,
+          '',
+          pdfEncoded,
+          ''
+        ]);
+      } catch (attachmentError) {
+        console.error('Error downloading attachment:', attachmentError.message);
+        
+        // Log more detail about the error for debugging
+        if (attachmentError.response) {
+          console.error('Response status:', attachmentError.response.status);
+          console.error('Response headers:', JSON.stringify(attachmentError.response.headers));
+        }
+        
+        // Continue sending email without attachment
+        console.log('Sending email without attachment due to download error');
+      }
+    }
+    
+    // Close the multipart message
+    messageParts.push(`--${boundary}--`);
+    
+    const emailContent = messageParts.join('\r\n');
+    
+    // For debugging, log the size of the raw email
+    console.log('Email content length:', emailContent.length, 'bytes');
     
     // Encode the email to base64url format
     const encodedMessage = Buffer.from(emailContent)
@@ -57,6 +188,8 @@ export const sendEmail = async (req, res) => {
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
+    
+    console.log('Sending email to Gmail API...');
     
     // Send the email
     const result = await gmail.users.messages.send({
@@ -66,9 +199,18 @@ export const sendEmail = async (req, res) => {
       }
     });
     
-    return res.status(200).json({ success: true, messageId: result.data.id });
+    console.log('Email sent successfully, ID:', result.data.id);
+    
+    return res.status(200).json({ 
+      success: true, 
+      messageId: result.data.id,
+      attachmentIncluded: !!pdfUrl
+    });
   } catch (error) {
-    console.error('Send email error:', error);
+    console.error('Send email error:', error.message);
+    if (error.response) {
+      console.error('API response error:', error.response.data);
+    }
     return res.status(500).json({ error: 'Failed to send email', details: error.message });
   }
 };
@@ -76,8 +218,8 @@ export const sendEmail = async (req, res) => {
 // Send an email with attachments
 export const sendEmailWithAttachment = async (req, res) => {
   try {
-    const { to, subject, message } = req.body;
-    const attachment = req.file; // Assuming you're using multer for file uploads
+    const { to, subject, message, pdfUrl } = req.body;
+    const attachment = req.file; // For file uploads with multer
     const userId = req.user.id;
     
     const user = await User.findById(userId);
@@ -92,11 +234,14 @@ export const sendEmailWithAttachment = async (req, res) => {
     // Create Gmail API client
     const gmail = google.gmail({ version: 'v1', auth });
     
-    // Read file if there is an attachment
+    // Define boundary for multipart message
+    const boundary = 'foo_bar_baz';
     let attachmentPart = '';
+    
+    // Handle attachment scenarios
     if (attachment) {
+      // Case 1: File upload via multer
       const attachmentBase64 = attachment.buffer.toString('base64');
-      const boundary = 'foo_bar_baz';
       
       attachmentPart = `
 --${boundary}
@@ -106,7 +251,37 @@ Content-Disposition: attachment; filename="${attachment.originalname}"
 
 ${attachmentBase64}
 --${boundary}--`;
-      
+    } else if (pdfUrl) {
+      // Case 2: PDF URL provided
+      try {
+        // Fetch the PDF from the URL
+        const response = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
+        const pdfBuffer = Buffer.from(response.data);
+        const pdfBase64 = pdfBuffer.toString('base64');
+        
+        // Extract filename from URL or use default
+        const urlParts = pdfUrl.split('/');
+        const filename = urlParts[urlParts.length - 1] || 'document.pdf';
+        
+        attachmentPart = `
+--${boundary}
+Content-Type: application/pdf
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="${filename}"
+
+${pdfBase64}
+--${boundary}--`;
+      } catch (fetchError) {
+        console.error('Error fetching PDF from URL:', fetchError);
+        return res.status(400).json({ error: 'Failed to fetch PDF from provided URL', details: fetchError.message });
+      }
+    } else {
+      // No attachment case - use the regular email function
+      return await sendEmail(req, res);
+    }
+    
+    // Build the email with attachment if we have one
+    if (attachmentPart) {
       // Start with multipart message
       const messageParts = [
         `From: ${user.email}`,
@@ -139,9 +314,13 @@ ${attachmentBase64}
         }
       });
       
-      return res.status(200).json({ success: true, messageId: result.data.id });
+      return res.status(200).json({ 
+        success: true, 
+        messageId: result.data.id,
+        attachmentType: attachment ? 'file' : (pdfUrl ? 'url' : 'none')
+      });
     } else {
-      // Regular email without attachment
+      // This code shouldn't be reached due to the earlier return, but just in case
       return await sendEmail(req, res);
     }
   } catch (error) {
@@ -149,7 +328,6 @@ ${attachmentBase64}
     return res.status(500).json({ error: 'Failed to send email with attachment', details: error.message });
   }
 };
-
 function generateEmailTemplate22(params) {
     // Destructure parameters with defaults
     const {
@@ -223,11 +401,11 @@ function generateEmailTemplate22(params) {
 
 export const createEmail = async (req, res) => {
   try {
-    // const { jobTitle, jobDescription } = req.body;
+    const { jobTitle, jobDescription, email, companyName, resume_id } = req.body;
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
     const user = await User.findById(userId);
-    const userPreferences = await UserPreferences.findOne({ userId: user._id });
+    const userPreferences = await UserPreferences.findOne({ _id: resume_id });
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
     }
@@ -236,19 +414,20 @@ export const createEmail = async (req, res) => {
     }
 
     const emailParams = {
-      to: "email@gmail.com",
-      jobTitle: "Senior Frontend Developer",
-      jobDescription: "We are looking for a passionate and skilled Software Engineer to design, develop, and maintain high-quality software solutions. You will work closely with cross-functional teams to build scalable applications, write clean and efficient code, and solve complex technical challenges across various projects such as developing internal tools, building customer-facing web apps, and optimizing cloud-based systems. A strong foundation in programming languages like JavaScript, Python, or Java, experience with modern frameworks, and a good understanding of databases and cloud technologies are essential. If you thrive in a fast-paced environment, enjoy contributing to impactful projects, and are committed to continuous learning, we'd love to hear from you.",
+      to: email || "email@gmail.com",
+      jobTitle: jobTitle || "Senior Frontend Developer",
+      jobDescription: jobDescription || "We are looking for a passionate and skilled Software Engineer to design, develop, and maintain high-quality software solutions. You will work closely with cross-functional teams to build scalable applications, write clean and efficient code, and solve complex technical challenges across various projects such as developing internal tools, building customer-facing web apps, and optimizing cloud-based systems. A strong foundation in programming languages like JavaScript, Python, or Java, experience with modern frameworks, and a good understanding of databases and cloud technologies are essential. If you thrive in a fast-paced environment, enjoy contributing to impactful projects, and are committed to continuous learning, we'd love to hear from you.",
       summary:userPreferences.summary ||"Highly motivated Software Engineer with over five years of experience in full-stack development. Proficient in designing, implementing, and optimizing scalable web applications. Passionate about problem-solving, automation, and cloud computing. Strong background in software development, database management, and DevOps practices",
       skills: userPreferences.skills || ["React", "JavaScript", "CSS"],
       projects: userPreferences.projects || ["Project A", "Project B"],
       candidateName: user.name || "John Doe",
-      companyName: "TechCorp",
+      companyName: companyName,
       recruiterName: "Sam Smith"
     };
+    
 
-    const email = generateEmailTemplate(emailParams);
-    const { to, subject, body} = email;
+    const data = generateEmailTemplate(emailParams);
+    const { to, subject, body} = data;
     res.status(200).json({ to, subject, body});
  
   } catch (error) {

@@ -60,18 +60,15 @@ export const onboardResume = async (req, res) => {
                 : [];
 
             // Update or create user preferences with the extracted data
-            const userPreferences = await UserPreferences.findOneAndUpdate(
-                { userId: user._id },
+            const userPreferences = await UserPreferences.create(
                 {
-                    $set: {
-                        preferences: pref,
-                        summary: summary || "",
-                        skills: flattenedSkills,  // Flat array of strings
-                        projects: simplifiedProjects, // Simplified projects data
-                        updatedAt: Date.now()
-                    }
+                    userId: user._id,
+                    preferences: pref,
+                    summary: summary || "",
+                    skills: flattenedSkills,  // Flat array of strings
+                    projects: simplifiedProjects, // Simplified projects data
+                    updatedAt: Date.now()
                 },
-                { new: true, upsert: true }
             );
 
             console.log(`Saved user preferences for ${email}:`, {
@@ -113,7 +110,7 @@ export const onboardResume = async (req, res) => {
 
 
         res.write(`event: complete\n`);
-        res.write(`data: ${JSON.stringify({ pdfUrl: pdf.pdfUrl , updateOnborad, userResume })}\n\n`);
+        res.write(`data: ${JSON.stringify({ pdfUrl: pdf.pdfUrl, updateOnborad, userResume })}\n\n`);
         res.end(); // Close the connection after sending the final data
         console.log("Response sent to client");
         // res.json({ pref1, pref2, pref3 });
@@ -152,7 +149,7 @@ export const addResume = async (req, res) => {
             return res.status(400).json({ message: 'User ID is required' });
         }
         const thubmnail = await pdfToImage(resume);
-        if (!thubmnail) {  
+        if (!thubmnail) {
             return res.status(400).json({ message: 'Thumbnail generation failed' });
         }
         const { imageUrl, publicId, size, format } = thubmnail;
@@ -250,14 +247,14 @@ export const pdfToImage = async (pdfUrl) => {
 export const convertPdfToImage = async (req, res) => {
     try {
         const { pdfUrl } = req.query;
-        
+
         if (!pdfUrl) {
             return res.status(400).json({ error: 'PDF URL is required' });
         }
-        
+
         const result = await pdfToImage(pdfUrl);
         res.status(200).json(result);
-        
+
     } catch (error) {
         console.error('Error in convertPdfToImage controller:', error);
         res.status(500).json({ message: 'Internal server error', error: error.message });

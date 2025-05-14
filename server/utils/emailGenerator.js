@@ -32,19 +32,35 @@ export const generateEmailTemplate = (params) => {
         summary,
         skills = [],
         projects = [],
-        candidateName = "Candidate",
-        companyName = "Company",
-        recruiterName = "Hiring Manager",
+        candidateName,
+        companyName,
+        recruiterName,
         extractSummary = true
     } = params;
 
+    let subjectLine, starting_line, middle_sentence, closing_sentence;
+
+
     // Validate required parameters
+    if (companyName === "") {
+        subjectLine = `${candidateName} - Qualified Candidate for ${jobTitle}`;
+        starting_line = `I hope this email finds you well. I am writing to express my interest in the ${jobTitle} position.`
+        middle_sentence = `I'd welcome the opportunity to discuss how my background and skills would benefit the company. I've attached my resume for your review, and I'm available for an interview at your convenience.`
+        closing_sentence = `Thank you for considering my application. I look forward to the possibility of working with your team.`
+
+    }
+    else {
+        subjectLine = `${candidateName} - Qualified Candidate for ${jobTitle} Position at ${companyName}`;
+        starting_line = `I hope this email finds you well. I am writing to express my interest in the ${jobTitle} position at ${companyName}.`
+        middle_sentence = `I'd welcome the opportunity to discuss how my background and skills would benefit ${companyName}. I've attached my resume for your review, and I'm available for an interview at your convenience.`
+        closing_sentence = `Thank you for considering my application. I look forward to the possibility of working with the ${companyName} team.`
+    }
     if (!jobTitle || !jobDescription || !summary) {
         throw new Error("Missing required parameters: jobTitle, jobDescription, and summary are required");
     }
 
     // Generate a personalized subject line
-    const subjectLine = `${candidateName} - Qualified Candidate for ${jobTitle} Position at ${companyName}`;
+
 
     const jobKeywords = extractKeywords(jobDescription);
 
@@ -94,22 +110,22 @@ export const generateEmailTemplate = (params) => {
 
     // Generate the email body
     console.log("Processed Summary: ", processedSummary);
-    const emailBody = `Dear ${recruiterName},
+    const emailBody = `Dear Hiring Manager/Team,
   
-  I hope this email finds you well. I am writing to express my interest in the ${jobTitle} position at ${companyName}.
+    ${starting_line}
   
-  ${processedSummary}
+    ${processedSummary}
   
-  ${matchSummary}
+    ${matchSummary}
   
-  Based on the job description, I believe my experience aligns well with what you're looking for. ${skills.length > 0 ? `My proficiency in ${skillsText} makes me a strong candidate for this role.` : ""}${projectsSection}
+    Based on the job description, I believe my experience aligns well with what you're looking for. ${skills.length > 0 ? `My proficiency in ${skillsText} makes me a strong candidate for this role.` : ""}${projectsSection}
   
-  I'd welcome the opportunity to discuss how my background and skills would benefit ${companyName}. I've attached my resume for your review, and I'm available for an interview at your convenience.
+    ${middle_sentence}
   
-  Thank you for considering my application. I look forward to the possibility of working with the ${companyName} team.
+    ${closing_sentence}
   
-  Best regards,
-  ${candidateName}`;
+    Best regards,
+    ${candidateName}`;
 
     // Return the email template in JSON format
     return {

@@ -1,5 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { jwtDecode } from "jwt-decode"; // Make sure to install this: npm install jwt-decode
+import api from "../utils/api";
 
 const AuthContext = createContext();
 
@@ -7,16 +8,17 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     // Check for token in localStorage on initial load
     const checkAuth = () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (token) {
         try {
           // Decode token to get user data
           const decoded = jwtDecode(token);
-          
+
           // Check if token is expired
           const currentTime = Date.now() / 1000;
           if (decoded.exp && decoded.exp < currentTime) {
@@ -27,7 +29,7 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
           }
         } catch (error) {
-          console.error('Error decoding token:', error);
+          console.error("Error decoding token:", error);
           logoutUser();
         }
       }
@@ -35,11 +37,27 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
+    checkConnection();
   }, []);
+
+  const checkConnection = async () => {
+    try {
+      const response = await api.get(`${apiUrl}/connectionStatus`);
+      if (response.status === 200) {
+        console.log("Connection is good");
+      } else {
+        console.error("Connection error:", response.status);
+      }
+      return response.isExtensionConnected;
+    } catch (error) {
+      console.error("Error checking connection:", error);
+      return false;
+    }
+  };
 
   // Login user and store token
   const loginUser = (token) => {
-    localStorage.setItem('token', token);
+    localStorage.setItem("token", token);
     const decoded = jwtDecode(token);
     setUser(decoded);
     setIsAuthenticated(true);
@@ -47,14 +65,14 @@ export const AuthProvider = ({ children }) => {
 
   // Logout user and remove token
   const logoutUser = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setUser(null);
     setIsAuthenticated(false);
   };
 
   // Get the auth token
   const getToken = () => {
-    return localStorage.getItem('token');
+    return localStorage.getItem("token");
   };
 
   // Get the user ID from decoded token
@@ -63,15 +81,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        isAuthenticated, 
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
         loading,
         loginUser,
         logoutUser,
         getToken,
-        getUserId
+        getUserId,
+        checkConnection,
       }}
     >
       {children}
@@ -83,7 +102,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
