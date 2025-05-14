@@ -4,7 +4,7 @@ import { verifyToken } from "../middleware/auth.js";
 
 const emailRoutes = express.Router();
 
-emailRoutes.post("/send-email", verifyToken, sendEmail);
+// emailRoutes.post("/send-email", verifyToken, sendEmail);
 emailRoutes.post("/send-email-with-attachment", verifyToken, sendEmailWithAttachment);
 emailRoutes.post("/create-email", verifyToken, createEmail);
 emailRoutes.post("/save-email", verifyToken, saveEmail);

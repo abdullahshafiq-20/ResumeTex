@@ -96,7 +96,7 @@ export const generateEmailTemplate = (params) => {
     // Format projects section
     let projectsSection = "";
     if (projects.length > 0) {
-        projectsSection = "\n\nNotable projects include:";
+        projectsSection = "Notable projects include:";
         projects.forEach(project => {
             projectsSection += `\n- ${project}`;
         });
@@ -112,20 +112,16 @@ export const generateEmailTemplate = (params) => {
     console.log("Processed Summary: ", processedSummary);
     const emailBody = `Dear Hiring Manager/Team,
   
-    ${starting_line}
+${starting_line} ${processedSummary} ${matchSummary}
   
-    ${processedSummary}
+Based on the job description, I believe my experience aligns well with what you're looking for. ${skills.length > 0 ? `My proficiency in ${skillsText} makes me a strong candidate for this role.` : ""} 
+${projectsSection}
   
-    ${matchSummary}
+${middle_sentence} 
+${closing_sentence}
   
-    Based on the job description, I believe my experience aligns well with what you're looking for. ${skills.length > 0 ? `My proficiency in ${skillsText} makes me a strong candidate for this role.` : ""}${projectsSection}
-  
-    ${middle_sentence}
-  
-    ${closing_sentence}
-  
-    Best regards,
-    ${candidateName}`;
+Best regards,
+${candidateName}`;
 
     // Return the email template in JSON format
     return {
