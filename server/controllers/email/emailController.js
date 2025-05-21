@@ -411,19 +411,18 @@ function generateEmailTemplate22(params) {
 
 export const createEmail = async (req, res) => {
   try {
-    const { jobTitle, jobDescription, email, companyName, resume_id } = req.body;
+    const { email, jobTitle, jobDescription,companyName, resume_id, postId } = req.body;
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
     // Get user from database with tokens
     console.log("userId", userId)
     console.log("resume_id", resume_id)
-    console.log("email", email)
     console.log("jobTitle", jobTitle)
     console.log("jobDescription", jobDescription)
 
     const user = await User.findById(userId);
     const userResume = await UserResume.findById(resume_id);
-    const { resume_title } = userResume;
+    const { resume_title, resume_link } = userResume;
     const userPreferences = await UserPreferences.findOne({ preferences: resume_title });
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
@@ -444,9 +443,16 @@ export const createEmail = async (req, res) => {
       recruiterName: "Sam Smith"
     };
 
-
+    
     const data = generateEmailTemplate(emailParams);
+
     const { to, subject, body } = data;
+    const saveEmail = await Email.findOneAndUpdate(
+      { userId, linkedInId: postId },
+      { $set: { userId, linkedInId:postId, resumeId: resume_id,  isEmailGenerated: true, isEmailSent: false, to: email, subject, body, attachment: resume_link } },
+      { upsert: true , new: true }
+    )
+    console.log("saveEmail", saveEmail)
     res.status(200).json({ to, subject, body });
 
   } catch (error) {
@@ -457,13 +463,19 @@ export const createEmail = async (req, res) => {
 
 export const saveEmail = async (req, res) => {
   try {
-    const { to, subject, body, attachment } = req.body;
+    const { postId, resumeId, to, subject, body, pdfUrl } = req.body || req.saveEmailParams;
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
     // Save the email to the database (you need to implement this part)
-    const email = new Email({ userId, to, subject, body, attachment });
-    await email.save();
-
+    const saveEmail = await Email.findOneAndUpdate(
+      { userId, linkedInId: postId },
+      { $set: { userId, linkedInId: postId, resumeId, isEmailGenerated: true, isEmailSent: true, to, subject, body, attachment: pdfUrl } },
+      { upsert: true, new: true }
+    );
+    console.log("saveEmail", saveEmail)
+    if (!saveEmail) {
+      return res.status(404).json({ error: 'Email not found' });
+    }
     res.status(200).json({ message: 'Email saved successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save email', details: error.message });
@@ -472,10 +484,22 @@ export const saveEmail = async (req, res) => {
 
 export const getEmails = async (req, res) => {
   try {
+    const { postId } = req.query || req.params;
+    // console.log("postId", postId)
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
     // Fetch emails from the database (you need to implement this part)
-    const emails = await Email.find({ userId });
+    if (!postId) {
+      const emails = await Email.find({ userId });
+      if (!emails) {
+        return res.status(404).json({ error: 'No emails found' });
+      }
+      return res.status(200).json(emails);
+    }
+    const emails = await Email.find({ userId, linkedInId: postId });
+    if (!emails) {
+      return res.status(404).json({ error: 'No emails found' });
+    }
 
     res.status(200).json(emails);
   } catch (error) {

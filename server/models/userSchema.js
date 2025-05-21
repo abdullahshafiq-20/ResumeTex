@@ -85,6 +85,24 @@ const emailSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
+    linkedInId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "extensionSchema",
+        required: true
+    },
+    resumeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "UserResume",
+        required: true
+    },
+    isEmailGenerated: {
+        type: Boolean,
+        default: false
+    },
+    isEmailSent: {
+        type: Boolean,
+        default: false
+    },
     to: {
         type: String,
         required: true
@@ -101,6 +119,7 @@ const emailSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+
     createdAt: {
         type: Date,
         default: Date.now
