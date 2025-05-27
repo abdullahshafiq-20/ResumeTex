@@ -134,6 +134,28 @@ export const PostsProvider = ({ children }) => {
     }
   }
 
+  const deletePost = async (postId) => {
+    if (!postId) {
+      console.error("Post ID is required");
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const response = await api.delete(`${apiUrl}/deletePost/${postId}`);
+      console.log("Delete response:", response.data);
+      
+      // Refresh posts after deletion
+      await refreshPosts();
+      
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <PostsContext.Provider value={{ 
       posts, 
@@ -142,6 +164,7 @@ export const PostsProvider = ({ children }) => {
       loading,
       refreshPosts,
       fetchEmailbyId,
+      deletePost
     }}>
       {children}
     </PostsContext.Provider>

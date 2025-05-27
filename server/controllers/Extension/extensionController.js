@@ -172,3 +172,26 @@ export const getPosts = async (req, res) => {
         });
     }
 }
+
+
+export const deletePost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const deletedPost = await extensionSchema.findByIdAndDelete(postId);
+        if (!deletedPost) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Post deleted successfully",
+            data: deletedPost
+        });
+    } catch (error) {
+        console.error("Error deleting post:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete post",
+            error: error.message
+        });
+    }
+}

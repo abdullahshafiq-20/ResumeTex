@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ExternalLink, Mail, Hash, X, Eye, Check, Briefcase } from 'lucide-react'
 
 const PostsPage = () => {
-    const { posts, loading } = usePosts()
+    const { posts, loading, deletePost } = usePosts()
     const { checkConnection } = useAuth()
     const isConnected = checkConnection()
     const [selectedPost, setSelectedPost] = useState(null)
@@ -29,6 +29,18 @@ const PostsPage = () => {
                 </div>
             </div>
         )
+    }
+
+    const handleDeletePost = async (postId) => {
+        if (window.confirm("Are you sure you want to delete this post?")) { 
+            try {
+                await deletePost(postId)
+                alert("Post deleted successfully.")
+            } catch (error) {
+                console.error("Error deleting post:", error)
+                alert("Failed to delete post. Please try again.")
+            }
+        }
     }
     
     // Convert posts to array if it's not already
@@ -96,12 +108,26 @@ const PostsPage = () => {
                                         </div>
                                     </div>
                                     
-                                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-100">
-                                        <Eye 
-                                            size={14} 
-                                            className="text-gray-500 cursor-pointer" 
-                                            onClick={() => openModal(post)}
-                                        />
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-100">
+                                            <Eye 
+                                                size={14} 
+                                                className="text-gray-500 cursor-pointer" 
+                                                onClick={() => openModal(post)}
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-red-50 hover:bg-red-100 cursor-pointer transition-colors"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeletePost(post._id);
+                                            }}
+                                            title="Delete post"
+                                        >
+                                            <X 
+                                                size={14} 
+                                                className="text-red-500" 
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
