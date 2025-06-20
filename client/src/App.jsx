@@ -22,6 +22,7 @@ const DocumentationPage = lazy(() => import("./pages/DocumentationPage"));
 const EditorPage = lazy(() => import("./pages/EditorPage"));
 const PostsPage = lazy(() => import("./pages/PostsPage"));
 const EmailPage = lazy(() => import("./pages/EmailPage"));
+const JobPage = lazy(() => import("./pages/JobPage"));
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
               <Route path="editor" element={<EditorPage />} />
               <Route path="posts" element={<PostsPage />} />
               <Route path="email" element={<EmailPage />} />
+              <Route path="jobs" element={<JobPage />} />
               {/* Add more dashboard routes here */}
             </Route>
 

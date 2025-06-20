@@ -11,6 +11,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'My Resumes', href: '/my-resume', icon: DocumentIcon },
     { name: 'Posts', href: '/posts', icon: TemplateIcon },
     { name: 'Email', href: '/email', icon: UserIcon },
+    { name: 'Jobs', href: '/jobs', icon: DocumentIcon },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
 
