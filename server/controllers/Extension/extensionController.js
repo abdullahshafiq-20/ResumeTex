@@ -7,6 +7,17 @@ import axios from "axios";
 function extractContentInfo(content) {
     // Regular expression for URLs
     // This matches most common URL formats including http, https, ftp, and www prefixes
+
+    //remove any leading or trailing whitespace from the content
+    content = content.trim();
+    
+    // Clean up the content by removing *, **, *** and extra spaces but keep single line breaks
+    content = content
+        .replace(/\*{1,}/g, '') // Remove all * occurrences (single, double, triple, or more)
+        .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
+        .replace(/\n{3,}/g, '\n\n') // Replace 3+ consecutive newlines with just 2 newlines
+        .trim(); // Remove leading/trailing whitespace again
+    
     const urlRegex = /(?:https?|ftp):\/\/[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?|www\.[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi;
 
     // Regular expression for email addresses
@@ -19,6 +30,8 @@ function extractContentInfo(content) {
     // Remove duplicates using Set
     const uniqueUrls = [...new Set(extractedUrls)];
     const uniqueEmails = [...new Set(extractedEmails)];
+
+    console.log(content)
 
     return {
         content,
@@ -34,11 +47,20 @@ const getJobTitle = async (content) => {
 
 export const savePost = async (req, res) => {
     try {
-        const { content, email } = req.body;
+        const { content } = req.body;
+        const id = req.user.id; // Assuming email is available in req.user from authentication middleware
         const timestamp = new Date().toISOString();
+        console.log("User ID:", id);
+
+        // Clean the content before processing - keep line breaks but remove extra spaces and lines
+        const cleanedContent = content
+            .replace(/\*{1,}/g, '') // Remove all * occurrences (single, double, triple, or more)
+            .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
+            .replace(/\n{3,}/g, '\n\n') // Replace 3+ consecutive newlines with just 2 newlines
+            .trim(); // Remove leading/trailing whitespace
 
         // Find user and check if exists
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ _id: id });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -49,7 +71,7 @@ export const savePost = async (req, res) => {
         // Use external API to extract information
         try {
             const response = await axios.post("https://jobtitle-extarction-model-nlp.vercel.app/extract/", {
-                content: content
+                content: cleanedContent // Use cleaned content for API
             }, {
                 headers: {
                     "Content-Type": "application/json"
@@ -61,7 +83,7 @@ export const savePost = async (req, res) => {
                 const { extracted_urls, extracted_emails, extracted_hashtags, job_title } = response.data;
                 data = await extensionSchema.create({
                     userId: userid,
-                    content: content,
+                    content: cleanedContent, // Save cleaned content
                     extractedUrls: extracted_urls,
                     extractedEmails: extracted_emails,
                     jobTitle: job_title,
@@ -75,10 +97,10 @@ export const savePost = async (req, res) => {
             }
         } catch (apiError) {
             console.error("Using locally stored function:", apiError.message);
-            const { extractedUrls, extractedEmails } = extractContentInfo(content);
+            const { content: localCleanedContent, extractedUrls, extractedEmails } = extractContentInfo(cleanedContent);
             data = await extensionSchema.create({
                 userId: userid,
-                content: content,
+                content: localCleanedContent, // This will be cleaned by extractContentInfo
                 extractedUrls: extractedUrls,
                 extractedEmails: extractedEmails,
                 timestamp: timestamp
@@ -100,7 +122,6 @@ export const savePost = async (req, res) => {
         });
     }
 }
-
 export const createSecret = async (req, res) => {
     try {
         const { email } = req.body;
@@ -152,7 +173,7 @@ export const createExtensionSecret = (email) => {
 export const getPosts = async (req, res) => {
     try {
         const { userId } = req.query;
-        const posts = await extensionSchema.find({ userId: userId });
+        const posts = await extensionSchema.find({ userId: userId }).sort({ timestamp: -1 });
         if (!posts) {
             return res.status(404).json({ message: "No posts found" });
         }

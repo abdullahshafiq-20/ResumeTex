@@ -47,7 +47,7 @@ export const googleCallback = async (req, res) => {
 
     // Create JWT
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '3d',
+      expiresIn: '29days', // 29 days
     });
 
     // Send JWT to frontend (or set cookie)

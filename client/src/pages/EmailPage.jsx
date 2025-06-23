@@ -37,42 +37,41 @@ const EmailPage = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    if (posts && posts.length > 0) {
-      console.log("Posts in EmailPage:", posts);
-      
-      // Filter posts that contain emails
-      const postsWithEmails = posts.filter(
-        (post) => post.extractedEmails && post.extractedEmails.length > 0
-      );
-      
-      // Get IDs of posts that have emails generated or sent
-      const generatedPostIds = emailsGenerated.map(post => post._id) || [];
-      const sentPostIds = emailsSent.map(post => post._id) || [];
-      
-      // Make sure no post appears in both arrays
-      const uniqueGeneratedPostIds = generatedPostIds.filter(
-        id => !sentPostIds.includes(id)
-      );
-      
-      // Filter for pending posts (those with emails but no generated/sent emails)
-      const pendingPosts = postsWithEmails.filter(
-        post => !generatedPostIds.includes(post._id) && !sentPostIds.includes(post._id)
-      );
-      
-      console.log("Pending posts:", pendingPosts);
-      setPendingEmailPosts(pendingPosts);
-    }
-
-    // Set default selected resume if available
-    if (resumes && resumes.length > 0) {
-      setSelectedResumeId(resumes[0]._id);
-    }
+useEffect(() => {
+  if (posts && posts.length > 0) {
+    console.log("Posts in EmailPage:", posts);
     
-    // Reset email sent flag when changing selected post
-    setEmailSent(false);
-  }, [posts, resumes, emailsGenerated, emailsSent]);
+    // Filter posts that contain emails
+    const postsWithEmails = posts.filter(
+      (post) => post.extractedEmails && post.extractedEmails.length > 0
+    );
+    
+    // Get IDs of posts that have emails generated or sent
+    const generatedPostIds = emailsGenerated.map(post => post._id) || [];
+    const sentPostIds = emailsSent.map(post => post._id) || [];
+    
+    // Make sure no post appears in both arrays
+    const uniqueGeneratedPostIds = generatedPostIds.filter(
+      id => !sentPostIds.includes(id)
+    );
+    
+    // Filter for pending posts (those with emails but no generated/sent emails)
+    const pendingPosts = postsWithEmails.filter(
+      post => !generatedPostIds.includes(post._id) && !sentPostIds.includes(post._id)
+    );
+    
+    console.log("Pending posts:", pendingPosts);
+    setPendingEmailPosts(pendingPosts);
+  }
+
+  // Only set default selected resume if no resume is currently selected
+  if (resumes && resumes.length > 0 && !selectedResumeId) {
+    setSelectedResumeId(resumes[0]._id);
+  }
+  
+  // Reset email sent flag when changing selected post
+  setEmailSent(false);
+}, [posts, resumes, emailsGenerated, emailsSent]);
 
   const selectPost = (post) => {
     // If it's the same post, deselect it

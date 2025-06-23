@@ -1,19 +1,38 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
-  
+  const navigate = useNavigate();
+  const { logoutUser, user } = useAuth();
+
   // Navigation menu items
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'My Resumes', href: '/my-resume', icon: DocumentIcon },
+    { name: 'Preferences', href: '/preferences', icon: UserIcon },
     { name: 'Posts', href: '/posts', icon: TemplateIcon },
     { name: 'Email', href: '/email', icon: UserIcon },
     { name: 'Jobs', href: '/jobs', icon: DocumentIcon },
-    { name: 'Settings', href: '/settings', icon: SettingsIcon },
+    // { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser(); // Call logout from AuthContext
+      navigate('/login'); // Redirect to login page
+      if (toggleSidebar) {
+        toggleSidebar(); // Close sidebar on mobile
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still redirect even if logout fails
+      navigate('/login');
+    }
+  };
 
   return (
     <>
@@ -67,6 +86,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </Link>
             </div>
             
+            {/* User Info */}
+            {user && (
+              <div className="mb-6 p-3 bg-blue-50/60 rounded-lg border border-blue-100/60">
+                <p className="text-sm font-medium text-gray-800 truncate">
+                  {user.name || user.email}
+                </p>
+                <p className="text-xs text-gray-600 truncate">
+                  {user.email}
+                </p>
+              </div>
+            )}
+            
             <nav className="flex-1 space-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
@@ -97,13 +128,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Link
-                  to="/logout"
-                  className="flex items-center px-4 py-2.5 rounded-md text-gray-600 hover:bg-red-50/60 hover:text-red-600 transition-all"
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center px-4 py-2.5 rounded-md text-gray-600 hover:bg-red-50/60 hover:text-red-600 transition-all"
                 >
                   <LogoutIcon className="h-5 w-5 mr-3 text-gray-500" />
                   Logout
-                </Link>
+                </button>
               </motion.div>
             </div>
           </div>

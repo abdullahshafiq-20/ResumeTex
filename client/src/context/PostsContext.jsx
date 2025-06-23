@@ -134,6 +134,28 @@ export const PostsProvider = ({ children }) => {
     }
   }
 
+  const savePost = async (postData) => {
+    if (!postData) {
+      console.error("Post data is required");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await api.post(`${apiUrl}/extension/savePost`, {
+        content: postData
+      });
+      console.log("Save response:", response.data);
+      
+      // Refresh posts after saving
+      await refreshPosts();
+      
+    } catch (error) {
+      console.error("Error saving post:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const deletePost = async (postId) => {
     if (!postId) {
       console.error("Post ID is required");
@@ -164,7 +186,8 @@ export const PostsProvider = ({ children }) => {
       loading,
       refreshPosts,
       fetchEmailbyId,
-      deletePost
+      deletePost,
+      savePost
     }}>
       {children}
     </PostsContext.Provider>

@@ -2,58 +2,65 @@ import React from "react";
 import { motion } from "framer-motion";
 import FileUploader from "../components/FileUploader";
 import PDFCard from "../components/PdfCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useResumes } from "../context/ResumeContext";
-import { useEffect } from "react";
-import { use } from "react";
 import api from "../utils/api";
 
-const MyResume = () => {
-  // Demo data for resumes
+const apiUrl = import.meta.env.VITE_API_URL;
 
-  const { resumes } = useResumes();
+const MyResume = () => {
+  const { resumes, fetchResumes, loading } = useResumes();
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   console.log("Resumes from context:", resumes);
+  console.log("Is uploading:", isUploading);
+  console.log("Upload success:", uploadSuccess);
 
-  const demoResumes = [
-    {
-      _id: "1",
-      title: "Software Engineer Resume",
-      pdfUrl:
-        "https://res.cloudinary.com/dlthjlibc/raw/upload/v1746795410/ykow4hjuecwtux7qglvl.pdf",
-      imageUrl:
-        "https://res.cloudinary.com/dlthjlibc/image/upload/v1746816884/resume_thumbnails/h7hxbsarrmctya9babdq.png",
-      updatedAt: "2025-05-01T12:00:00Z",
-    },
-    {
-      _id: "2",
-      title: "Product Manager CV",
-      pdfUrl:
-        "https://res.cloudinary.com/dlthjlibc/raw/upload/v1746795410/ykow4hjuecwtux7qglvl.pdf",
-      imageUrl:
-        "https://res.cloudinary.com/dlthjlibc/image/upload/v1746816884/resume_thumbnails/h7hxbsarrmctya9babdq.png",
-      updatedAt: "2025-04-28T14:30:00Z",
-    },
-    {
-      _id: "3",
-      title: "UX Designer Portfolio",
-      pdfUrl:
-        "https://res.cloudinary.com/dlthjlibc/raw/upload/v1746795410/ykow4hjuecwtux7qglvl.pdf",
-      imageUrl:
-        "https://res.cloudinary.com/dlthjlibc/image/upload/v1746816884/resume_thumbnails/h7hxbsarrmctya9babdq.png",
-      updatedAt: "2025-05-05T09:15:00Z",
-    },
-    {
-      _id: "4",
-      title: "Project Manager Resume",
-      pdfUrl:
-        "https://res.cloudinary.com/dlthjlibc/raw/upload/v1746795410/ykow4hjuecwtux7qglvl.pdf",
-      imageUrl:
-        "https://res.cloudinary.com/dlthjlibc/image/upload/v1746816884/resume_thumbnails/h7hxbsarrmctya9babdq.png",
-      updatedAt: "2025-05-08T16:45:00Z",
-    },
-  ];
+  // Force refresh resumes when component mounts
+  useEffect(() => {
+    if (fetchResumes) {
+      fetchResumes();
+    }
+  }, []);
+
+  // Handle file upload completion
+  const handleFileUpload = async (data) => {
+    console.log("File upload completed:", data);
+    setIsUploading(false);
+    setUploadSuccess(true);
+    
+    // Force refresh the resumes list
+    try {
+      if (fetchResumes) {
+        console.log("Refreshing resumes...");
+        await fetchResumes();
+        console.log("Resumes refreshed successfully");
+      }
+    } catch (error) {
+      console.error("Error refreshing resumes:", error);
+    }
+
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setUploadSuccess(false);
+    }, 3000);
+  };
+
+  // Handle upload start
+  const handleUploadStart = () => {
+    console.log("Upload started");
+    setIsUploading(true);
+    setUploadSuccess(false);
+  };
+
+  // Handle upload error
+  const handleUploadError = (error) => {
+    console.error("Upload error:", error);
+    setIsUploading(false);
+    setUploadSuccess(false);
+  };
 
   // Format date function
   const formatDate = (dateString) => {
@@ -91,36 +98,117 @@ const MyResume = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.h2
-        className="text-2xl font-bold mb-6"
+    <div className="container mx-auto px-6 py-8">
+      {/* Important Notice Header */}
+      <motion.div
+        className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg shadow-sm"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        My Resumes
-      </motion.h2>
+        <div className="flex items-start space-x-3">
+          <div className="h-5 w-5 text-amber-600 mt-0.5">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-amber-800 font-semibold text-sm mb-1">Important Notice</h3>
+            <p className="text-amber-700 text-sm">
+              Please ensure your uploaded CV contains the same email address you logged in with. 
+              After the process completes, make sure to refresh the page to see your updated resumes.
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       <motion.div
         className="mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <FileUploader
-          apiUrl={api}
-          template="v2"
-          onFileUpload={(data) => console.log("File uploaded:", data)}
-        />
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">My Resumes</h2>
+        <p className="text-gray-600">Manage and organize your resume collection</p>
       </motion.div>
 
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        className="mb-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <FileUploader
+          apiUrl={apiUrl}
+          template="v2"
+          onFileUpload={handleFileUpload}
+          onUploadStart={handleUploadStart}
+          onUploadError={handleUploadError}
+        />
+      </motion.div>
+
+      {/* Show uploading indicator */}
+      {isUploading && (
+        <motion.div
+          className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <span className="text-blue-700 font-medium">
+              Processing your resume... This may take a few moments.
+            </span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Show success message */}
+      {uploadSuccess && (
+        <motion.div
+          className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <div className="flex items-center space-x-3">
+            <div className="h-5 w-5 text-green-600">
+              <svg fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <span className="text-green-700 font-medium">
+              Resume uploaded successfully!
+            </span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Loading state */}
+      {loading && !isUploading && (
+        <motion.div
+          className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+            <span className="text-gray-700 font-medium">
+              Loading resumes...
+            </span>
+          </div>
+        </motion.div>
+      )}
+
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        key={resumes.length} // Force re-render when resumes change
       >
-        {resumes.map((resume) => (
+        {resumes && resumes.map((resume) => (
           <motion.div
             key={resume._id}
             variants={itemVariants}
@@ -135,6 +223,34 @@ const MyResume = () => {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Show empty state if no resumes and not uploading/loading */}
+      {resumes && resumes.length === 0 && !isUploading && !loading && (
+        <motion.div
+          className="text-center py-16 bg-white border border-gray-200 rounded-lg shadow-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="text-gray-500 text-lg mb-2">No resumes yet</div>
+          <div className="text-gray-400">Upload your first resume to get started!</div>
+        </motion.div>
+      )}
+
+      {/* Debug info in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm shadow-sm">
+          <strong>Debug Info:</strong>
+          <br />
+          Resumes count: {resumes ? resumes.length : 'null'}
+          <br />
+          Is uploading: {isUploading ? 'Yes' : 'No'}
+          <br />
+          Is loading: {loading ? 'Yes' : 'No'}
+          <br />
+          Upload success: {uploadSuccess ? 'Yes' : 'No'}
+        </div>
+      )}
     </div>
   );
 };

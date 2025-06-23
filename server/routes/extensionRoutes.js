@@ -4,7 +4,7 @@ import { verifyToken } from "../middleware/auth.js";
 
 const extensionRoutes = express.Router();
 
-extensionRoutes.post("/extension/savePost", savePost);
+extensionRoutes.post("/extension/savePost", verifyToken, savePost);
 extensionRoutes.post("/extension/createSecret", verifyToken ,createSecret);
 extensionRoutes.get("/getPosts", verifyToken ,getPosts);
 extensionRoutes.delete("/deletePost/:postId", verifyToken ,deletePost);

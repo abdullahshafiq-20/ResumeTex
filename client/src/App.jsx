@@ -23,6 +23,7 @@ const EditorPage = lazy(() => import("./pages/EditorPage"));
 const PostsPage = lazy(() => import("./pages/PostsPage"));
 const EmailPage = lazy(() => import("./pages/EmailPage"));
 const JobPage = lazy(() => import("./pages/JobPage"));
+const PrefPage = lazy(() => import("./pages/PrefPage"));
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="posts" element={<PostsPage />} />
               <Route path="email" element={<EmailPage />} />
               <Route path="jobs" element={<JobPage />} />
+              <Route path="preferences" element={<PrefPage />} />
               {/* Add more dashboard routes here */}
             </Route>
 
