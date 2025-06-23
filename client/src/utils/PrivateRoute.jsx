@@ -54,7 +54,7 @@ const PrivateRoute = ({ children }) => {
   }
   
   if (!isValid) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
   
   return children;

@@ -18,7 +18,7 @@ const AuthCallback = () => {
         navigate("/dashboard", { replace: true });
       }, 100); // Delay to ensure token is written
     } else {
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     }
   }, [navigate]);
 
