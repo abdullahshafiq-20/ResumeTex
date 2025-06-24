@@ -3,11 +3,12 @@ import { motion } from "framer-motion";
 import Squares from "../components/background/Squares";
 import "../App.css";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default function LoginPage() {
   const handleLogin = () => {
     // Redirect to your backend Google OAuth endpoint
-    window.location.href = import.meta.env.VITE_API_URL + "/auth/google";
-    
+    window.location.href = apiUrl + "/auth/google";
   };
 
   return (
