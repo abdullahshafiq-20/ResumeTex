@@ -1,5 +1,6 @@
 import express from "express";
 const app = express();
+import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
@@ -11,6 +12,7 @@ import jobRoutes from "./routes/jobRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import extensionRoutes from "./routes/extensionRoutes.js";
 import statsRouter from "./routes/statsRoutes.js";
+import { initSocket } from './config/socketConfig.js';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -28,6 +30,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Disposition', 'Content-Length']
 }));
+
+const server = http.createServer(app);
+const io = initSocket(server);
 
 mongoose.connect(process.env.URI).then(() => {
   console.log("Connected to MongoDB");
@@ -59,8 +64,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log("Server is running on port 3000");
+  console.log("Socket.IO is ready");
 });
+
+export { io };
 
 export default app;

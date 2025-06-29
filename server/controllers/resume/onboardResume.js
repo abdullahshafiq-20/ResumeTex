@@ -5,7 +5,8 @@ import { User, UserPreferences, UserResume } from "../../models/userSchema.js";
 import fetch from 'node-fetch';
 import { PDFDocument } from 'pdf-lib';
 import { cloudinaryConfig, cloudinaryUploader } from "../../utils/cloudinary.js";
-
+import { emitResumeCreated, emitStatsDashboard, emitPreferencesDashboard } from "../../config/socketConfig.js";
+import { triggerDashboardUpdate } from "../../utils/dashboardUpdater.js";
 
 
 export const onboardResume = async (req, res) => {
@@ -108,7 +109,11 @@ export const onboardResume = async (req, res) => {
         send(`Adding resume to user`, { step: `Adding resume to user`, status: "completed", data: { pdfUrl: pdf.pdfUrl } });
         console.log("userResume", userResume)
 
-
+        emitResumeCreated(user._id, userResume);
+        
+        // Emit dashboard updates after resume creation
+        await triggerDashboardUpdate(user._id);
+        
         res.write(`event: complete\n`);
         res.write(`data: ${JSON.stringify({ pdfUrl: pdf.pdfUrl, updateOnborad, userResume })}\n\n`);
         res.end(); // Close the connection after sending the final data
@@ -154,20 +159,19 @@ export const addResume = async (req, res) => {
         }
         const { imageUrl, publicId, size, format } = thubmnail;
 
+        const userResume = await UserResume.create({
+            userId: userId,
+            resume_link: resume,
+            resume_title: resume_title,
+            thumbnail: imageUrl,
+            file_type: 'pdf',
+            description: '',
+            updatedAt: new Date(),
+            createdAt: new Date()
+        });
 
-        const userResume = await UserResume.create(
-            {
-                userId: userId,
-                resume_link: resume,
-                resume_title: resume_title,
-                thumbnail: imageUrl,
-                file_type: 'pdf',
-                description: '',
-                updatedAt: new Date(),
-                createdAt: new Date()
-            },
-        );
-
+        // Emit dashboard updates after resume creation
+        await triggerDashboardUpdate(userId);
 
         res.status(200).json(userResume);
     } catch (error) {
@@ -175,7 +179,6 @@ export const addResume = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 
 function bytesToMB(bytes) {
     return (bytes / 1048576).toFixed(2) + " MB";

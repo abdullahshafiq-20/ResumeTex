@@ -46,12 +46,12 @@ export const googleCallback = async (req, res) => {
     }
 
     // Create JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
       expiresIn: '29days', // 29 days
     });
 
     // Send JWT to frontend (or set cookie)
-    res.redirect(`https://resume-tex-cyan.vercel.app/auth/callback?token=${token}`); // Replace with your frontend URL
+    res.redirect(`${process.env.GOOGLE_REDIRECT_URI_1}?token=${token}`); // Replace with your frontend URL
   } catch (err) {
     console.error('Google login error:', err);
     res.status(500).send('Authentication Failed');

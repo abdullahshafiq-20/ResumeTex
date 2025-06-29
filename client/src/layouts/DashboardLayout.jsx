@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { motion } from 'framer-motion';
+import NotificationToast from '../components/NotificationToast';
 
 const DashboardLayout = () => {
   // Set sidebarOpen to true by default for larger screens
@@ -67,6 +68,9 @@ const DashboardLayout = () => {
           </div>
         </main>
       </motion.div>
+      
+      {/* Add notification toast */}
+      <NotificationToast />
     </div>
   );
 };

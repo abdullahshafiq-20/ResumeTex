@@ -1,29 +1,30 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import FileUploader from "../components/FileUploader";
 import PDFCard from "../components/PdfCard";
-import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useResumes } from "../context/ResumeContext";
-import api from "../utils/api";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const MyResume = () => {
-  const { resumes, fetchResumes, loading } = useResumes();
+  const { resumes, loading, isSocketConnected } = useResumes();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  console.log("Resumes from context:", resumes);
-  console.log("Is uploading:", isUploading);
-  console.log("Upload success:", uploadSuccess);
+  // Memoize console logs to prevent infinite logging
+  const debugInfo = useMemo(() => ({
+    resumesCount: resumes ? resumes.length : 0,
+    isUploading,
+    uploadSuccess,
+    socketConnected: isSocketConnected
+  }), [resumes, isUploading, uploadSuccess, isSocketConnected]);
 
-  // Force refresh resumes when component mounts
+  // Only log when values actually change
   useEffect(() => {
-    if (fetchResumes) {
-      fetchResumes();
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Debug Info:", debugInfo);
     }
-  }, []);
+  }, [debugInfo]);
 
   // Handle file upload completion
   const handleFileUpload = async (data) => {
@@ -31,16 +32,7 @@ const MyResume = () => {
     setIsUploading(false);
     setUploadSuccess(true);
     
-    // Force refresh the resumes list
-    try {
-      if (fetchResumes) {
-        console.log("Refreshing resumes...");
-        await fetchResumes();
-        console.log("Resumes refreshed successfully");
-      }
-    } catch (error) {
-      console.error("Error refreshing resumes:", error);
-    }
+    console.log("Resume will be updated automatically via socket");
 
     // Hide success message after 3 seconds
     setTimeout(() => {
@@ -99,6 +91,25 @@ const MyResume = () => {
 
   return (
     <div className="container mx-auto px-6 py-8">
+      {/* Socket Connection Status */}
+      <motion.div
+        className={`mb-4 p-3 rounded-lg shadow-sm ${
+          isSocketConnected 
+            ? "bg-green-50 border border-green-200" 
+            : "bg-red-50 border border-red-200"
+        }`}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex items-center space-x-2">
+          <div className={`h-2 w-2 rounded-full ${isSocketConnected ? "bg-green-500" : "bg-red-500"}`}></div>
+          <span className={`text-sm font-medium ${isSocketConnected ? "text-green-700" : "text-red-700"}`}>
+            {isSocketConnected ? "🟢 Live updates enabled" : "🔴 Live updates disconnected"}
+          </span>
+        </div>
+      </motion.div>
+
       {/* Important Notice Header */}
       <motion.div
         className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg shadow-sm"
@@ -116,7 +127,10 @@ const MyResume = () => {
             <h3 className="text-amber-800 font-semibold text-sm mb-1">Important Notice</h3>
             <p className="text-amber-700 text-sm">
               Please ensure your uploaded CV contains the same email address you logged in with. 
-              After the process completes, make sure to refresh the page to see your updated resumes.
+              {isSocketConnected 
+                ? " Your resumes will update automatically in real-time once processing is complete."
+                : " You may need to refresh the page to see updates if live updates are disabled."
+              }
             </p>
           </div>
         </div>
@@ -129,7 +143,10 @@ const MyResume = () => {
         transition={{ duration: 0.5, delay: 0.1 }}
       >
         <h2 className="text-3xl font-bold text-gray-900 mb-2">My Resumes</h2>
-        <p className="text-gray-600">Manage and organize your resume collection</p>
+        <p className="text-gray-600">
+          Manage and organize your resume collection
+          {isSocketConnected && <span className="text-green-600 ml-2">• Live updates active</span>}
+        </p>
       </motion.div>
 
       <motion.div
@@ -159,6 +176,7 @@ const MyResume = () => {
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
             <span className="text-blue-700 font-medium">
               Processing your resume... This may take a few moments.
+              {isSocketConnected && " You'll see the new resume appear automatically when ready."}
             </span>
           </div>
         </motion.div>
@@ -180,6 +198,7 @@ const MyResume = () => {
             </div>
             <span className="text-green-700 font-medium">
               Resume uploaded successfully!
+              {isSocketConnected && " It will appear in your collection automatically."}
             </span>
           </div>
         </motion.div>
@@ -206,13 +225,23 @@ const MyResume = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        key={resumes.length} // Force re-render when resumes change
+        key={resumes?.length || 0}
       >
-        {resumes && resumes.map((resume) => (
+        {resumes && resumes.map((resume, index) => (
           <motion.div
             key={resume._id}
             variants={itemVariants}
             whileHover="hover"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              transition: { 
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 100
+              }
+            }}
           >
             <PDFCard
               pdfUrl={resume.resume_link}
@@ -234,21 +263,28 @@ const MyResume = () => {
         >
           <div className="text-gray-500 text-lg mb-2">No resumes yet</div>
           <div className="text-gray-400">Upload your first resume to get started!</div>
+          {isSocketConnected && (
+            <div className="text-green-600 text-sm mt-2">
+              ✓ Real-time updates are active - new resumes will appear instantly
+            </div>
+          )}
         </motion.div>
       )}
 
-      {/* Debug info in development */}
+      {/* Debug info in development - only show when values change */}
       {process.env.NODE_ENV === 'development' && (
         <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm shadow-sm">
           <strong>Debug Info:</strong>
           <br />
-          Resumes count: {resumes ? resumes.length : 'null'}
+          Resumes count: {debugInfo.resumesCount}
           <br />
-          Is uploading: {isUploading ? 'Yes' : 'No'}
+          Is uploading: {debugInfo.isUploading ? 'Yes' : 'No'}
           <br />
           Is loading: {loading ? 'Yes' : 'No'}
           <br />
-          Upload success: {uploadSuccess ? 'Yes' : 'No'}
+          Upload success: {debugInfo.uploadSuccess ? 'Yes' : 'No'}
+          <br />
+          Socket connected: {debugInfo.socketConnected ? 'Yes' : 'No'}
         </div>
       )}
     </div>

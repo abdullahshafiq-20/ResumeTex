@@ -1,7 +1,9 @@
 import { User, UserPreferences } from "../../models/userSchema.js";
 import { extensionSchema } from "../../models/extensionSchema.js";
+import { emitPostCreated, emitStatsDashboard } from "../../config/socketConfig.js";
 import bcrypt from "bcrypt";
 import axios from "axios";
+import { triggerDashboardUpdate } from "../../utils/dashboardUpdater.js";
 
 
 function extractContentInfo(content) {
@@ -106,6 +108,11 @@ export const savePost = async (req, res) => {
                 timestamp: timestamp
             });
         }
+
+        emitPostCreated(userid, data);
+        
+        // Emit dashboard update after post creation
+        await triggerDashboardUpdate(userid);
 
         // Return success response
         return res.status(201).json({
@@ -216,3 +223,40 @@ export const deletePost = async (req, res) => {
         });
     }
 }
+
+export const updatePostStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isEmailSent } = req.body;
+        const userId = req.user.id;
+
+        const updatedPost = await extensionSchema.findOneAndUpdate(
+            { _id: id, userId: userId },
+            { isEmailSent: isEmailSent },
+            { new: true }
+        );
+
+        if (!updatedPost) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found"
+            });
+        }
+
+        // Emit socket event for real-time update
+        emitPostCreated(userId, updatedPost);
+
+        return res.status(200).json({
+            success: true,
+            message: "Post status updated successfully",
+            data: updatedPost
+        });
+    } catch (error) {
+        console.error("Error updating post status:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update post status",
+            error: error.message
+        });
+    }
+};

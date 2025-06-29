@@ -1,6 +1,6 @@
 import { User, UserPreferences, Email, UserResume } from '../models/userSchema.js';
 import mongoose from 'mongoose';
-
+import { emitPreferencesDashboard } from '../../config/socketConfig.js';
 
 
 export const updateUserPreferences = async (req, res) => {
@@ -28,7 +28,7 @@ export const updateUserPreferences = async (req, res) => {
             message: 'User preferences updated successfully',
             data: userPreferences
         });
-
+        emitPreferencesDashboard(userId, userPreferences);
     } catch (error) {
         console.error('Error updating user preferences:', error);
         res.status(500).json({

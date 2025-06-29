@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import { User, UserPreferences, Email, UserResume } from "../../models/userSchema.js";
 import { setupOAuthWithRefreshToken } from "../../utils/oauthUtils.js";
 import { generateEmailTemplate } from "../../utils/emailGenerator.js";
-
+import { emitEmailCreated, emitEmailSent, emitStatsDashboard } from "../../config/socketConfig.js";
+import { triggerDashboardUpdate } from "../../utils/dashboardUpdater.js";
 dotenv.config();
 
 const PROMPT = `
@@ -201,10 +202,27 @@ export const sendEmail = async (req, res) => {
 
     console.log('Email sent successfully, ID:', result.data.id);
 
-    return res.status(200).json({
-      success: true,
+    // Save email record with sent status
+    const emailRecord = await Email.create({
+      userId: userId,
+      to: to,
+      subject: subject,
+      message: message,
       messageId: result.data.id,
-      attachmentIncluded: !!pdfUrl
+      isEmailSent: true,
+      sentAt: new Date()
+    });
+
+    // Emit socket events
+    emitEmailSent(userId, emailRecord);
+    
+    // Trigger dashboard update
+    await triggerDashboardUpdate(userId);
+
+    return res.status(200).json({ 
+      success: true, 
+      messageId: result.data.id,
+      emailRecord 
     });
   } catch (error) {
     console.error('Send email error:', error.message);
@@ -453,11 +471,26 @@ export const createEmail = async (req, res) => {
       { upsert: true , new: true }
     )
     console.log("saveEmail", saveEmail)
-    res.status(200).json({ to, subject, body });
+
+    // Emit socket event
+    emitEmailCreated(userId, saveEmail);
+    
+    // Trigger dashboard update
+    await triggerDashboardUpdate(userId);
+
+    res.status(201).json({
+      success: true,
+      message: "Email created and saved successfully",
+      data: saveEmail
+    });
 
   } catch (error) {
-    res.status(500).json({ error: 'Failed to generate email', details: error.message });
-    console.error('Error generating email:', error);
+    console.error("Error creating email:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create email",
+      error: error.message
+    });
   }
 }
 
@@ -538,3 +571,6 @@ export const updateEmail = async (req, res) => {
     res.status(500).json({ error: 'Failed to update email', details: error.message });
   }
 }
+
+// Add the helper function
+

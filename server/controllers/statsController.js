@@ -2,7 +2,7 @@ import { User, UserPreferences, Email, UserResume } from '../models/userSchema.j
 import { extensionSchema } from '../models/extensionSchema.js';
 import { Count } from '../models/countSchema.js';
 import mongoose from 'mongoose';
-
+import { emitStatsDashboard } from '../config/socketConfig.js';
 /**
  * Get comprehensive user statistics for dashboard
  */
@@ -43,6 +43,8 @@ export const getUserPreferences = async (req, res) => {
             latestPreferences: preferencesData[0]?.preferences || {}, // Most recent preferences
             lastUpdated: preferencesData[0]?.updatedAt || null
         };
+
+        emitStatsDashboard(userId, aggregatedData);
 
         res.status(200).json({
             success: true,
@@ -264,6 +266,8 @@ export const getUserActivityTimeline = async (req, res) => {
             }))
         ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit);
 
+        emitStatsDashboard(userId, activities);
+
         res.status(200).json({
             success: true,
             message: 'Activity timeline retrieved successfully',
@@ -345,6 +349,7 @@ export const getComparisonStats = async (req, res) => {
                 percentile: calculatePercentile(userPostCount, avgPosts[0]?.average || 0)
             }
         };
+        emitStatsDashboard(userId, comparison);
 
         res.status(200).json({
             success: true,
@@ -374,3 +379,18 @@ const calculatePercentile = (userValue, average) => {
     if (ratio >= 0.5) return 40;
     return 25;
 };
+
+export const updateStatsDashboard = async ( req, res) => {
+    try {
+        const userId = req.user.id;
+        const stats = req.body;
+        emitStatsDashboard(userId, stats);
+    } catch (error) {
+        console.error('Error updating stats dashboard:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update stats dashboard',
+            error: error.message
+        });
+    }
+}

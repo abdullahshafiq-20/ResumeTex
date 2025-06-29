@@ -1,14 +1,27 @@
 import React, { useState } from 'react'
 import { usePosts } from '../context/PostsContext'
+import { useSocket } from '../context/SocketContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ExternalLink, Mail, Hash, X, Eye, Briefcase, Plus, Send, Clock } from 'lucide-react'
 
 const PostsPage = () => {
     const { posts, loading, deletePost, savePost, updatePostStatus } = usePosts()
+    const { socket } = useSocket()
     const [selectedPost, setSelectedPost] = useState(null)
     const [newPostContent, setNewPostContent] = useState('')
     const [isSaving, setIsSaving] = useState(false)
     const [activeTab, setActiveTab] = useState('not-sent') // 'not-sent' or 'sent'
+
+    // Function to emit notification
+    const showNotification = (message, type = 'info') => {
+        if (socket) {
+            socket.emit('notification', {
+                type: type,
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+        }
+    };
 
     const openModal = (post) => {
         setSelectedPost(post)
@@ -22,7 +35,7 @@ const PostsPage = () => {
 
     const handleSavePost = async () => {
         if (!newPostContent.trim()) {
-            alert("Please enter some content for the post.")
+            showNotification("Please enter some content for the post.", 'error')
             return
         }
         console.log("Saving post:", newPostContent.trim())
@@ -31,10 +44,10 @@ const PostsPage = () => {
         try {
             await savePost(newPostContent.trim())
             setNewPostContent('')
-            alert("Post saved successfully!")
+            showNotification("Post saved successfully!", 'success')
         } catch (error) {
             console.error("Error saving post:", error)
-            alert("Failed to save post. Please try again.")
+            showNotification("Failed to save post. Please try again.", 'error')
         } finally {
             setIsSaving(false)
         }
@@ -43,20 +56,20 @@ const PostsPage = () => {
     const handleMarkAsSent = async (postId) => {
         try {
             await updatePostStatus(postId, true)
-            alert("Post marked as sent!")
+            showNotification("Post marked as sent!", 'success')
         } catch (error) {
             console.error("Error updating post status:", error)
-            alert("Failed to update post status. Please try again.")
+            showNotification("Failed to update post status. Please try again.", 'error')
         }
     }
 
     const handleMarkAsNotSent = async (postId) => {
         try {
             await updatePostStatus(postId, false)
-            alert("Post marked as not sent!")
+            showNotification("Post marked as not sent!", 'success')
         } catch (error) {
             console.error("Error updating post status:", error)
-            alert("Failed to update post status. Please try again.")
+            showNotification("Failed to update post status. Please try again.", 'error')
         }
     }
 
@@ -75,10 +88,10 @@ const PostsPage = () => {
         if (window.confirm("Are you sure you want to delete this post?")) { 
             try {
                 await deletePost(postId)
-                alert("Post deleted successfully.")
+                showNotification("Post deleted successfully.", 'success')
             } catch (error) {
                 console.error("Error deleting post:", error)
-                alert("Failed to delete post. Please try again.")
+                showNotification("Failed to delete post. Please try again.", 'error')
             }
         }
     }
