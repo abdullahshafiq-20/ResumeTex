@@ -6,8 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import { User, UserPreferences, Email, UserResume } from "../../models/userSchema.js";
 import { setupOAuthWithRefreshToken } from "../../utils/oauthUtils.js";
 import { generateEmailTemplate } from "../../utils/emailGenerator.js";
-import { emitEmailCreated, emitEmailSent, emitStatsDashboard } from "../../config/socketConfig.js";
-import { triggerDashboardUpdate } from "../../utils/dashboardUpdater.js";
+import { emitEmailCreated, emitEmailSent, emitStatsDashboard, emitToUser } from "../../config/socketConfig.js";
+import { triggerStatsUpdate } from "../../utils/trigger.js";
 dotenv.config();
 
 const PROMPT = `
@@ -215,9 +215,8 @@ export const sendEmail = async (req, res) => {
 
     // Emit socket events
     emitEmailSent(userId, emailRecord);
-    
+    triggerStatsUpdate(userId);
     // Trigger dashboard update
-    await triggerDashboardUpdate(userId);
 
     return res.status(200).json({ 
       success: true, 
@@ -472,12 +471,27 @@ export const createEmail = async (req, res) => {
     )
     console.log("saveEmail", saveEmail)
 
-    // Emit socket event
-    emitEmailCreated(userId, saveEmail);
+    console.log("=== EMITTING EMAIL CREATED EVENT ===");
+    console.log("userId:", userId);
+    console.log("saveEmail:", saveEmail);
     
-    // Trigger dashboard update
-    await triggerDashboardUpdate(userId);
+    // Emit socket event with proper data structure
+    emitEmailCreated(userId, {
+      type: 'email_created',
+      data: saveEmail,
+      postId: postId // Include postId for easier frontend handling
+    });
+    
+    // Also emit a more specific event for real-time updates
+    emitToUser(userId, 'post_email_status_updated', {
+      postId: postId,
+      isEmailGenerated: true,
+      isEmailSent: false,
+      emailData: saveEmail
+    });
 
+    triggerStatsUpdate(userId);
+    
     res.status(201).json({
       success: true,
       message: "Email created and saved successfully",
@@ -509,6 +523,8 @@ export const saveEmail = async (req, res) => {
     if (!saveEmail) {
       return res.status(404).json({ error: 'Email not found' });
     }
+
+    triggerStatsUpdate(userId);
     res.status(200).json({ message: 'Email saved successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save email', details: error.message });

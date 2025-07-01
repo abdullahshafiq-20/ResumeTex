@@ -16,8 +16,8 @@ export const DashbaordProvider = ({ children }) => {
     const [lastUpdated, setLastUpdated] = useState(null);
     const { socket, isConnected } = useSocket();
 
-    // Single comprehensive fetch function
-    const fetchDashboardData = useCallback(async () => {
+    // Single comprehensive fetch function using the unified endpoint
+    const fetchDashboardData = useCallback(async (limit = 10) => {
         // Don't fetch if auth is still loading or user is not authenticated
         if (authLoading || !isAuthenticated || !user) {
             console.log('Skipping fetch - auth loading:', authLoading, 'authenticated:', isAuthenticated, 'user:', !!user);
@@ -29,55 +29,34 @@ export const DashbaordProvider = ({ children }) => {
         setError(null);
         
         try {
-            // Make all API calls in parallel
-            const [statsRes, activityRes, comparisonRes, preferencesRes] = await Promise.all([
-                api.get('/user/stats').catch(err => {
-                    console.error('Stats API error:', err);
-                    return { data: { success: false, error: err.message } };
-                }),
-                api.get('/user/activity').catch(err => {
-                    console.error('Activity API error:', err);
-                    return { data: { success: false, error: err.message } };
-                }),
-                api.get('/user/comparison').catch(err => {
-                    console.error('Comparison API error:', err);
-                    return { data: { success: false, error: err.message } };
-                }),
-                api.get('/user/preferences').catch(err => {
-                    console.error('Preferences API error:', err);
-                    return { data: { success: false, error: err.message } };
-                })
-            ]);
+            // Single API call to get all dashboard data
+            const response = await api.get(`/user/all-stats?limit=${limit}`);
 
-            console.log('API Responses:', {
-                stats: statsRes.data,
-                activity: activityRes.data,
-                comparison: comparisonRes.data,
-                preferences: preferencesRes.data
-            });
+            console.log('API Response:', response.data);
 
-            // Process responses
-            if (statsRes.data.success) {
-                console.log('Setting stats data:', statsRes.data.data);
-                setStats(statsRes.data.data);
+            if (response.data.success) {
+                const data = response.data.data;
+                
+                // Extract different sections from the unified response
+                setStats({
+                    user: data.user,
+                    resumes: data.resumes,
+                    emails: data.emails,
+                    linkedIn: data.linkedIn,
+                    global: data.global
+                });
+                
+                setActivity(data.activityTimeline || []);
+                setComparison(data.comparison || null);
+                setPreferences(data.preferences || null);
                 setLastUpdated(new Date().toISOString());
+                
+                console.log('Dashboard data fetch completed successfully');
             } else {
-                console.warn('Stats fetch failed:', statsRes.data.message || statsRes.data.error);
+                console.warn('Stats fetch failed:', response.data.message || response.data.error);
+                setError(response.data.message || 'Failed to fetch dashboard data');
             }
 
-            if (activityRes.data.success) {
-                setActivity(activityRes.data.data);
-            }
-
-            if (comparisonRes.data.success) {
-                setComparison(comparisonRes.data.data);
-            }
-
-            if (preferencesRes.data.success) {
-                setPreferences(preferencesRes.data.data);
-            }
-
-            console.log('Dashboard data fetch completed successfully');
         } catch (err) {
             console.error('Dashboard fetch error:', err);
             setError(err.response?.data?.message || err.message || 'Failed to fetch dashboard data');
@@ -95,11 +74,36 @@ export const DashbaordProvider = ({ children }) => {
         const handleStatsUpdate = (data) => {
             console.log('Received live stats update:', data);
             if (data.type === 'stats_dashboard' && data.data) {
-                setStats(data.data);
-                setLastUpdated(data.timestamp);
+                const statsData = data.data;
+                
+                // Update all sections from the unified stats data
+                if (statsData.user || statsData.resumes || statsData.emails || statsData.linkedIn || statsData.global) {
+                    setStats({
+                        user: statsData.user,
+                        resumes: statsData.resumes,
+                        emails: statsData.emails,
+                        linkedIn: statsData.linkedIn,
+                        global: statsData.global
+                    });
+                }
+                
+                if (statsData.activityTimeline) {
+                    setActivity(statsData.activityTimeline);
+                }
+                
+                if (statsData.comparison) {
+                    setComparison(statsData.comparison);
+                }
+                
+                if (statsData.preferences) {
+                    setPreferences(statsData.preferences);
+                }
+                
+                setLastUpdated(data.timestamp || new Date().toISOString());
             }
         };
 
+        // Keep individual listeners for compatibility with existing socket events
         const handleActivityUpdate = (data) => {
             console.log('Received live activity update:', data);
             if (data.type === 'activity_dashboard' && data.data) {
@@ -172,55 +176,27 @@ export const DashbaordProvider = ({ children }) => {
         }
     }, [authLoading, isAuthenticated, user, fetchDashboardData]);
 
-    // Individual refresh functions for manual refresh
+    // Individual refresh functions now all use the unified endpoint
     const refreshStats = useCallback(async () => {
-        if (!isAuthenticated || !user) return;
-        try {
-            const response = await api.get('/user/stats');
-            if (response.data.success) {
-                setStats(response.data.data);
-                setLastUpdated(new Date().toISOString());
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to refresh stats');
-        }
-    }, [isAuthenticated, user]);
+        await fetchDashboardData();
+    }, [fetchDashboardData]);
 
     const refreshActivity = useCallback(async () => {
-        if (!isAuthenticated || !user) return;
-        try {
-            const response = await api.get('/user/activity');
-            if (response.data.success) {
-                setActivity(response.data.data);
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to refresh activity');
-        }
-    }, [isAuthenticated, user]);
+        await fetchDashboardData();
+    }, [fetchDashboardData]);
 
     const refreshComparison = useCallback(async () => {
-        if (!isAuthenticated || !user) return;
-        try {
-            const response = await api.get('/user/comparison');
-            if (response.data.success) {
-                setComparison(response.data.data);
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to refresh comparison');
-        }
-    }, [isAuthenticated, user]);
+        await fetchDashboardData();
+    }, [fetchDashboardData]);
 
     const refreshPreferences = useCallback(async () => {
-        if (!isAuthenticated || !user) return;
-        try {
-            const response = await api.get('/user/preferences');
-            if (response.data.success) {
-                setPreferences(response.data.data);
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to refresh preferences');
-        }
-    }, [isAuthenticated, user]);
+        await fetchDashboardData();
+    }, [fetchDashboardData]);
+
+    // New function to refresh with custom limit
+    const refreshDashboardData = useCallback(async (limit = 10) => {
+        await fetchDashboardData(limit);
+    }, [fetchDashboardData]);
 
     const value = {
         // Data
@@ -237,12 +213,13 @@ export const DashbaordProvider = ({ children }) => {
         // Socket status
         isLive: isConnected,
         
-        // Actions
+        // Actions - all now use the unified endpoint
         fetchDashboardData,
         refreshStats,
         refreshActivity,
         refreshComparison,
         refreshPreferences,
+        refreshDashboardData, // New function with custom limit
         
         // Clear error
         clearError: () => setError(null)

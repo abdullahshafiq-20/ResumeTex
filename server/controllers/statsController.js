@@ -4,69 +4,176 @@ import { Count } from '../models/countSchema.js';
 import mongoose from 'mongoose';
 import { emitStatsDashboard } from '../config/socketConfig.js';
 /**
- * Get comprehensive user statistics for dashboard
+ * Helper function to fetch user preferences data
  */
+const fetchUserPreferences = async (userId) => {
+    const userPreferences = await UserPreferences.find({ userId }).sort({ createdAt: -1 });
 
-export const getUserPreferences = async (req, res) => {
-    try {
-        const userId = req.user.id; // Assuming user ID comes from auth middleware
-
-        // Find all user preferences for this user
-        const userPreferences = await UserPreferences.find({ userId }).sort({ createdAt: -1 });
-
-        if (!userPreferences || userPreferences.length === 0) {
-            return res.status(200).json({
-                success: false,
-                message: 'User preferences not found',
-                data: []
-            });
-        }
-
-        // Format the response for multiple records
-        const preferencesData = userPreferences.map(pref => ({
-            _id: pref._id,
-            userId: pref.userId,
-            preferences: pref.preferences || {},
-            summary: pref.summary || '',
-            skills: pref.skills || [],
-            projects: pref.projects || [],
-            createdAt: pref.createdAt,
-            updatedAt: pref.updatedAt
-        }));
-
-        // Also provide aggregated data for convenience
-        const aggregatedData = {
-            totalRecords: preferencesData.length,
-            allSkills: [...new Set(preferencesData.flatMap(p => p.skills))], // Unique skills across all records
-            allProjects: preferencesData.flatMap(p => p.projects), // All projects
-            latestSummary: preferencesData[0]?.summary || '', // Most recent summary
-            latestPreferences: preferencesData[0]?.preferences || {}, // Most recent preferences
-            lastUpdated: preferencesData[0]?.updatedAt || null
-        };
-
-        emitStatsDashboard(userId, aggregatedData);
-
-        res.status(200).json({
-            success: true,
-            message: 'User preferences retrieved successfully',
-            data: {
-                records: preferencesData,
-                aggregated: aggregatedData
+    if (!userPreferences || userPreferences.length === 0) {
+        return {
+            records: [],
+            aggregated: {
+                totalRecords: 0,
+                allSkills: [],
+                allProjects: [],
+                latestSummary: '',
+                latestPreferences: {},
+                lastUpdated: null
             }
-        });
-
-    } catch (error) {
-        console.error('Error fetching user preferences:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to retrieve user preferences',
-            error: error.message
-        });
+        };
     }
+
+    const preferencesData = userPreferences.map(pref => ({
+        _id: pref._id,
+        userId: pref.userId,
+        preferences: pref.preferences || {},
+        summary: pref.summary || '',
+        skills: pref.skills || [],
+        projects: pref.projects || [],
+        createdAt: pref.createdAt,
+        updatedAt: pref.updatedAt
+    }));
+
+    const aggregatedData = {
+        totalRecords: preferencesData.length,
+        allSkills: [...new Set(preferencesData.flatMap(p => p.skills))],
+        allProjects: preferencesData.flatMap(p => p.projects),
+        latestSummary: preferencesData[0]?.summary || '',
+        latestPreferences: preferencesData[0]?.preferences || {},
+        lastUpdated: preferencesData[0]?.updatedAt || null
+    };
+
+    return {
+        records: preferencesData,
+        aggregated: aggregatedData
+    };
 };
-export const getUserStats = async (req, res) => {
+
+/**
+ * Helper function to fetch user activity timeline
+ */
+const fetchUserActivityTimeline = async (userId, limit = 10) => {
+    const [recentResumes, recentEmails, recentPosts] = await Promise.all([
+        UserResume.find({ userId })
+            .select('resume_title createdAt file_type')
+            .sort({ createdAt: -1 })
+            .limit(limit),
+        
+        Email.find({ userId })
+            .select('subject createdAt isEmailSent to')
+            .sort({ createdAt: -1 })
+            .limit(limit),
+        
+        extensionSchema.find({ userId: userId.toString() })
+            .select('jobTitle timestamp content')
+            .sort({ timestamp: -1 })
+            .limit(limit)
+    ]);
+
+    const activities = [
+        ...recentResumes.map(resume => ({
+            type: 'resume',
+            title: `Created resume: ${resume.resume_title}`,
+            date: resume.createdAt,
+            metadata: { fileType: resume.file_type }
+        })),
+        ...recentEmails.map(email => ({
+            type: 'email',
+            title: `${email.isEmailSent ? 'Sent' : 'Generated'} email: ${email.subject}`,
+            date: email.createdAt,
+            metadata: { recipient: email.to, sent: email.isEmailSent }
+        })),
+        ...recentPosts.map(post => ({
+            type: 'linkedin',
+            title: `Extracted LinkedIn post: ${post.jobTitle || 'Job posting'}`,
+            date: post.timestamp,
+            metadata: { preview: post.content?.substring(0, 100) + '...' }
+        }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit);
+
+    return activities;
+};
+
+/**
+ * Helper function to fetch comparison stats
+ */
+const fetchComparisonStats = async (userId) => {
+    const [userResumeCount, userEmailCount, userPostCount] = await Promise.all([
+        UserResume.countDocuments({ userId }),
+        Email.countDocuments({ userId }),
+        extensionSchema.countDocuments({ userId: userId.toString() })
+    ]);
+
+    const [avgResumes, avgEmails, avgPosts] = await Promise.all([
+        UserResume.aggregate([
+            { $group: { _id: '$userId', count: { $sum: 1 } } },
+            { $group: { _id: null, average: { $avg: '$count' } } }
+        ]),
+        Email.aggregate([
+            { $group: { _id: '$userId', count: { $sum: 1 } } },
+            { $group: { _id: null, average: { $avg: '$count' } } }
+        ]),
+        extensionSchema.aggregate([
+            { $group: { _id: '$userId', count: { $sum: 1 } } },
+            { $group: { _id: null, average: { $avg: '$count' } } }
+        ])
+    ]);
+
+    return {
+        resumes: {
+            user: userResumeCount,
+            average: Math.round(avgResumes[0]?.average || 0),
+            percentile: calculatePercentile(userResumeCount, avgResumes[0]?.average || 0)
+        },
+        emails: {
+            user: userEmailCount,
+            average: Math.round(avgEmails[0]?.average || 0),
+            percentile: calculatePercentile(userEmailCount, avgEmails[0]?.average || 0)
+        },
+        posts: {
+            user: userPostCount,
+            average: Math.round(avgPosts[0]?.average || 0),
+            percentile: calculatePercentile(userPostCount, avgPosts[0]?.average || 0)
+        }
+    };
+};
+
+/**
+ * Helper function to calculate user activity score
+ */
+const calculateActivityScore = ({ resumes, emails, posts, onboarded, extensionConnected }) => {
+    let score = 0;
+    
+    score += Math.min(resumes * 10, 50); // Max 50 points for resumes
+    score += Math.min(emails * 5, 30); // Max 30 points for emails
+    score += Math.min(posts * 2, 20); // Max 20 points for LinkedIn posts
+    
+    if (onboarded) score += 10;
+    if (extensionConnected) score += 10;
+    
+    return Math.min(score, 100); // Cap at 100
+};
+
+/**
+ * Helper function to calculate percentile
+ */
+const calculatePercentile = (userValue, average) => {
+    if (average === 0) return userValue > 0 ? 100 : 50;
+    const ratio = userValue / average;
+    if (ratio >= 2) return 90;
+    if (ratio >= 1.5) return 75;
+    if (ratio >= 1) return 60;
+    if (ratio >= 0.5) return 40;
+    return 25;
+};
+
+/**
+ * MAIN API CONTROLLER - Get all user statistics in one call
+ */
+export const getAllUserStats = async (req, res) => {
     try {
-        const userId = req.user.id; // Assuming user ID comes from auth middleware
+        const userId = req.user.id;
+        const limit = parseInt(req.query.limit) || 10;
 
         // Parallel queries for better performance
         const [
@@ -77,13 +184,8 @@ export const getUserStats = async (req, res) => {
             linkedInStats,
             globalCount
         ] = await Promise.all([
-            // Basic user info
             User.findById(userId).select('name email subscribed isExtensionConnected onboarded createdAt'),
-            
-            // User preferences
             UserPreferences.findOne({ userId }),
-            
-            // Resume statistics
             UserResume.aggregate([
                 { $match: { userId: new mongoose.Types.ObjectId(userId) } },
                 {
@@ -95,8 +197,6 @@ export const getUserStats = async (req, res) => {
                     }
                 }
             ]),
-            
-            // Email statistics
             Email.aggregate([
                 { $match: { userId: new mongoose.Types.ObjectId(userId) } },
                 {
@@ -113,8 +213,6 @@ export const getUserStats = async (req, res) => {
                     }
                 }
             ]),
-            
-            // LinkedIn posts statistics
             extensionSchema.aggregate([
                 { $match: { userId: userId.toString() } },
                 {
@@ -129,9 +227,14 @@ export const getUserStats = async (req, res) => {
                     }
                 }
             ]),
-            
-            // Global count
             Count.findOne()
+        ]);
+
+        // Get additional data using helper functions
+        const [preferencesData, activityTimeline, comparisonStats] = await Promise.all([
+            fetchUserPreferences(userId),
+            fetchUserActivityTimeline(userId, limit),
+            fetchComparisonStats(userId)
         ]);
 
         // Process file types distribution
@@ -142,14 +245,14 @@ export const getUserStats = async (req, res) => {
             });
         }
 
-        // Process job titles (remove duplicates and default values)
+        // Process job titles
         const uniqueJobTitles = linkedInStats[0]?.jobTitles 
             ? [...new Set(linkedInStats[0].jobTitles.filter(title => 
                 title && title !== "ex: Software Engineer"
               ))]
             : [];
 
-        // Calculate user activity score
+        // Calculate activity score
         const activityScore = calculateActivityScore({
             resumes: resumeStats[0]?.totalResumes || 0,
             emails: emailStats[0]?.totalEmails || 0,
@@ -158,8 +261,8 @@ export const getUserStats = async (req, res) => {
             extensionConnected: userInfo?.isExtensionConnected || false
         });
 
-        // Prepare response
-        const stats = {
+        // Comprehensive stats response
+        const allStats = {
             user: {
                 name: userInfo?.name || '',
                 email: userInfo?.email || '',
@@ -173,7 +276,8 @@ export const getUserStats = async (req, res) => {
                 hasPreferences: !!userPreferences,
                 skillsCount: userPreferences?.skills?.length || 0,
                 projectsCount: userPreferences?.projects?.length || 0,
-                hasSummary: !!(userPreferences?.summary?.trim())
+                hasSummary: !!(userPreferences?.summary?.trim()),
+                ...preferencesData
             },
             resumes: {
                 total: resumeStats[0]?.totalResumes || 0,
@@ -195,22 +299,27 @@ export const getUserStats = async (req, res) => {
                 totalUrls: linkedInStats[0]?.totalUrls || 0,
                 extractedEmails: linkedInStats[0]?.totalEmails || 0,
                 uniqueJobTitles: uniqueJobTitles.length,
-                jobTitles: uniqueJobTitles.slice(0, 5), // Show only top 5
+                jobTitles: uniqueJobTitles.slice(0, 5),
                 latestPost: linkedInStats[0]?.latestPost || null
             },
             global: {
                 totalUsers: globalCount?.count || 0
-            }
+            },
+            activityTimeline,
+            comparison: comparisonStats
         };
+
+        // Emit stats via socket
+        emitStatsDashboard(userId, allStats);
 
         res.status(200).json({
             success: true,
-            message: 'User statistics retrieved successfully',
-            data: stats
+            message: 'All user statistics retrieved successfully',
+            data: allStats
         });
 
     } catch (error) {
-        console.error('Error fetching user stats:', error);
+        console.error('Error fetching all user stats:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to retrieve user statistics',
@@ -218,173 +327,23 @@ export const getUserStats = async (req, res) => {
         });
     }
 };
-/**
- * Get user activity timeline (recent activities)
- */
-export const getUserActivityTimeline = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const limit = parseInt(req.query.limit) || 10;
-
-        // Get recent activities from different collections
-        const [recentResumes, recentEmails, recentPosts] = await Promise.all([
-            UserResume.find({ userId })
-                .select('resume_title createdAt file_type')
-                .sort({ createdAt: -1 })
-                .limit(limit),
-            
-            Email.find({ userId })
-                .select('subject createdAt isEmailSent to')
-                .sort({ createdAt: -1 })
-                .limit(limit),
-            
-            extensionSchema.find({ userId: userId.toString() })
-                .select('jobTitle timestamp content')
-                .sort({ timestamp: -1 })
-                .limit(limit)
-        ]);
-
-        // Combine and sort all activities
-        const activities = [
-            ...recentResumes.map(resume => ({
-                type: 'resume',
-                title: `Created resume: ${resume.resume_title}`,
-                date: resume.createdAt,
-                metadata: { fileType: resume.file_type }
-            })),
-            ...recentEmails.map(email => ({
-                type: 'email',
-                title: `${email.isEmailSent ? 'Sent' : 'Generated'} email: ${email.subject}`,
-                date: email.createdAt,
-                metadata: { recipient: email.to, sent: email.isEmailSent }
-            })),
-            ...recentPosts.map(post => ({
-                type: 'linkedin',
-                title: `Extracted LinkedIn post: ${post.jobTitle || 'Job posting'}`,
-                date: post.timestamp,
-                metadata: { preview: post.content?.substring(0, 100) + '...' }
-            }))
-        ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit);
-
-        emitStatsDashboard(userId, activities);
-
-        res.status(200).json({
-            success: true,
-            message: 'Activity timeline retrieved successfully',
-            data: activities
-        });
-
-    } catch (error) {
-        console.error('Error fetching activity timeline:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to retrieve activity timeline',
-            error: error.message
-        });
-    }
-};
 
 /**
- * Calculate user activity score based on various factors
+ * Update stats dashboard via socket (keep for real-time updates)
  */
-const calculateActivityScore = ({ resumes, emails, posts, onboarded, extensionConnected }) => {
-    let score = 0;
-    
-    // Base points for different activities
-    score += Math.min(resumes * 10, 50); // Max 50 points for resumes
-    score += Math.min(emails * 5, 30); // Max 30 points for emails
-    score += Math.min(posts * 2, 20); // Max 20 points for LinkedIn posts
-    
-    // Bonus points for setup completion
-    if (onboarded) score += 10;
-    if (extensionConnected) score += 10;
-    
-    return Math.min(score, 100); // Cap at 100
-};
 
-/**
- * Get comparison stats (user vs average)
- */
-export const getComparisonStats = async (req, res) => {
-    try {
-        const userId = req.user.id;
 
-        // Get user's stats
-        const [userResumeCount, userEmailCount, userPostCount] = await Promise.all([
-            UserResume.countDocuments({ userId }),
-            Email.countDocuments({ userId }),
-            extensionSchema.countDocuments({ userId: userId.toString() })
-        ]);
 
-        // Get platform averages
-        const [avgResumes, avgEmails, avgPosts] = await Promise.all([
-            UserResume.aggregate([
-                { $group: { _id: '$userId', count: { $sum: 1 } } },
-                { $group: { _id: null, average: { $avg: '$count' } } }
-            ]),
-            Email.aggregate([
-                { $group: { _id: '$userId', count: { $sum: 1 } } },
-                { $group: { _id: null, average: { $avg: '$count' } } }
-            ]),
-            extensionSchema.aggregate([
-                { $group: { _id: '$userId', count: { $sum: 1 } } },
-                { $group: { _id: null, average: { $avg: '$count' } } }
-            ])
-        ]);
-
-        const comparison = {
-            resumes: {
-                user: userResumeCount,
-                average: Math.round(avgResumes[0]?.average || 0),
-                percentile: calculatePercentile(userResumeCount, avgResumes[0]?.average || 0)
-            },
-            emails: {
-                user: userEmailCount,
-                average: Math.round(avgEmails[0]?.average || 0),
-                percentile: calculatePercentile(userEmailCount, avgEmails[0]?.average || 0)
-            },
-            posts: {
-                user: userPostCount,
-                average: Math.round(avgPosts[0]?.average || 0),
-                percentile: calculatePercentile(userPostCount, avgPosts[0]?.average || 0)
-            }
-        };
-        emitStatsDashboard(userId, comparison);
-
-        res.status(200).json({
-            success: true,
-            message: 'Comparison statistics retrieved successfully',
-            data: comparison
-        });
-
-    } catch (error) {
-        console.error('Error fetching comparison stats:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to retrieve comparison statistics',
-            error: error.message
-        });
-    }
-};
-
-/**
- * Calculate rough percentile based on user value vs average
- */
-const calculatePercentile = (userValue, average) => {
-    if (average === 0) return userValue > 0 ? 100 : 50;
-    const ratio = userValue / average;
-    if (ratio >= 2) return 90;
-    if (ratio >= 1.5) return 75;
-    if (ratio >= 1) return 60;
-    if (ratio >= 0.5) return 40;
-    return 25;
-};
-
-export const updateStatsDashboard = async ( req, res) => {
+export const updateStatsDashboard = async (req, res) => {
     try {
         const userId = req.user.id;
         const stats = req.body;
         emitStatsDashboard(userId, stats);
+        
+        res.status(200).json({
+            success: true,
+            message: 'Stats dashboard updated successfully'
+        });
     } catch (error) {
         console.error('Error updating stats dashboard:', error);
         res.status(500).json({
@@ -393,4 +352,4 @@ export const updateStatsDashboard = async ( req, res) => {
             error: error.message
         });
     }
-}
+};

@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 import { PDFDocument } from 'pdf-lib';
 import { cloudinaryConfig, cloudinaryUploader } from "../../utils/cloudinary.js";
 import { emitResumeCreated, emitStatsDashboard, emitPreferencesDashboard } from "../../config/socketConfig.js";
-import { triggerDashboardUpdate } from "../../utils/dashboardUpdater.js";
+import { triggerStatsUpdate } from "../../utils/trigger.js";
 
 
 export const onboardResume = async (req, res) => {
@@ -71,6 +71,7 @@ export const onboardResume = async (req, res) => {
                     updatedAt: Date.now()
                 },
             );
+            emitPreferencesDashboard(user._id, userPreferences);
 
             console.log(`Saved user preferences for ${email}:`, {
                 summary: summary ? summary.substring(0, 50) + "..." : "None provided",
@@ -110,9 +111,9 @@ export const onboardResume = async (req, res) => {
         console.log("userResume", userResume)
 
         emitResumeCreated(user._id, userResume);
+        triggerStatsUpdate(user._id);
         
         // Emit dashboard updates after resume creation
-        await triggerDashboardUpdate(user._id);
         
         res.write(`event: complete\n`);
         res.write(`data: ${JSON.stringify({ pdfUrl: pdf.pdfUrl, updateOnborad, userResume })}\n\n`);
@@ -169,9 +170,8 @@ export const addResume = async (req, res) => {
             updatedAt: new Date(),
             createdAt: new Date()
         });
-
-        // Emit dashboard updates after resume creation
-        await triggerDashboardUpdate(userId);
+        triggerStatsUpdate(userId);
+        emitResumeCreated(userId, userResume);
 
         res.status(200).json(userResume);
     } catch (error) {

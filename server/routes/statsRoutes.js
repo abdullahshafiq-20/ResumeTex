@@ -1,12 +1,13 @@
 import express from 'express';
-import { getUserStats, getUserActivityTimeline, getComparisonStats, getUserPreferences } from '../controllers/statsController.js';
+import { getAllUserStats, updateStatsDashboard } from '../controllers/statsController.js';
 import { verifyToken } from '../middleware/auth.js';
 
 const statsRouter = express.Router();
 
-statsRouter.get('/user/stats', verifyToken, getUserStats);
-statsRouter.get('/user/activity', verifyToken, getUserActivityTimeline);
-statsRouter.get('/user/comparison', verifyToken, getComparisonStats);
-statsRouter.get('/user/preferences', verifyToken, getUserPreferences);
+// Main unified endpoint for all user statistics
+statsRouter.get('/user/all-stats', verifyToken, getAllUserStats);
+
+// Socket update endpoint
+statsRouter.post('/user/update-stats', verifyToken, updateStatsDashboard);
 
 export default statsRouter;

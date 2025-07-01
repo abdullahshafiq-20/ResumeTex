@@ -168,6 +168,15 @@ const emitEmailSent = (userId, emailData) => {
   });
 };
 
+const emitPostDeleted = (userId, postId) => {
+  emitToUser(userId, 'post_deleted', {
+    type: 'post_deleted',
+    data: { postId },
+    timestamp: new Date().toISOString()
+  });
+};
+
+
 export {
   initSocket,
   getIO,
@@ -182,5 +191,6 @@ export {
   emitPreferencesDashboard,
   emitPostCreated,
   emitEmailCreated,
-  emitEmailSent
+  emitEmailSent,
+  emitPostDeleted 
 };

@@ -133,22 +133,29 @@ useEffect(() => {
         postId: post._id,
       };
 
-      console.log("Email data:", emailData);    
-
       const response = await api.post(`${apiUrl}/create-email`, emailData);
-      setGeneratedEmail({
-        ...response.data,
+      
+      // Format the email data properly
+      const newEmail = {
         to: post.extractedEmails[0],
-        resumeId: selectedResumeId
-      });
+        subject: response.data.subject || response.data.data?.subject,
+        body: response.data.body || response.data.data?.body,
+        resumeId: selectedResumeId,
+        attachment: response.data.attachment || response.data.data?.attachment
+      };
       
-      setEmailDetails(null); // Clear existing email details when regenerating
-      setEmailSent(false); // Reset email sent flag when regenerating
-      
-      // Refresh posts to update UI with newly generated email
+      // Only update the states after we have the new email and ensure it has content
+      if (newEmail.subject && newEmail.body) {
+        setGeneratedEmail(newEmail);
+        setEmailDetails(null);
+        setEmailSent(false);
+      } else {
+        throw new Error("Generated email is missing required fields");
+      }
+
       await refreshPosts();
     } catch (err) {
-      console.error("Error generating email:", err);
+      console.error("Email generation error:", err);
       setError("Failed to generate email. Please try again.");
     } finally {
       setIsLoading(false);
@@ -242,14 +249,14 @@ useEffect(() => {
   // Render a post card
   const renderPostCard = (post, status = null) => (
     <div 
-      key={post._id} 
+      key={post?._id || Math.random()} 
       className={`bg-white rounded-lg border overflow-hidden flex flex-col cursor-pointer transition-all duration-200 ${
         selectedPost && selectedPost._id === post._id ? 'ring-2 ring-blue-500 border-blue-300' : 
         status === 'generated' ? 'border-purple-300 hover:border-purple-400' : 
         status === 'sent' ? 'border-green-300 hover:border-green-400' : 
         'border-gray-200 hover:border-gray-300'
       }`}
-      onClick={() => selectPost(post)}
+      onClick={() => post && selectPost(post)}
     >
       {status && (
         <div className={`py-1 px-3 text-xs font-medium text-white ${
@@ -261,7 +268,7 @@ useEffect(() => {
       
       <div className="p-4 border-b border-gray-100">
         <h3 className="font-medium text-gray-800 line-clamp-1">
-          {post.jobTitle || "Untitled Position"}
+          {post?.jobTitle || "Untitled Position"}
         </h3>
       </div>
       
@@ -269,13 +276,17 @@ useEffect(() => {
         <div className="flex items-start mb-3">
           <Mail className="h-4 w-4 text-purple-500 mt-1 mr-2 flex-shrink-0" />
           <div className="flex flex-col space-y-1">
-            {post.extractedEmails && post.extractedEmails.map((email, index) => (
-              <span key={index} className="text-sm text-purple-600">{email}</span>
-            ))}
+            {Array.isArray(post?.extractedEmails) && post.extractedEmails.length > 0 ? (
+              post.extractedEmails.map((email, index) => (
+                <span key={index} className="text-sm text-purple-600">{email}</span>
+              ))
+            ) : (
+              <span className="text-sm text-gray-400">No email found</span>
+            )}
           </div>
         </div>
         
-        <p className="text-sm text-gray-600 line-clamp-3 mb-4">{post.content}</p>
+        <p className="text-sm text-gray-600 line-clamp-3 mb-4">{post?.content || "No description available."}</p>
       </div>
     </div>
   );
@@ -356,7 +367,7 @@ useEffect(() => {
         </div>
 
         {/* Loading state */}
-        {isLoading && (
+        {(isLoading || regenerating) && (
           <div className="flex flex-col items-center justify-center p-12">
             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="text-gray-600">

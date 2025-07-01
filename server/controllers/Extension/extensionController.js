@@ -1,9 +1,9 @@
 import { User, UserPreferences } from "../../models/userSchema.js";
 import { extensionSchema } from "../../models/extensionSchema.js";
-import { emitPostCreated, emitStatsDashboard } from "../../config/socketConfig.js";
+import { emitPostCreated, emitPostDeleted } from "../../config/socketConfig.js";
+import { triggerStatsUpdate } from "../../utils/trigger.js";
 import bcrypt from "bcrypt";
 import axios from "axios";
-import { triggerDashboardUpdate } from "../../utils/dashboardUpdater.js";
 
 
 function extractContentInfo(content) {
@@ -110,9 +110,7 @@ export const savePost = async (req, res) => {
         }
 
         emitPostCreated(userid, data);
-        
-        // Emit dashboard update after post creation
-        await triggerDashboardUpdate(userid);
+        triggerStatsUpdate(userid);
 
         // Return success response
         return res.status(201).json({
@@ -209,6 +207,8 @@ export const deletePost = async (req, res) => {
         if (!deletedPost) {
             return res.status(404).json({ message: "Post not found" });
         }
+        emitPostDeleted(deletedPost.userId, deletedPost._id);
+        triggerStatsUpdate(deletedPost.userId);
         return res.status(200).json({
             success: true,
             message: "Post deleted successfully",
