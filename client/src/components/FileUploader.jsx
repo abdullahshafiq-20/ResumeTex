@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import { Upload, FileText, Sparkles, Zap, Stars, Brain, Settings, Cpu, Target, Wand2, Bot } from "lucide-react";
 
 export default function FileUploader({
   onFileUpload,
@@ -19,17 +20,31 @@ export default function FileUploader({
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState("");
   const [processingMessage, setProcessingMessage] = useState("");
-  const navigate = useNavigate();
   const [selectedModel, setSelectedModel] = useState("Gemini 1.5 Flash");
   const [selectedApi, setSelectedApi] = useState("api_1");
-  const [showModelInfo, setShowModelInfo] = useState(false);
-  const [showApiInfo, setShowApiInfo] = useState(false);
   const [pId, setpId] = useState(null);
-  const [isModelBeta, setIsModelBeta] = useState(false);
-  // Remove isTailoredResume state
-  const [resumeTitle, setResumeTitle] = useState(""); // New state for resume title
-  // Remove jobDescription state
+  const [resumeTitle, setResumeTitle] = useState("");
   const { getUserId, isAuthenticated } = useAuth();
+
+  const modelOptions = [
+    { value: "Gemini 1.5 Flash", label: "Gemini 1.5 Flash", type: "Fast" },
+    { value: "Gemini 1.5 Pro", label: "Gemini 1.5 Pro", type: "Balanced" },
+    { value: "GPT-4", label: "GPT-4", type: "Premium" },
+    { value: "Claude 3", label: "Claude 3", type: "Advanced" },
+  ];
+
+  const apiOptions = [
+    { value: "api_1", label: "API Endpoint 1", status: "Primary" },
+    { value: "api_2", label: "API Endpoint 2", status: "Secondary" },
+    { value: "api_3", label: "API Endpoint 3", status: "Backup" },
+  ];
+
+  // Auto-upload when file is selected
+  useEffect(() => {
+    if (selectedFile && !isUploaded && !isUploading) {
+      handleUploadFile();
+    }
+  }, [selectedFile]);
 
   const handleFileSelect = (event) => {
     if (disable) return;
@@ -39,6 +54,25 @@ export default function FileUploader({
       setUploadProgress(0);
       setIsUploading(false);
       setIsUploaded(false);
+      // Auto-generate title from filename
+      setResumeTitle(file.name.replace(/\.[^/.]+$/, ""));
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (disable) return;
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+      setSelectedFile(file);
+      setUploadProgress(0);
+      setIsUploading(false);
+      setIsUploaded(false);
+      setResumeTitle(file.name.replace(/\.[^/.]+$/, ""));
     }
   };
 
@@ -66,15 +100,13 @@ export default function FileUploader({
       setIsUploaded(true);
       if (onFileUpload) {
         onFileUpload(response.data);
-        console.log("Upload response:", response.data);
-        console.log("Setting pdfurl to:", response.data.data.url);
         setPdfurl(response.data.data.url);
         setpId(response.data.data.publicId);
       }
     } catch (error) {
       console.error("Upload failed:", error);
       setIsUploading(false);
-      alert("Upload failed. Please try again.");
+      toast.error("Upload failed. Please try again.");
     }
   };
 
@@ -84,80 +116,27 @@ export default function FileUploader({
     setUploadProgress(0);
     setIsUploading(false);
     setIsUploaded(false);
+    setResumeTitle("");
   };
-
-  const handleModelChange = (e) => {
-    if (disable) return;
-    const model = e.target.value;
-    setSelectedModel(model);
-    // Check if selected model is in beta
-    setIsModelBeta(model === "Qwen 32B");
-    toast.success(`Switched to ${model}`, {
-      position: "bottom-center",
-      duration: 2000,
-    });
-  };
-
-  const handleApiChange = (e) => {
-    if (disable) return;
-    setSelectedApi(e.target.value);
-    toast.success(`Switched to ${e.target.value}`, {
-      position: "bottom-center",
-      duration: 2000,
-    });
-  };
-
-  const handleResumeUpload = async () => {
-    try {
-      const pdfurl = "https://example.com/resume.pdf"; // Replace with the actual resume URL
-      const resumeTitle = "My Resume"; // Replace with the actual resume title
-      const userId = getUserId()
-      console.log("User ID:", userId);
-      const repsone = await api.post(`${apiUrl}/addresume`, {
-        userId: userId,
-        resume: pdfurl,
-        resume_title: resumeTitle,
-        file_type: "pdf",
-      });
-      if (repsone.status === 200) {
-        console.log("Resume uploaded successfully");
-      }
-      const data = repsone.data;
-      console.log("Resume data:", data);
-      
-    } catch (error) {
-      console.error("Error uploading resume:", error);
-      toast.error("Error uploading resume. Please try again.", {
-        position: "bottom-center",
-        duration: 3000,
-      });
-    }
-  }
 
   const handleProcess = async () => {
     setIsProcessing(true);
     try {
-      // Use the onboard-resume API directly with pdfUrl and title
       setProcessingStep("processing");
-      setProcessingMessage("Processing your resume...");
+      setProcessingMessage("AI is analyzing your resume...");
       
-      
-      // Since onboard-resume is an SSE endpoint, handle the response differently
       const source = new EventSource(`${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}`);
       
       source.addEventListener('Extracting data', (event) => {
-        const data = JSON.parse(event.data);
         setProcessingMessage("Extracting data from PDF...");
       });
       
       source.addEventListener(`Fetching data for : ${resumeTitle}`, (event) => {
-        const data = JSON.parse(event.data);
         setProcessingMessage("Converting to LaTeX format...");
       });
 
       source.addEventListener('Adding resume to user', (event) => {
-        const data = JSON.parse(event.data);
-        setProcessingMessage("Adding resume to user...");
+        setProcessingMessage("Adding resume to your collection...");
       });
       
       source.addEventListener('complete', (event) => {
@@ -167,7 +146,6 @@ export default function FileUploader({
         source.close();
         setIsProcessing(false);
         
-        // Call onFileUpload with the response data
         onFileUpload({
           stage: "process",
           data: {
@@ -177,410 +155,310 @@ export default function FileUploader({
           },
         });
       });
-
-
       
       source.addEventListener('error', (event) => {
-        const data = JSON.parse(event.data);
-        console.error("Error processing resume:", data.error);
-        toast.error(`Processing failed: ${data.error}`, {
-          position: "bottom-center",
-          duration: 3000,
-        });
+        try {
+          console.log("SSE Error Event:", event);
+          
+          if (event.data && event.data !== 'undefined') {
+            const errorData = JSON.parse(event.data);
+            console.error("Error processing resume:", errorData);
+            
+            if (errorData.errorCode === 'EMAIL_MISMATCH') {
+              toast.error(`${errorData.error}`, {
+                duration: 6000,
+                style: {
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#dc2626'
+                }
+              });
+            } else {
+              toast.error(`Processing failed: ${errorData.error}`);
+            }
+          } else {
+            console.error("SSE Error: No valid data received");
+            toast.error("Processing failed: Connection error");
+          }
+        } catch (parseError) {
+          console.error("Failed to parse error data:", parseError);
+          toast.error("Processing failed: Invalid response format");
+        }
+        
         source.close();
         setIsProcessing(false);
+        setProcessingStep("idle");
+        setProcessingMessage("");
       });
 
-
+      // source.onerror = (event) => {
+      //   console.error("SSE Connection Error:", event);
+      //   toast.error("Connection lost. Please try again.");
+      //   source.close();
+      //   setIsProcessing(false);
+      //   setProcessingStep("idle");
+      //   setProcessingMessage("");
+      // };
       
     } catch (error) {
       console.error("Processing failed:", error);
-      toast.error(`Processing failed: ${error.message}`, {
-        position: "bottom-center",
-        duration: 3000,
-      });
+      toast.error(`Processing failed: ${error.message || 'Unknown error'}`);
       setIsProcessing(false);
+      setProcessingStep("idle");
+      setProcessingMessage("");
     }
   };
 
   return (
-    <div
-      className={`w-full bg-white rounded-lg border ${
-        disable ? "opacity-50 pointer-events-none" : ""
-      }`}
-    >
-      {/* Header without Toggle */}
-      <div className="flex items-center p-3 sm:p-4 border-b">
-        <div>
-          <h2 className="text-lg sm:text-xl font-semibold">Upload Resume</h2>
-        </div>
-      </div>
+    <div className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 border border-gray-200 rounded-lg shadow-sm relative overflow-hidden">
+      {/* Beautiful floating blobs */}
+      <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-gradient-to-br from-blue-200/40 to-purple-200/30 blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-200/30 to-pink-200/20 blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-purple-200/20 to-blue-200/15 blur-xl"></div>
 
-      {/* Resume Title input field */}
-      <div className="p-3 sm:p-4 border-b space-y-3">
-        <div>
-          <label
-            htmlFor="resumeTitle"
-            className="block text-xs font-medium text-gray-700 mb-1"
-          >
-            Resume Title
-          </label>
-          <input
-            type="text"
-            id="resumeTitle"
-            value={resumeTitle}
-            onChange={(e) => setResumeTitle(e.target.value)}
-            className="w-full p-2 border rounded-md text-sm"
-            placeholder="e.g. Software Engineer Resume"
-          />
-        </div>
-      </div>
-
-      {/* Settings Panel - Always visible */}
-      <div className="p-3 sm:p-4 border-b space-y-3 sm:space-y-4">
-        {/* Model Selection */}
-        <div className="space-y-2">
+      <div className="relative z-10 p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+            <Upload className="h-5 w-5 mr-2 text-blue-600" />
+            Resume Upload & Processing
+          </h3>
           <div className="flex items-center space-x-2">
-            <label className="text-xs sm:text-sm font-medium text-gray-700">
-              Model Selection
-            </label>
-            <div className="relative">
-              <button
-                className="text-gray-400 hover:text-gray-600"
-                onMouseEnter={() => setShowModelInfo(true)}
-                onMouseLeave={() => setShowModelInfo(false)}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </button>
-              {showModelInfo && (
-                <div className="absolute z-10 w-64 p-2 bg-gray-800 text-white text-xs rounded shadow-lg -left-20 top-6">
-                  Select from listed Gemini models when models are overloaded or
-                  api is exhausted.
-                </div>
-              )}
-            </div>
-            {isModelBeta && (
-              <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded ">
-                EXPERIMENTAL
-              </span>
-            )}
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs text-gray-600 font-medium">Auto-upload</span>
           </div>
-          <select
-            value={selectedModel}
-            onChange={handleModelChange}
-            disabled={disable}
-            className={`w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white ${
-              disable ? "cursor-not-allowed" : ""
-            }`}
-          >
-            <option value="Qwen 32B">Qwen 32B (Reponse time : 1 MIN) </option>
-            <option value="Gemini 1.5 Flash">Gemini 2.0 Flash</option>
-          </select>
         </div>
 
-        {/* API Selection */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <label className="text-xs sm:text-sm font-medium text-gray-700">
-              API Provider
-            </label>
-            <div className="relative">
-              <button
-                className="text-gray-400 hover:text-gray-600"
-                onMouseEnter={() => setShowApiInfo(true)}
-                onMouseLeave={() => setShowApiInfo(false)}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </button>
-              {showApiInfo && (
-                <div className="absolute z-10 w-64 p-2 bg-gray-800 text-white text-xs rounded shadow-lg -left-20 top-6">
-                  Choose from five listed api when model is overloaded or api is
-                  exhausted.
+        {/* Main Upload Area */}
+        <div className="mb-6">
+          {!selectedFile ? (
+            <div
+              className="border-2 border-dashed border-blue-300/60 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/40 transition-all duration-300 cursor-pointer bg-white/60 backdrop-blur-sm"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <div className="relative">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
+                  <Upload className="h-8 w-8 text-blue-600" />
                 </div>
-              )}
-            </div>
-          </div>
-          <select
-            value={selectedApi}
-            onChange={handleApiChange}
-            disabled={disable}
-            className={`w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white ${
-              disable ? "cursor-not-allowed" : ""
-            }`}
-          >
-            <option value="api_1">API 1 (Default)</option>
-            <option value="api_2">API 2</option>
-            <option value="api_3">API 3</option>
-            <option value="api_4">API 4</option>
-            <option value="api_5">API 5</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-        {/* Upload Area */}
-        {!selectedFile && (
-          <div
-            className={`border-2 border-dashed border-blue-400 ${
-              template ? "border-gray-200" : "border-gray-200 opacity-50"
-            } rounded-lg p-2`}
-          >
-            <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 py-4">
-              <svg
-                className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p className="text-xs sm:text-sm text-gray-600 text-center">
-                Drag & drop your PDF file here or
-              </p>
+                <h4 className="text-sm font-medium text-gray-800 mb-2">
+                  Drop your resume here or <span className="text-blue-600 underline">browse files</span>
+                </h4>
+                <p className="text-xs text-gray-500">PDF files only • Auto-uploads on select</p>
+              </div>
               <input
-                type="file"
-                className="hidden"
-                onChange={handleFileSelect}
                 id="fileInput"
+                type="file"
                 accept=".pdf"
-                disabled={!template || disable}
+                onChange={handleFileSelect}
+                className="hidden"
+                disabled={disable}
               />
-              <label
-                htmlFor="fileInput"
-                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm ${
-                  template
-                    ? "bg-gray-100 hover:bg-gray-200 cursor-pointer"
-                    : "bg-gray-100 cursor-not-allowed"
-                } rounded-md`}
-              >
-                Choose PDF file
-              </label>
             </div>
-          </div>
-        )}
-
-        {/* File Info and Template Info */}
-        {selectedFile && (
-          <div className="space-y-2">
-            <h3 className="text-xs sm:text-sm font-medium">
-              File and Template Information
-            </h3>
-            <div className="rounded-lg border p-2 sm:p-3 space-y-2 sm:space-y-3">
-              {/* File Information */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-medium">{selectedFile.name}</p>
-                    <span className="text-xs text-gray-500">
-                      {(selectedFile.size / (1024 * 1024)).toFixed(2)} mb
-                    </span>
-                    {isUploading && (
-                      <div className="mt-2 h-1 w-[180px] bg-gray-200 rounded-full">
-                        <div
-                          className="h-1 bg-[#2563EB] rounded-full transition-all duration-300"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
-                    )}
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-lg p-4 relative overflow-hidden">
+              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-br from-green-200 to-blue-200 opacity-30 blur-sm"></div>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-blue-100 rounded-lg flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {selectedFile.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • Ready to process
+                  </p>
+                </div>
+                <button
+                  onClick={handleDelete}
+                  className="text-red-500 hover:text-red-700 text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50 transition-all duration-200"
+                  disabled={disable}
+                >
+                  Remove
+                </button>
+              </div>
+              
+              {isUploading && (
+                <div className="mt-3">
+                  <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
                   </div>
+                  <p className="text-xs text-gray-600 mt-1 font-medium">Auto-uploading... {uploadProgress}%</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Configuration Panel */}
+        {selectedFile && (
+          <div className="space-y-4">
+            {/* AI Configuration */}
+            <div className=" backdrop-blur-sm rounded-xl p-5 ">
+              <h4 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
+                <Brain className="h-4 w-4 mr-2 text-purple-600" />
+                AI Configuration
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* Model Selection */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    AI Model
+                  </label>
+                  <select
+                    value={selectedModel}
+                    onChange={(e) => setSelectedModel(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200"
+                    disabled={disable}
+                  >
+                    {modelOptions.map((model) => (
+                      <option key={model.value} value={model.value}>
+                        {model.label} ({model.type})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex space-x-2">
-                  {!isUploading && !isUploaded && (
+                {/* API Selection */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">
+                    API Endpoint
+                  </label>
+                  <select
+                    value={selectedApi}
+                    onChange={(e) => setSelectedApi(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all duration-200"
+                    disabled={disable}
+                  >
+                    {apiOptions.map((api) => (
+                      <option key={api.value} value={api.value}>
+                        {api.label} ({api.status})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Resume Title */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-2 flex items-center">
+                  <Target className="h-3 w-3 mr-1 text-gray-600" />
+                  Target Role Title
+                  <span className="ml-2 text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+                    Transforms entire resume
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={resumeTitle}
+                  onChange={(e) => setResumeTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200"
+                  placeholder="e.g., AI Automation Engineer, Data Scientist, Full Stack Developer..."
+                  disabled={disable}
+                />
+                <p className="text-xs text-gray-500 mt-1.5">
+                  💡 Tip: Be specific with the role title to get the best transformation results
+                </p>
+              </div>
+            </div>
+
+            {/* Process Button - Now Unfilled */}
+            {isUploaded && (
+              <button
+                onClick={handleProcess}
+                disabled={isProcessing || !resumeTitle.trim() || disable}
+                className="w-full group relative px-6 py-4 bg-transparent border border-purple-500 hover:border-purple-600 text-purple-600 hover:text-purple-700 rounded-xl font-medium text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 hover:bg-purple-50 transform disabled:transform-none"
+              >
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/0 via-purple-100/50 to-purple-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                
+                {/* Floating particles */}
+                <div className="absolute inset-0 overflow-hidden rounded-xl">
+                  <div className="absolute top-2 left-4 w-1 h-1 bg-purple-400/60 rounded-full opacity-0 group-hover:opacity-100 animate-ping transition-opacity duration-300"></div>
+                  <div className="absolute top-3 right-6 w-0.5 h-0.5 bg-purple-500/80 rounded-full opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-300 delay-200"></div>
+                  <div className="absolute bottom-2 left-8 w-0.5 h-0.5 bg-purple-400/60 rounded-full opacity-0 group-hover:opacity-100 animate-ping transition-opacity duration-300 delay-400"></div>
+                  <div className="absolute bottom-3 right-4 w-1 h-1 bg-purple-300/40 rounded-full opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-300 delay-600"></div>
+                </div>
+                
+                {/* Main content */}
+                <div className="relative flex items-center justify-center space-x-3">
+                  {isProcessing ? (
                     <>
-                      <button
-                        onClick={handleUploadFile}
-                        className="p-2 hover:bg-blue-100 rounded-full"
-                      >
-                        <svg
-                          className="w-5 h-5 text-blue-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={handleDelete}
-                        className="p-2 hover:bg-red-100 rounded-full"
-                      >
-                        <svg
-                          className="w-5 h-5 text-red-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
+                      <div className="relative">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-500 border-t-transparent"></div>
+                        <div className="absolute inset-0 rounded-full border border-purple-300 border-t-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                      </div>
+                      <span className="font-semibold">Processing with AI...</span>
+                      <Stars className="h-4 w-4 animate-pulse text-purple-500" />
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
+                      <span className="font-semibold">Transform Resume with {selectedModel}</span>
+                      <Bot className="h-5 w-5 transition-all duration-300 group-hover:scale-110" />
                     </>
                   )}
-                  {isUploaded && (
-                    <div className="flex space-x-2">
-                      <div className="p-2">
-                        <svg
-                          className="w-5 h-5 text-green-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </div>
-                      <button
-                        onClick={handleDelete}
-                        className="p-2 hover:bg-red-100 rounded-full"
-                      >
-                        <svg
-                          className="w-5 h-5 text-red-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
+                </div>
+                
+                {/* Border glow effect */}
+                <div className="absolute inset-0 rounded-xl border border-purple-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur-sm"></div>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Processing Status */}
+        {isProcessing && (
+          <div className="mt-6 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border border-purple-200 rounded-xl p-5 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute top-2 left-6 w-3 h-3 bg-purple-300/30 rounded-full animate-pulse delay-300"></div>
+              <div className="absolute bottom-2 right-8 w-2 h-2 bg-blue-300/40 rounded-full animate-ping delay-700"></div>
+              <div className="absolute top-1/2 right-6 w-1.5 h-1.5 bg-indigo-300/50 rounded-full animate-pulse delay-1000"></div>
+            </div>
+            
+            <div className="relative flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-purple-600 animate-pulse" />
+                </div>
+                <div className="absolute inset-0 border-2 border-transparent border-t-purple-400 rounded-full animate-spin"></div>
+                <Stars className="absolute -top-1 -right-1 h-3 w-3 text-yellow-500 animate-ping" />
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <h4 className="text-sm font-semibold text-purple-800">AI Processing Active</h4>
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce delay-100"></div>
+                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-200"></div>
+                  </div>
+                </div>
+                <p className="text-sm text-purple-600 font-medium mb-3">{processingMessage}</p>
+                
+                {/* Enhanced progress bar */}
+                <div className="relative">
+                  <div className="h-2 bg-purple-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="absolute inset-0 h-2 bg-gradient-to-r from-purple-400/50 via-blue-400/50 to-indigo-400/50 rounded-full blur-sm"></div>
                 </div>
               </div>
-
-              {/* Template Information */}
-              <div className="flex items-center space-x-3 pt-2 border-t">
-                <svg
-                  className="w-5 h-5 text-blue-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
-                  />
-                </svg>
-                <div>
-                  <p className="text-sm font-medium">Selected Template</p>
-                  <p className="text-sm text-blue-600">{template}</p>
-                </div>
+              
+              <div className="relative">
+                <Zap className="h-6 w-6 text-yellow-500 animate-pulse" />
+                <div className="absolute inset-0 bg-yellow-400/30 rounded-full blur-md animate-ping"></div>
               </div>
             </div>
           </div>
         )}
-
-        <p className="text-xs text-gray-500">
-          Only PDF files. Maximum file size: 5MB
-        </p>
-      </div>
-
-      {/* Footer */}
-      <div className="flex justify-center p-3 sm:p-4 border-t">
-        <button
-          className="px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          disabled={
-            !selectedFile ||
-            isUploading ||
-            !isUploaded ||
-            isProcessing ||
-            !resumeTitle || // Require resume title
-            disable
-          }
-          onClick={handleProcess}
-        >
-          {isProcessing ? (
-            <>
-              <svg
-                className="animate-spin h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              {processingMessage || "Processing..."}
-            </>
-          ) : (
-            "Process"
-          )}
-        </button>
       </div>
     </div>
   );

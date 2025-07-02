@@ -30,6 +30,18 @@ export const onboardResume = async (req, res) => {
         const { extractedData } = await extractPdfData(pdfUrl);
         send("Extracting data", { step: "extractpdf", status: "completed", data: extractedData });
 
+        const emailExists = await User.findOne({ email: extractedData.email });
+        if (!emailExists) {
+            send("error", { 
+                step: "email_validation", 
+                status: "error", 
+                error: 'Email mismatch: Please make sure the resume contains the same email address you used to login to this platform.',
+                errorCode: 'EMAIL_MISMATCH'
+            });
+            res.end();
+            return;
+        }
+
 
 
 
@@ -48,39 +60,35 @@ export const onboardResume = async (req, res) => {
 
 
 
-        const user = await User.findOne({ email: email });
-        if (user) {
-            // Process the skills data - extract all skill items and flatten into a single array
-            const flattenedSkills = Array.isArray(skills)
-                ? skills.flatMap(category => Array.isArray(category.items) ? category.items : [])
-                : [];
+        const user = emailExists;
 
-            // For projects, extract simplified data or convert to strings
-            const simplifiedProjects = Array.isArray(projects)
-                ? projects.map(project => project.title || project.name || JSON.stringify(project))
-                : [];
+        // Process the skills data - extract all skill items and flatten into a single array
+        const flattenedSkills = Array.isArray(skills)
+            ? skills.flatMap(category => Array.isArray(category.items) ? category.items : [])
+            : [];
 
-            // Update or create user preferences with the extracted data
-            const userPreferences = await UserPreferences.create(
-                {
-                    userId: user._id,
-                    preferences: pref,
-                    summary: summary || "",
-                    skills: flattenedSkills,  // Flat array of strings
-                    projects: simplifiedProjects, // Simplified projects data
-                    updatedAt: Date.now()
-                },
-            );
-            emitPreferencesDashboard(user._id, userPreferences);
+        // For projects, extract simplified data or convert to strings
+        const simplifiedProjects = Array.isArray(projects)
+            ? projects.map(project => project.title || project.name || JSON.stringify(project))
+            : [];
 
-            console.log(`Saved user preferences for ${email}:`, {
-                summary: summary ? summary.substring(0, 50) + "..." : "None provided",
-                skills: `${flattenedSkills.length} skills saved`,
-                projects: `${simplifiedProjects.length} projects saved`
-            });
-        } else {
-            console.log(`User with email ${email} not found in database`);
-        }
+        // Update or create user preferences with the extracted data
+        const userPreferences = await UserPreferences.create({
+            userId: user._id,
+            preferences: pref,
+            summary: summary || "",
+            skills: flattenedSkills,
+            projects: simplifiedProjects,
+            updatedAt: Date.now()
+        });
+
+        emitPreferencesDashboard(user._id, userPreferences);
+
+        console.log(`Saved user preferences for ${email}:`, {
+            summary: summary ? summary.substring(0, 50) + "..." : "None provided",
+            skills: `${flattenedSkills.length} skills saved`,
+            projects: `${simplifiedProjects.length} projects saved`
+        });
 
 
         const pdf = await convertJsonTexToPdfLocally(formattedLatex);

@@ -27,20 +27,20 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 p-2 sm:p-4 gap-2 sm:gap-4">
       {/* Sidebar Component */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
       {/* Main Content */}
       <motion.div 
-        className="flex-1 flex flex-col overflow-hidden"
+        className="flex-1 flex flex-col overflow-hidden bg-white rounded-lg border border-gray-200 shadow-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6">
           <div className="container mx-auto">
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-4 sm:mb-6">
               {/* Mobile sidebar toggle */}
               <button
                 onClick={toggleSidebar}

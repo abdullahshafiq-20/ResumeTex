@@ -25,6 +25,7 @@ const EmailPage = lazy(() => import("./pages/EmailPage"));
 const JobPage = lazy(() => import("./pages/JobPage"));
 const PrefPage = lazy(() => import("./pages/PrefPage"));
 
+
 export default function App() {
   return (
     <>
@@ -34,6 +35,7 @@ export default function App() {
         <Suspense fallback={<div className="loading">Loading...</div>}>
           <Routes>
             {/* Public routes */}
+
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/" element={<BeforeAfterPage />} />
