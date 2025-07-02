@@ -51,7 +51,9 @@ export const googleCallback = async (req, res) => {
     });
 
     // Send JWT to frontend (or set cookie)
-    res.redirect(`${process.env.GOOGLE_REDIRECT_URI_1}?token=${token}`); // Replace with your frontend URL
+    // res.redirect(`${process.env.GOOGLE_REDIRECT_URI_1}?token=${token}`); // Replace with your frontend URL
+    res.redirect(`${process.env.GOOGLE_REDIRECT_URI}?token=${token}`); // Replace with your frontend URL
+
   } catch (err) {
     console.error('Google login error:', err);
     res.status(500).send('Authentication Failed');
