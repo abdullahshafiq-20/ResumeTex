@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { io } from 'socket.io-client';
 
 const SocketContext = createContext();
+const apiUrl = import.meta.env.VITE_API_URL_1;
 
 export const useSocket = () => {
   const context = useContext(SocketContext);
@@ -71,7 +72,7 @@ export const SocketProvider = ({ children }) => {
     });
 
     try {
-      const newSocket = io('http://localhost:3000', {
+      const newSocket = io(apiUrl, {
         auth: {
           token: token
         },
