@@ -4,11 +4,13 @@ import FileUploader from "../components/FileUploader";
 import PDFCard from "../components/PdfCard";
 import { useResumes } from "../context/ResumeContext";
 import { Wand2, Rocket, Target, Sparkles } from "lucide-react";
+import { useDashboard } from "../context/DashbaordContext";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const MyResume = () => {
   const { resumes, loading, isSocketConnected } = useResumes();
+  const { lastUpdated, isLive } = useDashboard();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
@@ -71,6 +73,7 @@ const itemVariants = {
       <div className="absolute top-32 left-1/3 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-10 blur-xl -z-10"></div>
 
       {/* Live Status Indicator */}
+      {/* Live Status Indicator */}
       <motion.div
         className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
         variants={itemVariants}
@@ -79,13 +82,13 @@ const itemVariants = {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${isSocketConnected ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
-            <span className={`text-sm font-medium ${isSocketConnected ? "text-green-700" : "text-yellow-700"}`}>
+            <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
+            <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
               Live Update
             </span>
-            {isSocketConnected && (
+            {lastUpdated && (
               <span className="text-xs text-gray-500">
-                • Real-time updates active
+                • {new Date(lastUpdated).toLocaleTimeString()}
               </span>
             )}
           </div>
@@ -214,7 +217,7 @@ const itemVariants = {
 
       {/* Resume Grid */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -239,7 +242,7 @@ const itemVariants = {
           resumes.map((resume, index) => (
             <motion.div key={resume._id || index} variants={itemVariants}>
               <PDFCard
-                pdfUrl={resume.resume_url}
+                pdfUrl={resume.resume_link}
                 imageUrl={resume.thumbnail}
                 title={resume.resume_title || "Untitled Resume"}
                 openedDate={formatDate(resume.createdAt)}

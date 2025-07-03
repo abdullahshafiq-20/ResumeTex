@@ -24,6 +24,7 @@ const PostsPage = lazy(() => import("./pages/PostsPage"));
 const EmailPage = lazy(() => import("./pages/EmailPage"));
 const JobPage = lazy(() => import("./pages/JobPage"));
 const PrefPage = lazy(() => import("./pages/PrefPage"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 
 export default function App() {
@@ -38,12 +39,12 @@ export default function App() {
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/" element={<BeforeAfterPage />} />
-            <Route path="/response" element={<ResponsePage />} />
-            <Route path="/bug-report" element={<BugReportPage />} />
-            <Route path="/documentation" element={<DocumentationPage />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/onboard" element={<PrivateRoute><OnBoardPage /></PrivateRoute>} />
+            <Route path="/" element={<LandingPage />} />
+            {/* <Route path="/response" element={<ResponsePage />} /> */}
+            {/* <Route path="/bug-report" element={<BugReportPage />} /> */}
+            {/* <Route path="/documentation" element={<DocumentationPage />} /> */}
+            {/* <Route path="/test" element={<TestPage />} /> */}
+            {/* <Route path="/onboard" element={<PrivateRoute><OnBoardPage /></PrivateRoute>} /> */}
             
             {/* Protected routes with Dashboard layout */}
             <Route 

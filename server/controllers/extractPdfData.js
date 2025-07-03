@@ -73,10 +73,12 @@ export const extractPdfData = async (pdfUrl) => {
                 links.push({ url, context });
             }
         }
-
+        const email = extractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        console.log("email", email)
         const extractedData = {
             text: extractedText,
-            links
+            links,
+            email
         };
 
 

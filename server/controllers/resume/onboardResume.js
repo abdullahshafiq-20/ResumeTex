@@ -21,16 +21,36 @@ export const onboardResume = async (req, res) => {
         res.write(`data: ${JSON.stringify(data)}\n\n`);
     };
     try {
-        const { pdfUrl, pref } = req.query; // Extract the PDF URL from the request body
+        const { pdfUrl, pref, apiKey, genmodel } = req.query; // Extract the PDF URL from the request body
+
+
         if (!pdfUrl) {
             return res.status(400).json({ error: 'PDF URL is required' });
         }
+        let api;
+        if (apiKey === "api_1") {
+            api = process.env.GEMINI_API_KEY_1;
+        } else if (apiKey === "api_2") {
+            api = process.env.GEMINI_API_KEY_2;
+        } else if (apiKey === "api_3") {
+            api = process.env.GEMINI_API_KEY_3;
+        }
+        else if (apiKey === "api_4") {
+            api = process.env.GEMINI_API_KEY_4;
+        }
+        else if (apiKey === "api_5") {
+            api = process.env.GEMINI_API_KEY_5;
+        }
+
+        
 
         send("Extracting data", { step: "extractpdf", status: "started" });
         const { extractedData } = await extractPdfData(pdfUrl);
         send("Extracting data", { step: "extractpdf", status: "completed", data: extractedData });
+        console.log("extractedData", extractedData.email)
 
         const emailExists = await User.findOne({ email: extractedData.email });
+        console.log("emailExists", emailExists)
         if (!emailExists) {
             send("error", { 
                 step: "email_validation", 
@@ -44,10 +64,14 @@ export const onboardResume = async (req, res) => {
 
 
 
+        console.log("pdfUrl", pdfUrl)
+        console.log("pref", pref)
+        console.log("apiKey", api)
+        console.log("genmodel", genmodel)
 
         send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "started" });
-        const apiKey1 = process.env.GEMINI_API_KEY_1;
-        const { formattedLatex, email, name, title, summary, skills, projects } = await ConvertLatex(extractedData, pref, apiKey1);
+        // const apiKey1 = process.env.GEMINI_API_KEY_1;
+        const { formattedLatex, email, name, title, summary, skills, projects } = await ConvertLatex(extractedData, pref, api, genmodel);
         send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "completed", data: { formattedLatex, email, name, title, summary, skills, projects } });
 
 

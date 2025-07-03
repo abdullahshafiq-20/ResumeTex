@@ -21,6 +21,7 @@ import {
   Target,
   Sparkles,
 } from "lucide-react";
+import { useDashboard } from "../context/DashbaordContext";
 
 const PostsPage = () => {
   const {
@@ -38,7 +39,7 @@ const PostsPage = () => {
   const [deletingPostId, setDeletingPostId] = useState(null);
   const [updatingPostId, setUpdatingPostId] = useState(null);
   const [activeTab, setActiveTab] = useState("not-sent");
-
+  const { lastUpdated, isLive } = useDashboard();
   // Function to emit notification
   const showNotification = (message, type = "info") => {
     if (socket) {
@@ -474,41 +475,35 @@ const PostsPage = () => {
         animate="visible"
       >
         {/* Live Status Indicator */}
-        <motion.div
-          className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
-          variants={itemVariants}
-        >
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-br from-green-200/30 to-blue-200/20 blur-sm"></div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div
-                className={`h-2 w-2 rounded-full ${
-                  isSocketConnected
-                    ? "bg-green-500 animate-pulse"
-                    : "bg-yellow-500"
-                }`}
-              ></div>
-              <span
-                className={`text-sm font-medium ${
-                  isSocketConnected ? "text-green-700" : "text-yellow-700"
-                }`}
-              >
-                Live Update
+
+              {/* Live Status Indicator */}
+      <motion.div
+        className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
+            <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
+              Live Update
+            </span>
+            {lastUpdated && (
+              <span className="text-xs text-gray-500">
+                • {new Date(lastUpdated).toLocaleTimeString()}
               </span>
-              {isSocketConnected && (
-                <span className="text-xs text-gray-500">
-                  • Real-time sync active
-                </span>
-              )}
-            </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
-            >
-              Refresh
-            </button>
+            )}
           </div>
-        </motion.div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
+      </motion.div>
+
         <motion.div
           className="mb-6 border border-purple-200 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 rounded-lg p-4 relative overflow-hidden"
           variants={itemVariants}

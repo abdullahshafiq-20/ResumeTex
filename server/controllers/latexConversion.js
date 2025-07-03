@@ -204,12 +204,12 @@ const CV_STRUCTURE = `{
 
 
 
-export const ConvertLatex = async (extractedData, jobTitle, apiKey) => {
+export const ConvertLatex = async (extractedData, jobTitle, apiKey, genmodel) => {
   let latexContent = '';
     try {
         const LATEX_CONVERSION_PROMPT = await getLatexPromptJobTitle(extractedData, jobTitle, CV_STRUCTURE);
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash"});
+        const model = genAI.getGenerativeModel({ model: genmodel || "gemini-2.0-flash"});
         const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
         latexContent = result.response.text();
         console.log("Response received from Gemini API");
