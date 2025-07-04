@@ -8,6 +8,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
 export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
 
+  // Detect if user prefers reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const handleLoginClick = () => {
     setShowModal(true);
   };
@@ -21,48 +24,64 @@ export default function LoginPage() {
     setShowModal(false);
   };
 
+  // Simplified animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 }
+  };
+
+  // Reduced motion transitions
+  const cardTransition = prefersReducedMotion 
+    ? { duration: 0 }
+    : { duration: 0.3, ease: "easeOut" };
+
+  const modalTransition = prefersReducedMotion 
+    ? { duration: 0 }
+    : { duration: 0.2, ease: "easeOut" };
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white">
-      {/* Floating Blobs */}
-      <div className="blob blob1"></div>
-      <div className="blob blob2"></div>
+      {/* Simplified Background - fewer blobs, hidden on mobile */}
+      <div className="hidden md:block blob blob1"></div>
+      <div className="hidden md:block blob blob2"></div>
       <div className="blob blob3"></div>
-      <div className="blob blob4"></div>
-      <div className="blob blob5"></div>
 
+      {/* Simplified overlay */}
+      <div className="fixed inset-0 z-5 bg-white/10 backdrop-blur-[0.1px]"></div>
 
+      {/* Reduced floating particles - fewer and hidden on mobile */}
+      {!prefersReducedMotion && (
+        <div className="hidden md:block fixed inset-0 z-5 pointer-events-none">
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-purple-400/20 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -50, 0],
+                opacity: [0, 0.5, 0],
+              }}
+              transition={{
+                duration: 8,
+                delay: Math.random() * 3,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Overlay for better readability */}
-      <div className="fixed inset-0 z-5 bg-white/5 backdrop-blur-[0.2px]"></div>
-
-      {/* Floating Particles */}
-      <div className="fixed inset-0 z-5 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              delay: Math.random() * 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-
-
-      {/* White Overlay beneath the card */}
-      <div className="fixed inset-0 z-8 bg-white/20 backdrop-blur-sm"></div>
+      {/* Simplified white overlay */}
+      <div className="fixed inset-0 z-8 bg-white/15 backdrop-blur-sm"></div>
 
       {/* Login Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-8">
@@ -70,109 +89,50 @@ export default function LoginPage() {
           {/* Main Login Card */}
           <motion.div
             className="relative"
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={cardTransition}
           >
             {/* Card Background with Glass Effect */}
             <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden relative">
-              {/* Subtle gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-transparent to-blue-50/50 pointer-events-none"></div>
-
-              {/* Floating elements inside card */}
-              <motion.div
-                className="absolute top-3 right-3 w-1.5 h-1.5 bg-purple-400/30 rounded-full"
-                animate={{
-                  scale: [0, 1, 0],
-                  opacity: [0, 0.6, 0],
-                }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-              <motion.div
-                className="absolute bottom-4 left-4 w-1 h-1 bg-blue-400/30 rounded-full"
-                animate={{
-                  scale: [0, 1, 0],
-                  opacity: [0, 0.6, 0],
-                }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}
-              />
+              {/* Simplified gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-blue-50/30 pointer-events-none"></div>
 
               {/* Logo Section */}
-              <motion.div
-                className="pt-4 pb-3 flex flex-col items-center relative z-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <motion.div
-                  className="w-20 h-20 rounded-lg bg-transparent flex items-center border border-gray-200 justify-center mb-2 shadow-sm"
-                  // whileHover={{ scale: 1.05 }}
-                >
+              <div className="pt-4 pb-3 flex flex-col items-center relative z-10">
+                <div className="w-20 h-20 rounded-lg bg-transparent flex items-center border border-gray-200 justify-center mb-2 shadow-sm">
                   <img 
                     src="/logo.png" 
                     alt="ResumeTex Logo" 
                     className="w-16 h-16 object-contain"
                   />
-                </motion.div>
+                </div>
 
-                <motion.h1
-                  className="text-lg font-bold text-gray-800 mb-1"
-                  animate={{
-                    textShadow: [
-                      "0 0 10px rgba(139, 92, 246, 0.1)",
-                      "0 0 20px rgba(59, 130, 246, 0.15)",
-                      "0 0 10px rgba(139, 92, 246, 0.1)",
-                    ],
-                  }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                >
+                <h1 className="text-lg font-bold text-gray-800 mb-1">
                   ResumeTex
-                </motion.h1>
+                </h1>
                 <p className="text-xs text-gray-500 text-center max-w-xs leading-relaxed px-2">
                   AI-Powered Resume Transformation
                 </p>
-              </motion.div>
+              </div>
 
               {/* Welcome Section */}
-              <motion.div
-                className="px-4 sm:px-6 pb-3 text-center relative z-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-
+              <div className="px-4 sm:px-6 pb-3 text-center relative z-10">
                 <p className="text-xs text-gray-600 leading-relaxed px-2">
                   Sign in to transform your resume with AI magic and create stunning LaTeX documents.
                 </p>
-              </motion.div>
+              </div>
 
               {/* Login Button */}
-              <motion.div
-                className="px-4 sm:px-6 pb-4 relative z-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
+              <div className="px-4 sm:px-6 pb-4 relative z-10">
                 <motion.button
                   onClick={handleLoginClick}
-                  className="group w-full flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-purple-300 px-4 py-2.5 rounded-lg transition-all duration-300 backdrop-blur-sm relative overflow-hidden"
-                  whileHover={{
-                    scale: 1.02,
-                    y: -1,
-                  }}
-                  whileTap={{ scale: 0.98 }}
+                  className="group w-full flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-purple-300 px-4 py-2.5 rounded-lg transition-colors duration-200 backdrop-blur-sm relative overflow-hidden"
+                  whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
+                  whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
+                  transition={{ duration: 0.1 }}
                 >
-                  {/* Subtle shine effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/50 to-transparent opacity-0 group-hover:opacity-100"
-                    animate={{ x: [-200, 200] }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  />
-
                   <div className="flex items-center space-x-2 relative z-10">
                     {/* Google Icon */}
                     <svg
@@ -200,23 +160,12 @@ export default function LoginPage() {
                     <span className="font-medium text-sm">
                       Continue with Google
                     </span>
-                    <motion.div
-                      className="group-hover:translate-x-0.5 transition-transform duration-200"
-                      animate={{ x: [0, 2, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <ArrowRight className="w-3 h-3 opacity-60" />
-                    </motion.div>
+                    <ArrowRight className="w-3 h-3 opacity-60" />
                   </div>
                 </motion.button>
 
                 {/* Trust Indicators */}
-                <motion.div
-                  className="mt-3 flex items-center justify-center space-x-4 text-xs text-gray-500"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
-                >
+                <div className="mt-3 flex items-center justify-center space-x-4 text-xs text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Shield className="w-3 h-3 text-green-500" />
                     <span>Secure</span>
@@ -225,58 +174,41 @@ export default function LoginPage() {
                     <Sparkles className="w-3 h-3 text-purple-500" />
                     <span>AI-Powered</span>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
 
               {/* Terms Section */}
-              <motion.div
-                className="px-4 sm:px-6 pb-3 text-center text-xs text-gray-500 leading-relaxed relative z-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1 }}
-              >
+              <div className="px-4 sm:px-6 pb-3 text-center text-xs text-gray-500 leading-relaxed relative z-10">
                 By continuing, you agree to our{" "}
-                <motion.a
-                  href="#"
-                  className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200"
-                  whileHover={{ scale: 1.05 }}
-                >
+                <a href="#" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
                   Terms
-                </motion.a>{" "}
+                </a>{" "}
                 and{" "}
-                <motion.a
-                  href="#"
-                  className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200"
-                  whileHover={{ scale: 1.05 }}
-                >
+                <a href="#" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
                   Privacy Policy
-                </motion.a>
-              </motion.div>
+                </a>
+              </div>
 
               {/* Footer */}
-              <motion.div
-                className="px-4 sm:px-6 py-2 bg-gradient-to-r from-gray-50/80 to-purple-50/80 border-t border-gray-100/50 text-center relative z-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-              >
+              <div className="px-4 sm:px-6 py-2 bg-gradient-to-r from-gray-50/80 to-purple-50/80 border-t border-gray-100/50 text-center relative z-10">
                 <p className="text-xs text-gray-500">
                   © 2025 ResumeTex
                 </p>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Privacy Info Modal */}
+      {/* Mobile-Responsive Privacy Info Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={modalTransition}
           >
             {/* Modal Backdrop */}
             <motion.div
@@ -287,23 +219,32 @@ export default function LoginPage() {
               onClick={closeModal}
             />
 
-            {/* Modal Content */}
+            {/* Mobile-Responsive Modal Content */}
             <motion.div
-              className="relative w-full max-w-md bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden shadow-2xl"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="relative w-full max-w-sm sm:max-w-md mx-auto bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto"
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              transition={modalTransition}
             >
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-blue-50/30 pointer-events-none"></div>
+              {/* Close button for mobile */}
+              <button
+                onClick={closeModal}
+                className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors duration-200 sm:hidden"
+              >
+                <X className="w-4 h-4 text-gray-600" />
+              </button>
+
+              {/* Simplified gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-transparent to-blue-50/20 pointer-events-none"></div>
 
               {/* Modal Header */}
-              <div className="pt-6 pb-4 px-6 text-center relative z-10">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-                  <Mail className="w-8 h-8 text-purple-600" />
+              <div className="pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-6 text-center relative z-10">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+                  <Mail className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                   Email Permission Required
                 </h2>
                 <p className="text-sm text-gray-600">
@@ -312,37 +253,37 @@ export default function LoginPage() {
               </div>
 
               {/* Modal Body */}
-              <div className="px-6 pb-6 space-y-4 relative z-10">
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4 relative z-10">
                 {/* Info Points */}
                 <div className="space-y-3">
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
-                      <Mail className="w-3 h-3 text-purple-600" />
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
+                      <Mail className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-700 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                         <strong>Direct Email Sending:</strong> We require sensitive scope access to send emails directly from your account, so you won't be overwhelmed with sending them one by one.
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
-                      <CheckCircle className="w-3 h-3 text-green-600" />
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                      <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-700 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                         <strong>User Control:</strong> This action is solely taken by you, not us. You have complete control over when emails are sent.
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
-                      <Lock className="w-3 h-3 text-blue-600" />
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                      <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-700 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                         <strong>Encrypted Data:</strong> We save encrypted data that only you have access to. Your data is encoded - even we cannot decode it or read it.
                       </p>
                     </div>
@@ -350,27 +291,27 @@ export default function LoginPage() {
                 </div>
 
                 {/* Encouragement Message */}
-                <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
-                  <p className="text-sm text-center text-gray-700 font-medium">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
+                  <p className="text-xs sm:text-sm text-center text-gray-700 font-medium">
                     🚀 Happy using ResumeTex and get hired quickly!
                   </p>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex space-x-3 mt-6">
+                {/* Action Buttons - Stacked on mobile, side by side on desktop */}
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6">
                   <motion.button
                     onClick={closeModal}
-                    className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="w-full px-4 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
                   >
                     Cancel
                   </motion.button>
                   <motion.button
                     onClick={handleProceedLogin}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-lg"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-lg"
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
                   >
                     Continue with Google
                   </motion.button>

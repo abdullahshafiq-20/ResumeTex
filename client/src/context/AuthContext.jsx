@@ -80,6 +80,15 @@ export const AuthProvider = ({ children }) => {
   const getUserId = () => {
     return user ? user.id || user._id || user.userId : null;
   };
+  
+  const getUserProfile = () => {
+    const data = {
+      name: user.name,
+      email: user.email,
+      picture: user.picture,
+    };
+    return data;
+  };
 
   return (
     <AuthContext.Provider
@@ -92,6 +101,7 @@ export const AuthProvider = ({ children }) => {
         getToken,
         getUserId,
         checkConnection,
+        getUserProfile,
       }}
     >
       {children}

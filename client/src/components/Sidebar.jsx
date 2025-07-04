@@ -2,11 +2,16 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from '../context/AuthContext';
+import logo from '../../public/logo.png';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logoutUser, user } = useAuth();
+  const { getUserProfile } = useAuth();
+
+  // Detect if user prefers reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Navigation menu items with professional matched icons
   const navigation = [
@@ -41,16 +46,52 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     }
   };
 
+  // Optimized animation variants for better mobile performance
+  const sidebarVariants = {
+    hidden: { x: -280 },
+    visible: { x: 0 }
+  };
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 }
+  };
+
+  // Reduced motion transitions
+  const sidebarTransition = prefersReducedMotion 
+    ? { duration: 0 }
+    : { 
+        type: "tween", 
+        ease: "easeOut", 
+        duration: 0.15 
+      };
+
+  const overlayTransition = prefersReducedMotion 
+    ? { duration: 0 }
+    : { duration: 0.1 };
+
+  // Function to get user initials for default avatar
+  const getUserInitials = (user) => {
+    if (user?.name) {
+      return user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
     <>
       {/* Mobile sidebar overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            variants={overlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            transition={overlayTransition}
             className="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
             onClick={toggleSidebar}
           ></motion.div>
@@ -60,48 +101,68 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       {/* Sidebar */}
       <motion.div
         className="fixed inset-y-4 left-4 z-30 w-64 lg:w-64 overflow-y-auto lg:relative lg:inset-auto"
-        initial={{ x: -280 }}
-        animate={{ 
-          x: isOpen || window.innerWidth >= 1024 ? 0 : -280 
-        }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 400, 
-          damping: 40 
-        }}
+        variants={sidebarVariants}
+        initial="hidden"
+        animate={isOpen || window.innerWidth >= 1024 ? "visible" : "hidden"}
+        transition={sidebarTransition}
       >
         <div className="h-full rounded-lg border border-gray-200 bg-white shadow-lg relative overflow-hidden">
-          {/* Bigger gradient blobs with blur */}
-          <div className="absolute top-4 left-4 w-32 h-32 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-50 blur-2xl"></div>
-          <div className="absolute bottom-8 right-2 w-28 h-28 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-45 blur-xl"></div>
-          <div className="absolute top-24 right-4 w-24 h-24 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-40 blur-xl"></div>
-          <div className="absolute bottom-24 left-2 w-26 h-26 rounded-full bg-gradient-to-br from-cyan-200 to-cyan-300 opacity-35 blur-2xl"></div>
-          <div className="absolute top-40 left-8 w-20 h-20 rounded-full bg-gradient-to-br from-pink-200 to-rose-300 opacity-30 blur-lg"></div>
+          {/* Reduced gradient blobs - fewer and less blur for mobile performance */}
+          <div className="absolute top-4 left-4 w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-40 blur-lg md:w-32 md:h-32 md:blur-2xl md:opacity-50"></div>
+          <div className="absolute bottom-8 right-2 w-20 h-20 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-35 blur-md md:w-28 md:h-28 md:blur-xl md:opacity-45"></div>
+          <div className="hidden md:block absolute top-24 right-4 w-24 h-24 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-40 blur-xl"></div>
           
           {/* Content */}
           <div className="relative flex flex-col h-full py-6 px-4">
             {/* Brand Logo */}
-            <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center justify-start mb-8">
               <Link to="/dashboard" className="flex items-center space-x-2" onClick={handleLinkClick}>
-                <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl h-10 w-10 shadow-md">
-                  R
-                </div>
-                <span className="font-semibold text-lg text-gray-800">ResumeWizard</span>
+                <motion.div
+                  className="w-14 h-14 rounded-lg bg-transparent flex items-center border border-gray-200 justify-center"
+                >
+                  <img 
+                    src="/logo.png" 
+                    alt="ResumeTex Logo" 
+                    className="w-10 h-10 object-contain"
+                  />
+                </motion.div>
+                <span className="font-semibold text-lg text-gray-800">ResumeTex</span>
               </Link>
             </div>
             
-            {/* User Info */}
+            {/* Simple User Profile Card */}
             {user && (
-              <div className="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-100 shadow-sm">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {user.name || user.email}
-                </p>
-                <p className="text-xs text-gray-600 truncate">
-                  {user.email}
-                </p>
+              <div className="mb-6 p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  {/* Profile Avatar */}
+                  <div className="flex-shrink-0">
+                    {getUserProfile().picture ? (
+                      <img 
+                        src={getUserProfile().picture} 
+                        alt="Profile" 
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">
+                        {getUserInitials(user)}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* User Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">
+                      {getUserProfile().name || 'User'}
+                    </p>
+                    <p className="text-xs text-gray-600 truncate">
+                      {getUserProfile().email}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
             
+            {/* Navigation */}
             <nav className="flex-1 space-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
@@ -110,13 +171,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <Link
                       to={item.href}
                       onClick={handleLinkClick}
-                      className={`flex items-center px-3 py-2 rounded-md transition-all duration-200 group relative text-sm ${
+                      className={`flex items-center px-3 py-2 rounded-md transition-colors duration-150 group relative text-sm ${
                         isActive
                           ? 'bg-blue-50 text-blue-600 border border-blue-500 font-medium'
                           : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600 border border-transparent'
                       }`}
                     >
-                      <item.icon className={`h-4 w-4 mr-2.5 transition-colors ${
+                      <item.icon className={`h-4 w-4 mr-2.5 transition-colors duration-150 ${
                         isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
                       }`} />
                       <span className={`text-sm ${isActive ? 'font-medium' : 'font-normal'}`}>{item.name}</span>
@@ -126,12 +187,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               })}
             </nav>
 
+            {/* Logout Button */}
             <div className="pt-3 mt-4 border-t border-gray-200">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group border border-transparent hover:border-red-200 text-sm"
+                className="w-full flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-150 group border border-transparent hover:border-red-200 text-sm"
               >
-                <LogoutIcon className="h-4 w-4 mr-2.5 text-gray-500 group-hover:text-red-600 transition-colors" />
+                <LogoutIcon className="h-4 w-4 mr-2.5 text-gray-500 group-hover:text-red-600 transition-colors duration-150" />
                 <span className="font-normal text-sm">Logout</span>
               </button>
             </div>
