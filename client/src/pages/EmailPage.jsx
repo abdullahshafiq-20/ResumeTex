@@ -163,6 +163,7 @@ const EmailPage = () => {
       };
 
       const response = await api.post(`${apiUrl}/create-email`, emailData);
+      console.log("response", response)
 
       // Format the email data properly
       const newEmail = {

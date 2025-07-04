@@ -431,15 +431,21 @@ export const createEmail = async (req, res) => {
     const { email, jobTitle, jobDescription,companyName, resume_id, postId } = req.body;
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
+    // console.log("req.body", req.body)
+
     // Get user from database with tokens
-    console.log("userId", userId)
-    console.log("resume_id", resume_id)
-    console.log("jobTitle", jobTitle)
-    console.log("jobDescription", jobDescription)
+    // console.log("userId", userId)
+    // console.log("resume_id", resume_id)
+    // console.log("jobTitle", jobTitle)
+    // console.log("jobDescription", jobDescription)
 
     const user = await User.findById(userId);
+    console.log("user", user)
     const userResume = await UserResume.findById(resume_id);
+    console.log("userResume", userResume)
     const { resume_title, resume_link } = userResume;
+    console.log("resume_title", resume_title)
+    console.log("resume_link", resume_link)
     const userPreferences = await UserPreferences.findOne({ preferences: resume_title });
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
@@ -448,6 +454,7 @@ export const createEmail = async (req, res) => {
       return res.status(400).json({ error: 'User preferences not found' });
     }
 
+    console.log("userPreferences", userPreferences)
     const emailParams = {
       to: email || "email@gmail.com",
       jobTitle: jobTitle || "Senior Frontend Developer",
@@ -460,8 +467,11 @@ export const createEmail = async (req, res) => {
       recruiterName: "Sam Smith"
     };
 
+    console.log("emailParams")
+
     
     const data = generateEmailTemplate(emailParams);
+    console.log("data", data)
 
     const { to, subject, body } = data;
     const saveEmail = await Email.findOneAndUpdate(

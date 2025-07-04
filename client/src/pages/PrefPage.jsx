@@ -19,8 +19,67 @@ import {
   X,
   Plus,
   Loader2,
+  Info,
+  Lock,
 } from "lucide-react";
 import { useResumes } from "../context/ResumeContext";
+
+// Title Restriction Modal Component
+const TitleRestrictionModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md mx-4"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                Title Cannot Be Edited
+              </h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-sm text-gray-600 leading-relaxed mb-3">
+              The preference title is automatically linked to your resume title and is used for generating personalized emails.
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <div className="flex items-start">
+                <Info className="h-4 w-4 text-amber-600 mt-0.5 mr-2 flex-shrink-0" />
+                <div className="text-xs text-amber-800">
+                  <p className="font-medium mb-1">Why can't I edit the title?</p>
+                  <p>This ensures consistency between your resume and email generation, maintaining professional accuracy across all communications.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            Got it
+          </button>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
 
 // Skills Modal Component
 const SkillsModal = ({ isOpen, onClose, currentSkills, onSave, isLoading }) => {
@@ -47,16 +106,16 @@ const SkillsModal = ({ isOpen, onClose, currentSkills, onSave, isLoading }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+          className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md mx-4 max-h-[90vh] overflow-y-auto"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Code className="h-5 w-5 mr-2 text-blue-600" />
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <Code className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
               Add Skills
             </h3>
             <button
@@ -75,7 +134,7 @@ const SkillsModal = ({ isOpen, onClose, currentSkills, onSave, isLoading }) => {
               value={skillsInput}
               onChange={(e) => setSkillsInput(e.target.value)}
               placeholder="React, Node.js, Python, JavaScript, etc."
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={4}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -102,7 +161,7 @@ const SkillsModal = ({ isOpen, onClose, currentSkills, onSave, isLoading }) => {
             </div>
           )}
 
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <button
               onClick={handleSave}
               disabled={isLoading || !skillsInput.trim()}
@@ -158,16 +217,16 @@ const ProjectsModal = ({ isOpen, onClose, currentProjects, onSave, isLoading }) 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+          className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md mx-4 max-h-[90vh] overflow-y-auto"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <FolderOpen className="h-5 w-5 mr-2 text-green-600" />
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <FolderOpen className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-green-600" />
               Add Projects
             </h3>
             <button
@@ -186,7 +245,7 @@ const ProjectsModal = ({ isOpen, onClose, currentProjects, onSave, isLoading }) 
               value={projectsInput}
               onChange={(e) => setProjectsInput(e.target.value)}
               placeholder="E-commerce Platform, Mobile App, Portfolio Website, etc."
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               rows={4}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -213,7 +272,7 @@ const ProjectsModal = ({ isOpen, onClose, currentProjects, onSave, isLoading }) 
             </div>
           )}
 
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <button
               onClick={handleSave}
               disabled={isLoading || !projectsInput.trim()}
@@ -259,6 +318,7 @@ const PrefPage = () => {
   // Modal states
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [showTitleRestrictionModal, setShowTitleRestrictionModal] = useState(false);
   const [isAddingSkills, setIsAddingSkills] = useState(false);
   const [isAddingProjects, setIsAddingProjects] = useState(false);
 
@@ -354,7 +414,7 @@ const PrefPage = () => {
 
   if (loading) {
     return (
-      <div className="relative">
+      <div className="relative px-4 sm:px-6 lg:px-8">
         <div className="flex justify-center items-center min-h-[60vh]">
           <div className="flex flex-col items-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent"></div>
@@ -367,9 +427,9 @@ const PrefPage = () => {
 
   if (error) {
     return (
-      <div className="relative">
+      <div className="relative px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <div className="text-red-600 text-sm font-medium">Error: {error}</div>
+          <div className="text-red-600 text-sm font-medium">{error}</div>
           <button
             onClick={refreshPreferences}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center space-x-2"
@@ -384,7 +444,7 @@ const PrefPage = () => {
 
   if (!preferences || preferences.records.length === 0) {
     return (
-      <div className="relative">
+      <div className="relative px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
             <Settings className="h-8 w-8 text-blue-600" />
@@ -431,13 +491,18 @@ const PrefPage = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative px-4 sm:px-6 lg:px-8">
       {/* Background gradient blobs */}
       <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-10 blur-3xl -z-10"></div>
       <div className="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-8 blur-2xl -z-10"></div>
       <div className="absolute top-32 left-1/3 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-6 blur-xl -z-10"></div>
 
       {/* Modals */}
+      <TitleRestrictionModal
+        isOpen={showTitleRestrictionModal}
+        onClose={() => setShowTitleRestrictionModal(false)}
+      />
+
       <SkillsModal
         isOpen={showSkillsModal}
         onClose={() => setShowSkillsModal(false)}
@@ -467,7 +532,7 @@ const PrefPage = () => {
           initial="hidden"
           animate="visible"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div className="flex items-center space-x-2">
               <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
               <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
@@ -481,7 +546,7 @@ const PrefPage = () => {
             </div>
             <button 
               onClick={() => window.location.reload()}
-              className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+              className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors self-start sm:self-auto"
             >
               Refresh
             </button>
@@ -537,7 +602,7 @@ const PrefPage = () => {
             <Settings className="h-5 w-5 mr-2 text-blue-600" />
             User Preferences
           </h1>
-          <div className="flex items-center space-x-4 text-xs text-gray-600">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-xs text-gray-600">
             <span className="flex items-center">
               <FileText className="h-3 w-3 mr-1" />
               {preferences.aggregated.totalRecords} Records
@@ -552,9 +617,9 @@ const PrefPage = () => {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
           {/* Records Sidebar */}
-          <motion.div className="lg:col-span-1" variants={itemVariants}>
+          <motion.div className="lg:col-span-1 order-2 lg:order-1" variants={itemVariants}>
             <div className="bg-white border border-gray-200 rounded-lg p-4 relative overflow-hidden">
               <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-md"></div>
 
@@ -562,7 +627,7 @@ const PrefPage = () => {
                 <Layers className="h-4 w-4 mr-2 text-gray-600" />
                 Preference Records
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-64 lg:max-h-96 overflow-y-auto">
                 {preferences.records.map((record, index) => (
                   <button
                     key={record._id}
@@ -590,32 +655,29 @@ const PrefPage = () => {
           </motion.div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="lg:col-span-3 order-1 lg:order-2 space-y-4">
             {/* Current Record Details */}
             <motion.div
-              className="bg-white border border-gray-200 rounded-lg p-5 relative overflow-hidden"
+              className="bg-white border border-gray-200 rounded-lg p-4 sm:p-5 relative overflow-hidden"
               variants={itemVariants}
             >
               <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/15 blur-lg"></div>
 
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Target className="h-4 w-4 mr-2 text-blue-600" />
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editData.preferences || ""}
-                      onChange={(e) => setEditData(prev => ({ ...prev, preferences: e.target.value }))}
-                      className="border border-gray-300 rounded px-2 py-1 text-sm flex-1 max-w-md"
-                      placeholder="Preference title"
-                    />
-                  ) : (
-                    renderPreferenceTitle(currentRecord.preferences) || "Untitled Preference"
-                  )}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-3 sm:space-y-0">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center flex-1">
+                  <Target className="h-4 w-4 mr-2 text-blue-600 flex-shrink-0" />
+                  <button
+                    onClick={() => setShowTitleRestrictionModal(true)}
+                    className="text-left hover:text-blue-600 transition-colors cursor-pointer truncate"
+                    title="Click to learn why this cannot be edited"
+                  >
+                    {renderPreferenceTitle(currentRecord.preferences) || "Untitled Preference"}
+                  </button>
+                  <Lock className="h-3 w-3 ml-2 text-gray-400 flex-shrink-0" />
                 </h2>
                 
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
                     Record {selectedRecord + 1} of {preferences.records.length}
                   </span>
                   
@@ -668,7 +730,7 @@ const PrefPage = () => {
                   <textarea
                     value={editData.summary || ""}
                     onChange={(e) => setEditData(prev => ({ ...prev, summary: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg p-3 text-xs text-gray-700 resize-none"
+                    className="w-full border border-gray-300 rounded-lg p-3 text-xs text-gray-700 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={4}
                     placeholder="Enter your professional summary"
                   />
@@ -681,7 +743,7 @@ const PrefPage = () => {
 
               {/* Skills */}
               <div className="mb-5">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 space-y-2 sm:space-y-0">
                   <h3 className="text-sm font-semibold text-gray-800 flex items-center">
                     <Code className="h-3 w-3 mr-1 text-gray-600" />
                     Skills ({isEditing ? (editData.skills || []).length : (currentRecord.skills || []).length})
@@ -689,7 +751,7 @@ const PrefPage = () => {
                   {isEditing && (
                     <button
                       onClick={() => setShowSkillsModal(true)}
-                      className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-200 transition-colors flex items-center space-x-1"
+                      className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-200 transition-colors flex items-center space-x-1 self-start sm:self-auto"
                     >
                       <Plus className="h-3 w-3" />
                       <span>Add Skills</span>
@@ -720,7 +782,7 @@ const PrefPage = () => {
 
               {/* Projects */}
               <div className="mb-5">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 space-y-2 sm:space-y-0">
                   <h3 className="text-sm font-semibold text-gray-800 flex items-center">
                     <FolderOpen className="h-3 w-3 mr-1 text-gray-600" />
                     Projects ({isEditing ? (editData.projects || []).length : (currentRecord.projects || []).length})
@@ -728,14 +790,14 @@ const PrefPage = () => {
                   {isEditing && (
                     <button
                       onClick={() => setShowProjectsModal(true)}
-                      className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full hover:bg-green-200 transition-colors flex items-center space-x-1"
+                      className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full hover:bg-green-200 transition-colors flex items-center space-x-1 self-start sm:self-auto"
                     >
                       <Plus className="h-3 w-3" />
                       <span>Add Projects</span>
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(isEditing ? (editData.projects || []) : (currentRecord.projects || [])).map((project, index) => (
                     <div
                       key={index}
@@ -749,7 +811,7 @@ const PrefPage = () => {
                       {isEditing && (
                         <button
                           onClick={() => removeProject(index)}
-                          className="ml-2 text-red-500 hover:text-red-700"
+                          className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -761,16 +823,14 @@ const PrefPage = () => {
 
               {/* Metadata */}
               <div className="pt-3 border-t border-gray-200">
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex flex-col sm:flex-row sm:justify-between text-xs text-gray-500 space-y-1 sm:space-y-0">
                   <span className="flex items-center">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Created:{" "}
-                    {new Date(currentRecord.createdAt).toLocaleDateString()}
+                    Created: {new Date(currentRecord.createdAt).toLocaleDateString()}
                   </span>
                   <span className="flex items-center">
                     <RefreshCw className="h-3 w-3 mr-1" />
-                    Updated:{" "}
-                    {new Date(currentRecord.updatedAt).toLocaleDateString()}
+                    Updated: {new Date(currentRecord.updatedAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -778,7 +838,7 @@ const PrefPage = () => {
 
             {/* Aggregated Data */}
             <motion.div
-              className="bg-white border border-gray-200 rounded-lg p-5 relative overflow-hidden"
+              className="bg-white border border-gray-200 rounded-lg p-4 sm:p-5 relative overflow-hidden"
               variants={itemVariants}
             >
               <div className="absolute top-3 right-3 w-10 h-10 rounded-full bg-gradient-to-br from-purple-200/20 to-pink-200/15 blur-xl"></div>
@@ -788,13 +848,12 @@ const PrefPage = () => {
                 Aggregated Overview
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 {/* All Unique Skills */}
                 <div>
                   <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
                     <Code className="h-3 w-3 mr-1 text-gray-600" />
-                    All Unique Skills ({preferences.aggregated.allSkills.length}
-                    )
+                    All Unique Skills ({preferences.aggregated.allSkills.length})
                   </h4>
                   <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-lg p-3 bg-gray-50/50">
                     <div className="flex flex-wrap gap-1">
@@ -817,16 +876,14 @@ const PrefPage = () => {
                     All Projects ({preferences.aggregated.allProjects.length})
                   </h4>
                   <div className="max-h-40 overflow-y-auto border border-gray-100 rounded-lg p-3 bg-gray-50/50 space-y-1.5">
-                    {preferences.aggregated.allProjects.map(
-                      (project, index) => (
-                        <div
-                          key={index}
-                          className="p-2 bg-white rounded text-xs text-gray-700 border border-gray-200"
-                        >
-                          {project}
-                        </div>
-                      )
-                    )}
+                    {preferences.aggregated.allProjects.map((project, index) => (
+                      <div
+                        key={index}
+                        className="p-2 bg-white rounded text-xs text-gray-700 border border-gray-200"
+                      >
+                        {project}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -838,8 +895,7 @@ const PrefPage = () => {
                   Latest Summary
                 </h4>
                 <p className="text-xs text-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 p-3 rounded-lg border border-gray-200">
-                  {preferences.aggregated.latestSummary ||
-                    "No summary available"}
+                  {preferences.aggregated.latestSummary || "No summary available"}
                 </p>
               </div>
             </motion.div>

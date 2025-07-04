@@ -93,7 +93,7 @@ export const savePost = async (req, res) => {
                     timestamp: timestamp
                 });
 
-                console.log("Data saved successfully:", data);
+                // console.log("Data saved successfully:", data);
             } else {
                 throw new Error("API returned non-200 status");
             }
