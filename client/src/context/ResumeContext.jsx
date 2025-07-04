@@ -15,6 +15,9 @@ export const ResumeProvider = ({ children }) => {
   // Memoize userId to prevent unnecessary re-renders
   const userId = useMemo(() => getUserId(), [getUserId]);
 
+
+
+
   // Fetch resumes from API - fix dependency array
   const fetchResumes = useCallback(async () => {
     if (!userId) return;
@@ -72,6 +75,16 @@ export const ResumeProvider = ({ children }) => {
     }
   }, [apiUrl]);
 
+  const updatePreferences = useCallback(async (editData, prefId) => {
+    try {
+      const response = await api.post(`${apiUrl}/update-pref`, {updateData: editData, prefId});
+      return response.data;
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+      throw error;
+    }
+  }, [apiUrl]);
+
   // Socket event handlers - fix to prevent recreation
   useEffect(() => {
     if (!socket || !isConnected) return;
@@ -100,16 +113,23 @@ export const ResumeProvider = ({ children }) => {
       );
     };
 
+    const handlePreferencesUpdated = (data) => {
+      console.log('Preferences updated via socket:', data);
+      setPreferences(data.data);
+    };
+
     // Register event listeners
     const cleanupCreated = onEvent('resume_created', handleResumeCreated);
     const cleanupUpdated = onEvent('resume_updated', handleResumeUpdated);
     const cleanupDeleted = onEvent('resume_deleted', handleResumeDeleted);
+    const cleanupPreferencesUpdated = onEvent('preferences_updated', handlePreferencesUpdated);
 
     // Cleanup function
     return () => {
       if (cleanupCreated) cleanupCreated();
       if (cleanupUpdated) cleanupUpdated();
       if (cleanupDeleted) cleanupDeleted();
+      if (cleanupPreferencesUpdated) cleanupPreferencesUpdated();
     };
   }, [socket, isConnected, onEvent]);
 
@@ -128,8 +148,9 @@ export const ResumeProvider = ({ children }) => {
     updateResume,
     deleteResume,
     fetchResumes,
-    isSocketConnected: isConnected
-  }), [resumes, loading, createResume, updateResume, deleteResume, fetchResumes, isConnected]);
+    isSocketConnected: isConnected,
+    updatePreferences
+  }), [resumes, loading, createResume, updateResume, deleteResume, fetchResumes, isConnected, updatePreferences]);
 
   return (
     <ResumeContext.Provider value={value}>

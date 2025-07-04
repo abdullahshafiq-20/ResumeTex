@@ -9,6 +9,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(__dirname, '../node_modules/pdfjs-dist/build/pdf.worker.js');
 
+export const extractData = async (req, res) => {
+    const { pdfUrl } = req.body;
+    const { extractedData } = await extractPdfData(pdfUrl);
+    res.json(extractedData);
+}
+
 export const extractPdfData = async (pdfUrl) => {
     try {
         console.log("from extractpdf", pdfUrl)// Extract the PDF URL from the request body
@@ -73,12 +79,18 @@ export const extractPdfData = async (pdfUrl) => {
                 links.push({ url, context });
             }
         }
-        const email = extractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        const email = links.find(link => link.url.includes('@'));
+        const github = links.find(link => link.url.includes('github.com'));
+        const linkedin = links.find(link => link.url.includes('linkedin.com'));
+        //for potfilio add relaxing matching with name and last name
         console.log("email", email)
         const extractedData = {
             text: extractedText,
             links,
-            email
+            email,
+            github,
+            linkedin
+            // portfolio
         };
 
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDashboard } from "../context/DashbaordContext";
 import {
   Brain,
@@ -14,13 +14,344 @@ import {
   TrendingUp,
   Layers,
   RefreshCw,
+  Edit3,
+  Save,
+  X,
+  Plus,
+  Loader2,
 } from "lucide-react";
+import { useResumes } from "../context/ResumeContext";
+
+// Skills Modal Component
+const SkillsModal = ({ isOpen, onClose, currentSkills, onSave, isLoading }) => {
+  const [skillsInput, setSkillsInput] = useState("");
+
+  const handleSave = () => {
+    if (skillsInput.trim()) {
+      const newSkills = skillsInput
+        .split(",")
+        .map(skill => skill.trim())
+        .filter(skill => skill.length > 0);
+      
+      onSave(newSkills);
+      setSkillsInput("");
+    }
+  };
+
+  const handleClose = () => {
+    setSkillsInput("");
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Code className="h-5 w-5 mr-2 text-blue-600" />
+              Add Skills
+            </h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter skills separated by commas
+            </label>
+            <textarea
+              value={skillsInput}
+              onChange={(e) => setSkillsInput(e.target.value)}
+              placeholder="React, Node.js, Python, JavaScript, etc."
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none"
+              rows={4}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Separate multiple skills with commas
+            </p>
+          </div>
+
+          {/* Current Skills Preview */}
+          {currentSkills.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Current Skills
+              </label>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {currentSkills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={isLoading || !skillsInput.trim()}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Adding...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  <span>Add Skills</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
+
+// Projects Modal Component
+const ProjectsModal = ({ isOpen, onClose, currentProjects, onSave, isLoading }) => {
+  const [projectsInput, setProjectsInput] = useState("");
+
+  const handleSave = () => {
+    if (projectsInput.trim()) {
+      const newProjects = projectsInput
+        .split(",")
+        .map(project => project.trim())
+        .filter(project => project.length > 0);
+      
+      onSave(newProjects);
+      setProjectsInput("");
+    }
+  };
+
+  const handleClose = () => {
+    setProjectsInput("");
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <FolderOpen className="h-5 w-5 mr-2 text-green-600" />
+              Add Projects
+            </h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter projects separated by commas
+            </label>
+            <textarea
+              value={projectsInput}
+              onChange={(e) => setProjectsInput(e.target.value)}
+              placeholder="E-commerce Platform, Mobile App, Portfolio Website, etc."
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none"
+              rows={4}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Separate multiple projects with commas
+            </p>
+          </div>
+
+          {/* Current Projects Preview */}
+          {currentProjects.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Current Projects
+              </label>
+              <div className="space-y-1 max-h-20 overflow-y-auto">
+                {currentProjects.map((project, index) => (
+                  <div
+                    key={index}
+                    className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs"
+                  >
+                    {project}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={isLoading || !projectsInput.trim()}
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Adding...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  <span>Add Projects</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
 
 const PrefPage = () => {
   const { preferences, loading, error, refreshPreferences, isSocketConnected } =
     useDashboard();
+  const { updatePreferences } = useResumes();
   const [selectedRecord, setSelectedRecord] = useState(0);
   const { lastUpdated, isLive } = useDashboard();
+  
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Modal states
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [isAddingSkills, setIsAddingSkills] = useState(false);
+  const [isAddingProjects, setIsAddingProjects] = useState(false);
+
+  // Initialize edit data when editing starts
+  const startEditing = () => {
+    const currentRecord = preferences.records[selectedRecord];
+    setEditData({
+      preferences: typeof currentRecord.preferences === 'string' 
+        ? currentRecord.preferences 
+        : JSON.stringify(currentRecord.preferences) || "",
+      summary: currentRecord.summary || "",
+      skills: [...(currentRecord.skills || [])],
+      projects: [...(currentRecord.projects || [])]
+    });
+    setIsEditing(true);
+  };
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setEditData({});
+  };
+
+  // Save preferences - preserve selected record
+  const savePreferences = async () => {
+    const currentSelectedIndex = selectedRecord; // Store current selection index
+    console.log(preferences.records[selectedRecord]._id);
+    setIsSaving(true);
+    try {
+      await updatePreferences(editData, preferences.records[selectedRecord]._id);
+      setIsEditing(false);
+      setEditData({});
+      // Refresh preferences to get updated data
+      await refreshPreferences();
+      // Restore the selected record after refresh
+      setSelectedRecord(currentSelectedIndex);
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle adding skills from modal
+  const handleAddSkills = async (newSkills) => {
+    setIsAddingSkills(true);
+    try {
+      const updatedSkills = [...editData.skills, ...newSkills];
+      setEditData(prev => ({
+        ...prev,
+        skills: updatedSkills
+      }));
+      setShowSkillsModal(false);
+    } catch (error) {
+      console.error('Error adding skills:', error);
+    } finally {
+      setIsAddingSkills(false);
+    }
+  };
+
+  // Handle adding projects from modal
+  const handleAddProjects = async (newProjects) => {
+    setIsAddingProjects(true);
+    try {
+      const updatedProjects = [...editData.projects, ...newProjects];
+      setEditData(prev => ({
+        ...prev,
+        projects: updatedProjects
+      }));
+      setShowProjectsModal(false);
+    } catch (error) {
+      console.error('Error adding projects:', error);
+    } finally {
+      setIsAddingProjects(false);
+    }
+  };
+
+  // Remove skill
+  const removeSkill = (index) => {
+    setEditData(prev => ({
+      ...prev,
+      skills: prev.skills.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Remove project
+  const removeProject = (index) => {
+    setEditData(prev => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index)
+    }));
+  };
+
   if (loading) {
     return (
       <div className="relative">
@@ -89,12 +420,39 @@ const PrefPage = () => {
     },
   };
 
+  // Helper function to safely render preference title
+  const renderPreferenceTitle = (preferences) => {
+    if (typeof preferences === 'string') {
+      return preferences;
+    } else if (typeof preferences === 'object' && preferences !== null) {
+      return JSON.stringify(preferences);
+    }
+    return "Untitled Preference";
+  };
+
   return (
     <div className="relative">
       {/* Background gradient blobs */}
       <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-10 blur-3xl -z-10"></div>
       <div className="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-8 blur-2xl -z-10"></div>
       <div className="absolute top-32 left-1/3 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-6 blur-xl -z-10"></div>
+
+      {/* Modals */}
+      <SkillsModal
+        isOpen={showSkillsModal}
+        onClose={() => setShowSkillsModal(false)}
+        currentSkills={editData.skills || []}
+        onSave={handleAddSkills}
+        isLoading={isAddingSkills}
+      />
+
+      <ProjectsModal
+        isOpen={showProjectsModal}
+        onClose={() => setShowProjectsModal(false)}
+        currentProjects={editData.projects || []}
+        onSave={handleAddProjects}
+        isLoading={isAddingProjects}
+      />
 
       <motion.div
         className=""
@@ -103,33 +461,32 @@ const PrefPage = () => {
         animate="visible"
       >
         {/* Live Status Indicator */}
-              {/* Live Status Indicator */}
-      <motion.div
-        className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
-            <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
-              Live Update
-            </span>
-            {lastUpdated && (
-              <span className="text-xs text-gray-500">
-                • {new Date(lastUpdated).toLocaleTimeString()}
+        <motion.div
+          className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
+              <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
+                Live Update
               </span>
-            )}
+              {lastUpdated && (
+                <span className="text-xs text-gray-500">
+                  • {new Date(lastUpdated).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+            >
+              Refresh
+            </button>
           </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
-          >
-            Refresh
-          </button>
-        </div>
-      </motion.div>
+        </motion.div>
 
         {/* AI Notice */}
         <motion.div
@@ -220,7 +577,7 @@ const PrefPage = () => {
                       <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 opacity-60"></div>
                     )}
                     <div className="font-medium text-xs text-gray-900 truncate">
-                      {record.preferences || "Untitled"}
+                      {renderPreferenceTitle(record.preferences) || "Untitled"}
                     </div>
                     <div className="text-xs text-gray-500 mt-1 flex items-center">
                       <Calendar className="h-2 w-2 mr-1" />
@@ -244,11 +601,61 @@ const PrefPage = () => {
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                   <Target className="h-4 w-4 mr-2 text-blue-600" />
-                  {currentRecord.preferences || "Untitled Preference"}
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editData.preferences || ""}
+                      onChange={(e) => setEditData(prev => ({ ...prev, preferences: e.target.value }))}
+                      className="border border-gray-300 rounded px-2 py-1 text-sm flex-1 max-w-md"
+                      placeholder="Preference title"
+                    />
+                  ) : (
+                    renderPreferenceTitle(currentRecord.preferences) || "Untitled Preference"
+                  )}
                 </h2>
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                  Record {selectedRecord + 1} of {preferences.records.length}
-                </span>
+                
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                    Record {selectedRecord + 1} of {preferences.records.length}
+                  </span>
+                  
+                  {isEditing ? (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={savePreferences}
+                        disabled={isSaving}
+                        className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs flex items-center space-x-1 disabled:opacity-50"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-3 w-3" />
+                            <span>Save</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs flex items-center space-x-1"
+                      >
+                        <X className="h-3 w-3" />
+                        <span>Cancel</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={startEditing}
+                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs flex items-center space-x-1"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      <span>Edit</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Summary */}
@@ -257,24 +664,55 @@ const PrefPage = () => {
                   <FileText className="h-3 w-3 mr-1 text-gray-600" />
                   Summary
                 </h3>
-                <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg">
-                  {currentRecord.summary || "No summary provided"}
-                </p>
+                {isEditing ? (
+                  <textarea
+                    value={editData.summary || ""}
+                    onChange={(e) => setEditData(prev => ({ ...prev, summary: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg p-3 text-xs text-gray-700 resize-none"
+                    rows={4}
+                    placeholder="Enter your professional summary"
+                  />
+                ) : (
+                  <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg">
+                    {currentRecord.summary || "No summary provided"}
+                  </p>
+                )}
               </div>
 
               {/* Skills */}
               <div className="mb-5">
-                <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                  <Code className="h-3 w-3 mr-1 text-gray-600" />
-                  Skills ({currentRecord.skills.length})
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-800 flex items-center">
+                    <Code className="h-3 w-3 mr-1 text-gray-600" />
+                    Skills ({isEditing ? (editData.skills || []).length : (currentRecord.skills || []).length})
+                  </h3>
+                  {isEditing && (
+                    <button
+                      onClick={() => setShowSkillsModal(true)}
+                      className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-200 transition-colors flex items-center space-x-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>Add Skills</span>
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {currentRecord.skills.map((skill, index) => (
+                  {(isEditing ? (editData.skills || []) : (currentRecord.skills || [])).map((skill, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
+                      className={`px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium ${
+                        isEditing ? 'flex items-center space-x-1' : ''
+                      }`}
                     >
-                      {skill}
+                      <span>{skill}</span>
+                      {isEditing && (
+                        <button
+                          onClick={() => removeSkill(index)}
+                          className="ml-1 text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                     </span>
                   ))}
                 </div>
@@ -282,19 +720,40 @@ const PrefPage = () => {
 
               {/* Projects */}
               <div className="mb-5">
-                <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                  <FolderOpen className="h-3 w-3 mr-1 text-gray-600" />
-                  Projects ({currentRecord.projects.length})
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-800 flex items-center">
+                    <FolderOpen className="h-3 w-3 mr-1 text-gray-600" />
+                    Projects ({isEditing ? (editData.projects || []).length : (currentRecord.projects || []).length})
+                  </h3>
+                  {isEditing && (
+                    <button
+                      onClick={() => setShowProjectsModal(true)}
+                      className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full hover:bg-green-200 transition-colors flex items-center space-x-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>Add Projects</span>
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {currentRecord.projects.map((project, index) => (
+                  {(isEditing ? (editData.projects || []) : (currentRecord.projects || [])).map((project, index) => (
                     <div
                       key={index}
-                      className="p-2 bg-green-50 border border-green-200 rounded-lg"
+                      className={`p-2 bg-green-50 border border-green-200 rounded-lg ${
+                        isEditing ? 'flex items-center justify-between' : ''
+                      }`}
                     >
-                      <div className="font-medium text-xs text-green-800">
+                      <div className="font-medium text-xs text-green-800 flex-1">
                         {project}
                       </div>
+                      {isEditing && (
+                        <button
+                          onClick={() => removeProject(index)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

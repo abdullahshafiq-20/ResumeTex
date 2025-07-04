@@ -12,6 +12,7 @@ import jobRoutes from "./routes/jobRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import extensionRoutes from "./routes/extensionRoutes.js";
 import statsRouter from "./routes/statsRoutes.js";
+import prefRoutes from "./routes/prefRoutes.js";
 import { initSocket } from './config/socketConfig.js';
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -51,7 +52,7 @@ app.use("/api", jobRoutes);
 app.use("/api", resumeRoutes);
 app.use("/api", extensionRoutes);
 app.use("/api", statsRouter);
-
+app.use("/api", prefRoutes);
 app.get("/", (req, res) => {
   res.status(200).json({ status: 'ok' });
 });

@@ -176,6 +176,14 @@ const emitPostDeleted = (userId, postId) => {
   });
 };
 
+const emitPreferencesUpdated = (userId, preferencesData) => {
+  emitToUser(userId, 'preferences_updated', {
+    type: 'preferences_updated',
+    data: preferencesData,
+    timestamp: new Date().toISOString()
+  });
+};
+
 
 export {
   initSocket,
@@ -192,5 +200,6 @@ export {
   emitPostCreated,
   emitEmailCreated,
   emitEmailSent,
-  emitPostDeleted 
+  emitPostDeleted,
+  emitPreferencesUpdated
 };

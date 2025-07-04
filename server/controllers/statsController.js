@@ -7,7 +7,7 @@ import { emitStatsDashboard } from '../config/socketConfig.js';
  * Helper function to fetch user preferences data
  */
 const fetchUserPreferences = async (userId) => {
-    const userPreferences = await UserPreferences.find({ userId }).sort({ createdAt: -1 });
+    const userPreferences = await UserPreferences.find({ userId }).sort({ updatedAt: -1 });
 
     if (!userPreferences || userPreferences.length === 0) {
         return {

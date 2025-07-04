@@ -1,4 +1,4 @@
-import { User, UserPreferences, Email, UserResume } from '../models/userSchema.js';
+import { UserPreferences } from '../../models/userSchema.js';
 import mongoose from 'mongoose';
 import { emitPreferencesDashboard } from '../../config/socketConfig.js';
 import { triggerStatsUpdate } from "../../utils/trigger.js";
@@ -7,11 +7,11 @@ import { triggerStatsUpdate } from "../../utils/trigger.js";
 export const updateUserPreferences = async (req, res) => {
     try {
         const userId = req.user.id;
-        const updateData = req.body;
+        const {prefId, updateData} = req.body;
 
         // Update or create user preferences
         const userPreferences = await UserPreferences.findOneAndUpdate(
-            { userId },
+            { userId, _id: prefId },
             { 
                 ...updateData,
                 userId,
