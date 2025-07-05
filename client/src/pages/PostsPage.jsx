@@ -20,6 +20,8 @@ import {
   Rocket,
   Target,
   Sparkles,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { useDashboard } from "../context/DashbaordContext";
 
@@ -39,6 +41,7 @@ const PostsPage = () => {
   const [deletingPostId, setDeletingPostId] = useState(null);
   const [updatingPostId, setUpdatingPostId] = useState(null);
   const [activeTab, setActiveTab] = useState("not-sent");
+  const [deleteConfirmPost, setDeleteConfirmPost] = useState(null);
   const { lastUpdated, isLive } = useDashboard();
   // Function to emit notification
   const showNotification = (message, type = "info") => {
@@ -113,18 +116,27 @@ const PostsPage = () => {
   };
 
   const handleDeletePost = async (postId) => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      setDeletingPostId(postId);
-      try {
-        await deletePost(postId);
-        showNotification("Post deleted successfully.", "success");
-      } catch (error) {
-        console.error("Error deleting post:", error);
-        showNotification("Failed to delete post. Please try again.", "error");
-      } finally {
-        setDeletingPostId(null);
-      }
+    setDeletingPostId(postId);
+    try {
+      await deletePost(postId);
+      showNotification("Post deleted successfully.", "success");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      showNotification("Failed to delete post. Please try again.", "error");
+    } finally {
+      setDeletingPostId(null);
+      setDeleteConfirmPost(null);
     }
+  };
+
+  const openDeleteModal = (post) => {
+    setDeleteConfirmPost(post);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteConfirmPost(null);
+    document.body.style.overflow = "auto";
   };
 
   // Only show page loading on initial load when not saving
@@ -178,18 +190,54 @@ const PostsPage = () => {
     const hasHashtags = post.extractedHashtags?.length > 0;
     const isDeleting = deletingPostId === post._id;
     const isUpdating = updatingPostId === post._id;
+  
+    // More robust comparison for "no match found"
+    const isNoMatchFound = post.jobTitle?.toLowerCase()?.trim()?.includes("no match found") || 
+                          post.jobTitle?.toLowerCase()?.trim() === "no match found";
+  
+    // Enhanced debugging
+    console.log("Post ID:", post._id);
+    console.log("Job Title:", `"${post.jobTitle}"`);
+    console.log("Job Title Length:", post.jobTitle?.length);
+    console.log("Trimmed Job Title:", `"${post.jobTitle?.trim()}"`);
+    console.log("Lowercase Job Title:", `"${post.jobTitle?.toLowerCase()?.trim()}"`);
+    console.log("Is No Match Found:", isNoMatchFound);
+    console.log("---");
 
     return (
       <motion.div
         key={post._id}
-        className="bg-white border border-gray-200 rounded-lg overflow-hidden group transition-all duration-200 relative"
+        className={`border rounded-lg overflow-hidden group transition-all duration-200 relative ${
+          isNoMatchFound 
+            ? "bg-red-50 border-red-200" 
+            : "bg-white border-gray-200"
+        }`}
         variants={itemVariants}
+
       >
+        {/* Debug indicator - remove this once working */}
+
+
         {/* Subtle background blob */}
-        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+        <div className={`absolute top-2 right-2 w-6 h-6 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+          isNoMatchFound 
+            ? "bg-gradient-to-br from-red-200/30 to-orange-200/20" 
+            : "bg-gradient-to-br from-blue-200/20 to-purple-200/15"
+        }`}></div>
+
+        {/* Warning indicator for no match found */}
+        {/* {isNoMatchFound && (
+          <div className="absolute top-1 left-1 z-10">
+            <div className="bg-red-500 text-white rounded-full p-1" title="No match found - Email cannot be generated">
+              <AlertTriangle size={12} />
+            </div>
+          </div>
+        )} */}
 
         {/* Status indicators at the top of card */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50/50">
+        <div className={`flex items-center justify-between p-4 border-b border-gray-100 ${
+          isNoMatchFound ? "bg-red-50/50" : "bg-gray-50/50"
+        }`}>
           <div className="flex gap-3">
             <div
               className="flex flex-col items-center"
@@ -197,12 +245,22 @@ const PostsPage = () => {
             >
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  hasJobTitle ? "bg-green-100" : "bg-gray-100"
+                  hasJobTitle 
+                    ? isNoMatchFound 
+                      ? "bg-red-100" 
+                      : "bg-green-100" 
+                    : "bg-gray-100"
                 }`}
               >
                 <Briefcase
                   size={12}
-                  className={hasJobTitle ? "text-green-600" : "text-gray-400"}
+                  className={
+                    hasJobTitle 
+                      ? isNoMatchFound 
+                        ? "text-red-600" 
+                        : "text-green-600" 
+                      : "text-gray-400"
+                  }
                 />
               </div>
               <span className="text-xs mt-1 text-gray-600">
@@ -308,7 +366,7 @@ const PostsPage = () => {
               className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={(e) => {
                 e.stopPropagation();
-                handleDeletePost(post._id);
+                openDeleteModal(post);
               }}
               disabled={isDeleting || isUpdating}
               title="Delete post"
@@ -316,7 +374,7 @@ const PostsPage = () => {
               {isDeleting ? (
                 <div className="animate-spin rounded-full h-3 w-3 border border-red-500 border-t-transparent"></div>
               ) : (
-                <X size={12} />
+                <Trash2 size={12} />
               )}
             </button>
           </div>
@@ -324,36 +382,48 @@ const PostsPage = () => {
 
         {/* Status badge */}
         <div className="px-4 pt-3">
-          <span
-            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-              post.isEmailSent
-                ? "bg-green-100 text-green-800 border border-green-200"
-                : "bg-orange-100 text-orange-800 border border-orange-200"
-            }`}
-          >
-            {isUpdating ? (
-              <>
-                <div className="animate-spin rounded-full h-2 w-2 border border-current border-t-transparent mr-1"></div>
-                Updating...
-              </>
-            ) : post.isEmailSent ? (
-              <>
-                <Send size={10} className="mr-1" />
-                Sent
-              </>
-            ) : (
-              <>
-                <Clock size={10} className="mr-1" />
-                Pending
-              </>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                post.isEmailSent
+                  ? "bg-green-100 text-green-800 border border-green-200"
+                  : "bg-orange-100 text-orange-800 border border-orange-200"
+              }`}
+            >
+              {isUpdating ? (
+                <>
+                  <div className="animate-spin rounded-full h-2 w-2 border border-current border-t-transparent mr-1"></div>
+                  Updating...
+                </>
+              ) : post.isEmailSent ? (
+                <>
+                  <Send size={10} className="mr-1" />
+                  Sent
+                </>
+              ) : (
+                <>
+                  <Clock size={10} className="mr-1" />
+                  Pending
+                </>
+              )}
+            </span>
+            {isNoMatchFound && (
+              <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                <AlertTriangle size={10} className="mr-1" />
+                No Email Generation
+              </span>
             )}
-          </span>
+          </div>
         </div>
 
         <div className="p-4">
           {post.jobTitle && (
-            <h3 className="text-sm font-semibold text-gray-800 line-clamp-1 mb-3 flex items-center">
-              <Briefcase className="h-3 w-3 mr-1.5 text-blue-600" />
+            <h3 className={`text-sm font-semibold line-clamp-1 mb-3 flex items-center ${
+              isNoMatchFound ? "text-red-800" : "text-gray-800"
+            }`}>
+              <Briefcase className={`h-3 w-3 mr-1.5 ${
+                isNoMatchFound ? "text-red-600" : "text-blue-600"
+              }`} />
               {post.jobTitle}
             </h3>
           )}
@@ -594,7 +664,7 @@ const PostsPage = () => {
                           <div className="animate-spin rounded-full h-4 w-4 border border-blue-500 border-t-transparent"></div>
                         </div>
                         <span className="font-medium">Saving...</span>
-                        <Sparkles className="h-4 w-4 animate-pulse" />
+                        <Sparkles className="h-4 animate-pulse" />
                       </>
                     ) : (
                       <>
@@ -852,6 +922,97 @@ const PostsPage = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Confirmation Modal */}
+        <AnimatePresence>
+          {deleteConfirmPost && (
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeDeleteModal}
+            >
+              <motion.div
+                className="bg-white border border-gray-200 rounded-lg w-full max-w-md relative overflow-hidden"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.15 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal gradient blobs */}
+                <div className="absolute top-2 right-2 w-16 h-16 rounded-full bg-gradient-to-br from-red-200/30 to-orange-200/20 blur-2xl"></div>
+                <div className="absolute bottom-2 left-2 w-12 h-12 rounded-full bg-gradient-to-br from-gray-200/20 to-red-200/15 blur-xl"></div>
+
+                <div className="relative p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-800">
+                          Delete Post
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          This action cannot be undone
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={closeDeleteModal}
+                      className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                      aria-label="Close dialog"
+                    >
+                      <X size={16} className="text-gray-500" />
+                    </button>
+                  </div>
+
+                  {/* Post preview */}
+                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-6">
+                    {deleteConfirmPost.jobTitle && (
+                      <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                        <Briefcase className="h-3 w-3 mr-1.5 text-blue-600" />
+                        {deleteConfirmPost.jobTitle}
+                      </h3>
+                    )}
+                    <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
+                      {deleteConfirmPost.content}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={closeDeleteModal}
+                      disabled={deletingPostId === deleteConfirmPost._id}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(deleteConfirmPost._id)}
+                      disabled={deletingPostId === deleteConfirmPost._id}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 hover:border-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {deletingPostId === deleteConfirmPost._id ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
+                          Deleting...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 size={14} />
+                          Delete Post
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </motion.div>

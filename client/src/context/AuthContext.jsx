@@ -6,6 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
@@ -27,6 +28,7 @@ export const AuthProvider = ({ children }) => {
             logoutUser();
           } else {
             setUser(decoded);
+            setUserProfile(decoded);
             setIsAuthenticated(true);
           }
         } catch (error) {
@@ -82,12 +84,7 @@ export const AuthProvider = ({ children }) => {
   };
   
   const getUserProfile = () => {
-    const data = {
-      name: user.name,
-      email: user.email,
-      picture: user.picture,
-    };
-    return data;
+    return userProfile;
   };
 
   return (

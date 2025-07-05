@@ -442,7 +442,7 @@ const PrefPage = () => {
     );
   }
 
-  if (!preferences || preferences.records.length === 0) {
+  if (!preferences || !preferences.records || preferences.records.length === 0) {
     return (
       <div className="relative px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -491,7 +491,7 @@ const PrefPage = () => {
   };
 
   return (
-    <div className="relative px-4 sm:px-6 lg:px-8">
+    <div className="relative ">
       {/* Background gradient blobs */}
       <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-10 blur-3xl -z-10"></div>
       <div className="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-8 blur-2xl -z-10"></div>

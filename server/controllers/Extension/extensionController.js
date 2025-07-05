@@ -4,6 +4,13 @@ import { emitPostCreated, emitPostDeleted } from "../../config/socketConfig.js";
 import { triggerStatsUpdate } from "../../utils/trigger.js";
 import bcrypt from "bcrypt";
 import axios from "axios";
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from "dotenv";
+dotenv.config();
+
+
+
+
 
 
 function extractContentInfo(content) {
@@ -12,14 +19,14 @@ function extractContentInfo(content) {
 
     //remove any leading or trailing whitespace from the content
     content = content.trim();
-    
+
     // Clean up the content by removing *, **, *** and extra spaces but keep single line breaks
     content = content
         .replace(/\*{1,}/g, '') // Remove all * occurrences (single, double, triple, or more)
         .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
         .replace(/\n{3,}/g, '\n\n') // Replace 3+ consecutive newlines with just 2 newlines
         .trim(); // Remove leading/trailing whitespace again
-    
+
     const urlRegex = /(?:https?|ftp):\/\/[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?|www\.[\w-]+(?:\.[\w-]+)+(?:[\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/gi;
 
     // Regular expression for email addresses
@@ -42,7 +49,39 @@ function extractContentInfo(content) {
     };
 }
 
-const getJobTitle = async (content) => {
+const getJobTitle = async (content, userPrefrence) => {
+    //create gemini client
+    const apiKey = process.env.GEMINI_API_KEY_4;
+    console.log(apiKey);
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    //create gemini prompt
+    const prompt = `You are a job matching specialist. Your task is to analyze job listings and match them with user preferences.
+
+    USER PREFERENCES: ${userPrefrence}
+    
+    JOB LISTINGS TEXT: ${content}
+    
+    INSTRUCTIONS:
+    1. Analyze all job titles in the provided text
+    2. Compare each job title against the user's stated preferences
+    3. Select the ONE job title that best aligns with the user's preferences
+    4. Consider factors like: skills, experience level, industry, role type, and career goals
+    
+    RESPONSE FORMAT:
+    - Return ONLY the job title
+    - No explanations, descriptions, or additional text
+    - If no suitable match exists, return "no match found"
+    
+    Example output: "Senior Software Engineer" or "Marketing Manager" or "no match found"`;
+
+    //create gemini response
+    const result = await model.generateContent(prompt);
+    console.log(result.response.text());
+    return result.response.text();
+
+
 }
 
 
@@ -67,6 +106,7 @@ export const savePost = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+
         const userid = user._id;
         let data; // Declare data variable in outer scope
 
@@ -80,15 +120,21 @@ export const savePost = async (req, res) => {
                 }
             });
 
+
+
             if (response.status === 200) {
                 console.log("Using external API");
-                const { extracted_urls, extracted_emails, extracted_hashtags, job_title } = response.data;
+                const { extracted_urls, extracted_emails, extracted_hashtags} = response.data;
+                const userPrefrence = await UserPreferences.findOne({ userId: id });
+                const prefrences = userPrefrence.preferences;
+                const jobTitle = await getJobTitle(cleanedContent, prefrences);
+
                 data = await extensionSchema.create({
                     userId: userid,
                     content: cleanedContent, // Save cleaned content
                     extractedUrls: extracted_urls,
                     extractedEmails: extracted_emails,
-                    jobTitle: job_title,
+                    jobTitle: jobTitle,
                     extractedHashtags: extracted_hashtags,
                     timestamp: timestamp
                 });

@@ -63,9 +63,15 @@ const EmailPage = () => {
     if (posts && posts.length > 0) {
       console.log("Posts in EmailPage:", posts);
 
-      // Filter posts that contain emails
+      // Filter posts that contain emails AND exclude "no match found" posts
       const postsWithEmails = posts.filter(
-        (post) => post.extractedEmails && post.extractedEmails.length > 0
+        (post) => {
+          const hasEmails = post.extractedEmails && post.extractedEmails.length > 0;
+          const isNoMatchFound = post.jobTitle?.toLowerCase()?.trim()?.includes("no match found");
+          
+          // Only include posts that have emails AND are not "no match found"
+          return hasEmails && !isNoMatchFound;
+        }
       );
 
       // Get IDs of posts that have emails generated or sent
@@ -84,6 +90,7 @@ const EmailPage = () => {
           !sentPostIds.includes(post._id)
       );
 
+      console.log("Posts with emails (excluding no match found):", postsWithEmails);
       console.log("Pending posts:", pendingPosts);
       setPendingEmailPosts(pendingPosts);
     }
