@@ -53,7 +53,7 @@ const fetchUserPreferences = async (userId) => {
  * Helper function to fetch user activity timeline
  */
 const fetchUserActivityTimeline = async (userId, limit = 10) => {
-    const [recentResumes, recentEmails, recentPosts] = await Promise.all([
+    const [recentResumes, recentEmails, recentPosts, recentPreferences] = await Promise.all([
         UserResume.find({ userId })
             .select('resume_title createdAt file_type')
             .sort({ createdAt: -1 })
@@ -67,6 +67,11 @@ const fetchUserActivityTimeline = async (userId, limit = 10) => {
         extensionSchema.find({ userId: userId.toString() })
             .select('jobTitle timestamp content')
             .sort({ timestamp: -1 })
+            .limit(limit),
+
+        UserPreferences.find({ userId })
+            .select('preferences createdAt')
+            .sort({ createdAt: -1 })
             .limit(limit)
     ]);
 
@@ -88,6 +93,12 @@ const fetchUserActivityTimeline = async (userId, limit = 10) => {
             title: `Extracted LinkedIn post: ${post.jobTitle || 'Job posting'}`,
             date: post.timestamp,
             metadata: { preview: post.content?.substring(0, 100) + '...' }
+        })),
+        ...recentPreferences.map(preference => ({
+            type: 'preferences',
+            title: `Updated preferences: ${preference.preferences}`,
+            date: preference.createdAt,
+            metadata: {}
         }))
     ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit);
 

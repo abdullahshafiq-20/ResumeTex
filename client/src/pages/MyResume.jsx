@@ -9,7 +9,7 @@ import { useDashboard } from "../context/DashbaordContext";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const MyResume = () => {
-  const { resumes, loading, isSocketConnected } = useResumes();
+  const { resumes, loading, isSocketConnected, deleteResume } = useResumes();
   const { lastUpdated, isLive } = useDashboard();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -45,6 +45,17 @@ const MyResume = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  // Handle resume deletion
+  const handleDeleteResume = async (resumeId) => {
+    try {
+      await deleteResume(resumeId);
+      // The resumes state will be updated automatically via socket events
+    } catch (error) {
+      console.error('Failed to delete resume:', error);
+      throw error; // Re-throw to let PDFCard handle the error display
+    }
   };
 
   const containerVariants = {
@@ -247,6 +258,8 @@ const itemVariants = {
                 title={resume.resume_title || "Untitled Resume"}
                 openedDate={formatDate(resume.createdAt)}
                 owner={`Created ${formatDate(resume.createdAt)}`}
+                onDelete={handleDeleteResume}
+                resumeId={resume._id}
               />
             </motion.div>
           ))

@@ -65,7 +65,7 @@ export const ResumeProvider = ({ children }) => {
   const deleteResume = useCallback(async (resumeId) => {
     setLoading(true);
     try {
-      await api.delete(`${apiUrl}/resume/${resumeId}`);
+      await api.post(`${apiUrl}/delete-resume`, { resumeId });
       return true;
     } catch (error) {
       console.error("Error deleting resume:", error);

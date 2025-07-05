@@ -203,6 +203,7 @@ const EMAIL_TEMPLATES = {
                 "High-Impact ${jobTitle} Candidate"
             ]
         },
+
         openings: {
             withCompany: [
                 "I'm writing to apply for the ${jobTitle} position at ${companyName}, bringing a proven track record of delivering measurable results in similar roles.",
@@ -362,7 +363,7 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
     }
 
     // Create the email body
-    const emailBody = `Dear ${recruiterName},
+    const emailBody = `Dear ${recruiterName || "Hiring Manager"},
 
 ${opening} ${processedSummary} ${matchSummary}
 

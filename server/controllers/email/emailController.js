@@ -240,6 +240,11 @@ export const sendEmailWithAttachment = async (req, res) => {
     const userId = req.user.id;
     
     const user = await User.findById(userId);
+    const name = user.name;
+    const userResume = await UserResume.findOne({ userId, resume_link: pdfUrl });
+    console.log("userResume", userResume)
+    const resume_title = userResume.resume_title;
+
     
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
@@ -283,7 +288,7 @@ ${attachmentBase64}
         
         // Extract filename from URL or use default
         const urlParts = pdfUrl.split('/');
-        const filename = urlParts[urlParts.length - 1] || 'document.pdf';
+        const filename = `${name} - ${resume_title}.pdf` || urlParts[urlParts.length - 1] || 'document.pdf';
         
         attachmentPart = `
 --${boundary}
@@ -464,7 +469,7 @@ export const createEmail = async (req, res) => {
       projects: userPreferences.projects || ["Project A", "Project B"],
       candidateName: user.name || "John Doe",
       companyName: companyName,
-      recruiterName: "Sam Smith"
+      recruiterName: "Hiring Manager"
     };
 
     console.log("emailParams")

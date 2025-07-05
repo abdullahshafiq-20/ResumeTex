@@ -5,7 +5,7 @@ import { User, UserPreferences, UserResume } from "../../models/userSchema.js";
 import fetch from 'node-fetch';
 import { PDFDocument } from 'pdf-lib';
 import { cloudinaryConfig, cloudinaryUploader } from "../../utils/cloudinary.js";
-import { emitResumeCreated, emitStatsDashboard, emitPreferencesDashboard } from "../../config/socketConfig.js";
+import { emitResumeCreated, emitPreferencesDashboard, emitResumeDeleted } from "../../config/socketConfig.js";
 import { triggerStatsUpdate } from "../../utils/trigger.js";
 
 
@@ -292,6 +292,23 @@ export const convertPdfToImage = async (req, res) => {
 
     } catch (error) {
         console.error('Error in convertPdfToImage controller:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+}
+
+export const deleteResume = async (req, res) => {
+    try {
+        const { resumeId } = req.body;
+        const userId = req.user.id;
+        const userResume = await UserResume.findOneAndDelete({ userId: userId, _id: resumeId });
+        const { resume_title } = userResume;
+        const userPreferences = await UserPreferences.findOneAndDelete({ userId: userId, preferences : resume_title });
+
+        emitResumeDeleted(userId, resumeId);
+        triggerStatsUpdate(userId);
+        res.status(200).json({ message: 'Resume deleted successfully and user preferences deleted' });
+    } catch (error) {
+        console.error('Error deleting user resume:', error);
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }

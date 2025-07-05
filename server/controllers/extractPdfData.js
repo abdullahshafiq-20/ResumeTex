@@ -79,7 +79,8 @@ export const extractPdfData = async (pdfUrl) => {
                 links.push({ url, context });
             }
         }
-        const email = links.find(link => link.url.includes('@'));
+        const email = extractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)[0];
+
         const github = links.find(link => link.url.includes('github.com'));
         const linkedin = links.find(link => link.url.includes('linkedin.com'));
         //for potfilio add relaxing matching with name and last name

@@ -72,11 +72,13 @@ const getJobTitle = async (content, userPrefrence) => {
     RESPONSE FORMAT:
     - Return ONLY the job title
     - No explanations, descriptions, or additional text
-    - If no suitable match exists, return "no match found"
+    - Return the job title if at least one skill matches
+    - If no suitable match exists or no skills are matching, return "no match found"
     
     Example output: "Senior Software Engineer" or "Marketing Manager" or "no match found"`;
 
     //create gemini response
+    console.log("prompt", prompt)
     const result = await model.generateContent(prompt);
     console.log(result.response.text());
     return result.response.text();
@@ -125,8 +127,9 @@ export const savePost = async (req, res) => {
             if (response.status === 200) {
                 console.log("Using external API");
                 const { extracted_urls, extracted_emails, extracted_hashtags} = response.data;
-                const userPrefrence = await UserPreferences.findOne({ userId: id });
-                const prefrences = userPrefrence.preferences;
+                const userPrefrence = await UserPreferences.find({ userId: id });
+                const prefrences = userPrefrence.map(pref => pref.preferences);
+                console.log("prefrences", prefrences)
                 const jobTitle = await getJobTitle(cleanedContent, prefrences);
 
                 data = await extensionSchema.create({
@@ -134,7 +137,7 @@ export const savePost = async (req, res) => {
                     content: cleanedContent, // Save cleaned content
                     extractedUrls: extracted_urls,
                     extractedEmails: extracted_emails,
-                    jobTitle: jobTitle,
+                    jobTitle: jobTitle.trim(),
                     extractedHashtags: extracted_hashtags,
                     timestamp: timestamp
                 });

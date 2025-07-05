@@ -21,6 +21,7 @@ const Dashboard = () => {
     stats, 
     activity, 
     comparison, 
+    preferences,
     loading, 
     error, 
     fetchDashboardData, 
@@ -299,18 +300,25 @@ const itemVariants = {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Skills Added</span>
-                  <span className="font-semibold text-sm">{stats?.preferences?.skillsCount}</span>
+                  <span className="font-semibold text-sm">{preferences?.skillsCount || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Projects</span>
-                  <span className="font-semibold text-sm">{stats?.preferences?.projectsCount}</span>
+                  <span className="font-semibold text-sm">{preferences?.projectsCount || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Summary</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${stats?.preferences?.hasSummary ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
-                    {stats?.preferences?.hasSummary ? 'Complete' : 'Missing'}
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${preferences?.hasSummary ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                    {preferences?.hasSummary ? 'Complete' : 'Missing'}
                   </span>
                 </div>
+                {!preferences?.hasPreferences && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-700">
+                      Set up your preferences to personalize your experience.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -354,68 +362,74 @@ const itemVariants = {
           initial="hidden"
           animate="visible"
         >
-          <div className="bg-white border border-gray-200 rounded-lg p-5 relative overflow-hidden">
-            <div className="absolute top-2 right-2 w-10 h-10 rounded-full bg-gradient-to-br from-cyan-200 to-blue-200 opacity-25 blur-md"></div>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 relative overflow-hidden">
+            <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-200 to-blue-200 opacity-30 blur-md"></div>
             <div className="relative">
-              <h3 className="font-medium text-base mb-4 flex items-center text-gray-800">
-                <Calendar className="h-4 w-4 mr-2 text-gray-600" />
+              <h3 className="font-medium text-sm mb-3 flex items-center text-gray-800">
+                <Calendar className="h-3.5 w-3.5 mr-2 text-gray-600" />
                 Recent Activity
-                <Activity className="h-4 w-4 ml-auto text-gray-400" />
+                <Activity className="h-3.5 w-3.5 ml-auto text-gray-400" />
               </h3>
-              <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
-                {activity?.slice(0, 10).map((item, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div className={`p-1.5 rounded-full ${
+              <div className="space-y-2 max-h-72 overflow-y-auto custom-scrollbar">
+                {activity?.slice(0, 12).map((item, index) => (
+                  <div key={index} className="flex items-start space-x-2.5 p-2.5 bg-gray-50/80 rounded-md border border-gray-100/80 hover:bg-gray-50 transition-colors">
+                    <div className={`p-1 rounded-full shrink-0 ${
                       item.type === 'email' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
                     }`}>
                       {getActivityIcon(item.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-xs font-medium text-gray-900 truncate leading-tight">
                         {item.title}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-[10px] text-gray-500 mt-0.5">
                         {formatDate(item.date)}
                       </p>
                       {item.metadata?.recipient && (
-                        <p className="text-xs text-gray-400 truncate">
+                        <p className="text-[10px] text-gray-400 truncate mt-0.5">
                           To: {item.metadata.recipient}
                         </p>
                       )}
                       {item.metadata?.sent && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700 border border-green-200 mt-1">
-                          <Star className="h-2 w-2 mr-1" />
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] bg-green-50 text-green-600 border border-green-200 mt-1">
+                          <Star className="h-1.5 w-1.5 mr-1" />
                           Sent
                         </span>
                       )}
                     </div>
                   </div>
                 ))}
+                {(!activity || activity.length === 0) && (
+                  <div className="text-center py-6">
+                    <Activity className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs text-gray-500">No recent activity</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="bg-white border border-gray-200 rounded-lg p-5 relative overflow-hidden">
-            <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 opacity-30 blur-sm"></div>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 relative overflow-hidden">
+            <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 opacity-30 blur-sm"></div>
             <div className="relative">
-              <h3 className="font-medium text-base mb-4 text-gray-800">Quick Stats</h3>
-              <div className="space-y-3">
+              <h3 className="font-medium text-sm mb-3 text-gray-800">Quick Stats</h3>
+              <div className="space-y-2.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total Users</span>
-                  <span className="font-semibold text-sm text-gray-800">{stats?.global?.totalUsers?.toLocaleString()}</span>
+                  <span className="text-xs text-gray-600">Total Users</span>
+                  <span className="font-semibold text-xs text-gray-800">{stats?.global?.totalUsers?.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Job Titles Found</span>
-                  <span className="font-semibold text-sm text-gray-800">{stats?.linkedIn?.uniqueJobTitles}</span>
+                  <span className="text-xs text-gray-600">Job Titles Found</span>
+                  <span className="font-semibold text-xs text-gray-800">{stats?.linkedIn?.uniqueJobTitles}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Hashtags Extracted</span>
-                  <span className="font-semibold text-sm text-gray-800">{stats?.linkedIn?.totalHashtags}</span>
+                  <span className="text-xs text-gray-600">Hashtags Extracted</span>
+                  <span className="font-semibold text-xs text-gray-800">{stats?.linkedIn?.totalHashtags}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">URLs Found</span>
-                  <span className="font-semibold text-sm text-gray-800">{stats?.linkedIn?.totalUrls}</span>
+                  <span className="text-xs text-gray-600">URLs Found</span>
+                  <span className="font-semibold text-xs text-gray-800">{stats?.linkedIn?.totalUrls}</span>
                 </div>
               </div>
             </div>

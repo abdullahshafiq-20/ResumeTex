@@ -17,6 +17,7 @@ import {
   Wand2,
   Bot,
 } from "lucide-react";
+import { useProcessing } from "../context/ProcessingContext"; 
 
 export default function FileUploader({
   onFileUpload,
@@ -37,6 +38,7 @@ export default function FileUploader({
   const [pId, setpId] = useState(null);
   const [resumeTitle, setResumeTitle] = useState("");
   const { getUserId, isAuthenticated } = useAuth();
+  const { startProcessing, stopProcessing, updateProcessingMessage } = useProcessing();
 
   const modelOptions = [
     { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", type: "Fast" },
@@ -138,6 +140,7 @@ export default function FileUploader({
     try {
       setProcessingStep("processing");
       setProcessingMessage("AI is analyzing your resume...");
+      startProcessing("AI is analyzing your resume...");
 
       const source = new EventSource(
         `${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}&apiKey=${selectedApi}&genmodel=${selectedModel}`
@@ -161,7 +164,7 @@ export default function FileUploader({
         setProcessingMessage("Process complete!");
         source.close();
         setIsProcessing(false);
-
+        stopProcessing();
         onFileUpload({
           stage: "process",
           data: {

@@ -29,7 +29,7 @@ import axios from "axios";
 import api from "../utils/api";
 
 const EmailPage = () => {
-  const { getUserId } = useAuth();
+  const { getUserId, getUserProfile } = useAuth();
   const { posts, emailsGenerated, emailsSent, refreshPosts, fetchEmailbyId } =
     usePosts();
   const { resumes } = useResumes();
@@ -370,11 +370,8 @@ const EmailPage = () => {
       if (!resumes) return "Selected Resume";
       if (Array.isArray(resumes)) {
         const resume = resumes.find((r) => r._id === id);
-        return (
-          resume?.personalInfo?.name ||
-          resume?.resume_title ||
-          "Selected Resume"
-        );
+        const name = `${getUserProfile().name} - ${resume.resume_title}`;
+        return name;
       }
       return (
         resumes?.personalInfo?.name ||
@@ -403,53 +400,16 @@ const EmailPage = () => {
                 {selectedPost.jobTitle || "Job Position"}
               </h2>
             </div>
-
-            {/* AI Regenerate button */}
-            {(generatedEmail || emailDetails) && !emailSent && (
-              <button
-                onClick={() => generateEmail()}
-                disabled={regenerating}
-                className={`group relative px-3 py-1.5 bg-transparent border border-purple-300 text-purple-600 rounded-lg text-xs font-medium transition-all duration-200 overflow-hidden ${
-                  regenerating
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-purple-50"
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/0 via-purple-100/30 to-purple-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                <div className="relative flex items-center space-x-1.5">
-                  {regenerating ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3 w-3 border border-purple-500 border-t-transparent"></div>
-                      <span>Regenerating...</span>
-                      <Sparkles className="h-3 w-3 animate-pulse" />
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="h-3 w-3" />
-                      <span>Regenerate</span>
-                      <Bot className="h-3 w-3" />
-                    </>
-                  )}
-                </div>
-              </button>
-            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-            <div className="flex items-center">
-              <Mail className="h-3 w-3 text-purple-500 mr-2" />
-              <span className="text-gray-600 truncate">
-                {selectedPost.extractedEmails &&
-                selectedPost.extractedEmails.length > 0
-                  ? selectedPost.extractedEmails[0]
-                  : "No email found"}
-              </span>
-            </div>
-
+          {/* Updated layout: PDF dropdown on left, email on right */}
+          <div className="flex flex-col md:flex-row gap-3 text-xs">
+            {/* PDF Resume Selection - moved to left */}
             <div className="flex items-center">
               <FileText className="h-3 w-3 text-blue-500 mr-2" />
+              <span className="text-gray-700 font-medium mr-2">Resume:</span>
               <select
-                className="border border-gray-200 rounded-md py-1 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 bg-white"
+                className="border border-gray-200 rounded-md py-1 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 bg-white min-w-[180px]"
                 value={selectedResumeId}
                 onChange={(e) => setSelectedResumeId(e.target.value)}
                 disabled={emailSent}
@@ -470,6 +430,18 @@ const EmailPage = () => {
                   </option>
                 )}
               </select>
+            </div>
+
+            {/* Email address on right */}
+            <div className="flex items-center">
+              <Mail className="h-3 w-3 text-purple-500 mr-2" />
+              <span className="text-gray-700 font-medium mr-2">To:</span>
+              <span className="text-gray-600 truncate">
+                {selectedPost.extractedEmails &&
+                selectedPost.extractedEmails.length > 0
+                  ? selectedPost.extractedEmails[0]
+                  : "No email found"}
+              </span>
             </div>
           </div>
         </div>
@@ -646,6 +618,72 @@ const EmailPage = () => {
                 } border border-gray-200 rounded-md p-3 whitespace-pre-wrap focus:outline-none`}
               />
             </div>
+
+            {/* Professional regenerate section */}
+            {(generatedEmail || emailDetails) && !emailSent && (
+              <div className="p-3 sm:p-4 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start space-x-2">
+                    <div className="relative">
+                      <Sparkles className="h-4 w-4 text-purple-600" />
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        Don't like the generated email?
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Our AI can create a different version tailored to your preferences
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* AI-themed Generate Again Button */}
+                  <button
+                    onClick={() => generateEmail()}
+                    disabled={regenerating}
+                    className={`group relative px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 overflow-hidden shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[140px] sm:min-w-[160px] ${
+                      regenerating
+                        ? "opacity-75 cursor-not-allowed scale-100"
+                        : "hover:from-purple-700 hover:to-blue-700"
+                    }`}
+                  >
+                    {/* Animated background gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-blue-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Subtle shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                    
+                    <div className="relative flex items-center justify-center space-x-1.5 sm:space-x-2">
+                      {regenerating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent"></div>
+                          <span className="hidden sm:inline">AI Regenerating...</span>
+                          <span className="sm:hidden">Regenerating...</span>
+                          <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse" />
+                        </>
+                      ) : (
+                        <>
+                          <Bot className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse" />
+                          <span className="hidden sm:inline">AI Generate Again</span>
+                          <span className="sm:hidden">Generate Again</span>
+                          <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 group-hover:rotate-12 transition-transform duration-200" />
+                        </>
+                      )}
+                    </div>
+                    
+                    {/* Floating particles effect */}
+                    {!regenerating && (
+                      <>
+                        <div className="absolute top-1 left-2 w-1 h-1 bg-white/40 rounded-full animate-ping delay-100"></div>
+                        <div className="absolute bottom-1 right-3 w-1 h-1 bg-white/40 rounded-full animate-ping delay-300"></div>
+                        <div className="absolute top-2 right-1 w-0.5 h-0.5 bg-white/60 rounded-full animate-ping delay-500"></div>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Email actions - only show if not already sent */}
             {!emailSent && (

@@ -185,6 +185,8 @@ const emitPreferencesUpdated = (userId, preferencesData) => {
 };
 
 
+
+
 export {
   initSocket,
   getIO,
@@ -201,5 +203,5 @@ export {
   emitEmailCreated,
   emitEmailSent,
   emitPostDeleted,
-  emitPreferencesUpdated
+  emitPreferencesUpdated,
 };
