@@ -261,53 +261,11 @@ export const sendEmailWithAttachment = async (req, res) => {
     // Create Gmail API client
     const gmail = google.gmail({ version: 'v1', auth });
     
-    // Define boundary for multipart message
-    const boundary = 'foo_bar_baz';
-    let attachmentPart = '';
-    
-    // Handle attachment scenarios
-    if (attachment) {
-      // Case 1: File upload via multer
-      const attachmentBase64 = attachment.buffer.toString('base64');
-      
-      attachmentPart = `
---${boundary}
-Content-Type: ${attachment.mimetype}
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="${attachment.originalname}"
-
-${attachmentBase64}
---${boundary}--`;
-    } else if (pdfUrl) {
-      // Case 2: PDF URL provided
-      try {
-        // Fetch the PDF from the URL
-        const response = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
-        const pdfBuffer = Buffer.from(response.data);
-        const pdfBase64 = pdfBuffer.toString('base64');
-        
-        // Extract filename from URL or use default
-        const urlParts = pdfUrl.split('/');
-        const filename = `${name} - ${resume_title}.pdf` || urlParts[urlParts.length - 1] || 'document.pdf';
-        
-        attachmentPart = `
---${boundary}
-Content-Type: application/pdf
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="${filename}"
-
-${pdfBase64}
---${boundary}--`;
-      } catch (fetchError) {
-        console.error('Error fetching PDF from URL:', fetchError);
-        return res.status(400).json({ error: 'Failed to fetch PDF from provided URL', details: fetchError.message });
-      }
-    }
+    // Define boundary for multipart message - use a more unique boundary
+    const boundary = `boundary-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Properly format the HTML message content
-    // Wrap the message in proper HTML structure and ensure line breaks are <br> tags
-    const formattedMessage = `
-<!DOCTYPE html>
+    const formattedMessage = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -317,7 +275,7 @@ ${pdfBase64}
 </body>
 </html>`;
     
-    // Build the email with attachment
+    // Build the email headers and HTML content
     const messageParts = [
       `From: ${user.email}`,
       `To: ${to}`,
@@ -330,10 +288,53 @@ ${pdfBase64}
       'Content-Transfer-Encoding: 7bit',
       '',
       formattedMessage,
-      attachmentPart
+      ''
     ];
     
-    const emailContent = messageParts.join('\r\n'); // Use CRLF as per email standards
+    // Handle attachment scenarios
+    if (attachment) {
+      // Case 1: File upload via multer
+      const attachmentBase64 = attachment.buffer.toString('base64');
+      
+      messageParts.push(
+        `--${boundary}`,
+        `Content-Type: ${attachment.mimetype}`,
+        'Content-Transfer-Encoding: base64',
+        `Content-Disposition: attachment; filename="${attachment.originalname}"`,
+        '',
+        attachmentBase64,
+        ''
+      );
+    } else if (pdfUrl) {
+      // Case 2: PDF URL provided
+      try {
+        // Fetch the PDF from the URL
+        const response = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
+        const pdfBuffer = Buffer.from(response.data);
+        const pdfBase64 = pdfBuffer.toString('base64');
+        
+        // Extract filename from URL or use default
+        const filename = `${name} - ${resume_title}.pdf`;
+        
+        messageParts.push(
+          `--${boundary}`,
+          'Content-Type: application/pdf',
+          'Content-Transfer-Encoding: base64',
+          `Content-Disposition: attachment; filename="${filename}"`,
+          '',
+          pdfBase64,
+          ''
+        );
+      } catch (fetchError) {
+        console.error('Error fetching PDF from URL:', fetchError);
+        return res.status(400).json({ error: 'Failed to fetch PDF from provided URL', details: fetchError.message });
+      }
+    }
+    
+    // Close the multipart message
+    messageParts.push(`--${boundary}--`);
+    
+    const emailContent = messageParts.join('\r\n');
     
     // Encode the email to base64url format
     const encodedMessage = Buffer.from(emailContent)
@@ -476,7 +477,7 @@ export const createEmail = async (req, res) => {
 
     
     const data = generateEmailTemplate(emailParams);
-    console.log("data", data)
+    console.log("Gmail Created:", data)
 
     const { to, subject, body } = data;
     const saveEmail = await Email.findOneAndUpdate(

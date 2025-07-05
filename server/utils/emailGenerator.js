@@ -364,13 +364,9 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
 
     // Create the email body
     const emailBody = `Dear ${recruiterName || "Hiring Manager"},
-
 ${opening} ${processedSummary} ${matchSummary}
-
 ${skillsSection}
-
 ${projectsSection}
-
 ${closing}
 
 Best regards,
