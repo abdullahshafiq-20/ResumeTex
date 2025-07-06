@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo } from
 const ProcessingContext = createContext();
 
 export const ProcessingProvider = ({ children }) => {
-  const [isProcessing, setIsProcessing] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [processingMessage, setProcessingMessage] = useState('');
   const [processingType, setProcessingType] = useState(''); // 'upload', 'resume_processing', 'email', etc.
 
