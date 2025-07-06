@@ -83,6 +83,44 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     return 'U';
   };
 
+  // Function to get a gradient based on user data
+  const getUserGradient = (user) => {
+    const gradients = [
+      'bg-gradient-to-br from-blue-500 to-indigo-600',
+      'bg-gradient-to-br from-purple-500 to-pink-600', 
+      'bg-gradient-to-br from-green-500 to-teal-600',
+      'bg-gradient-to-br from-orange-500 to-red-600',
+      'bg-gradient-to-br from-cyan-500 to-blue-600',
+      'bg-gradient-to-br from-violet-500 to-purple-600',
+      'bg-gradient-to-br from-emerald-500 to-green-600',
+      'bg-gradient-to-br from-rose-500 to-pink-600',
+      'bg-gradient-to-br from-amber-500 to-orange-600',
+      'bg-gradient-to-br from-slate-500 to-gray-600'
+    ];
+
+    // Use email or name to consistently select a gradient for each user
+    const identifier = user?.email || user?.name || 'default';
+    let hash = 0;
+    for (let i = 0; i < identifier.length; i++) {
+      const char = identifier.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    const index = Math.abs(hash) % gradients.length;
+    return gradients[index];
+  };
+
+  // Enhanced function to safely get user profile with fallbacks
+  const getSafeUserProfile = () => {
+    try {
+      return getUserProfile() || user || {};
+    } catch (error) {
+      console.warn('Error getting user profile, falling back to user data:', error);
+      return user || {};
+    }
+  };
+
   return (
     <>
       {/* Mobile sidebar overlay */}
@@ -161,14 +199,27 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <div className="flex items-center space-x-3">
                   {/* Profile Avatar */}
                   <div className="flex-shrink-0">
-                    {getUserProfile().picture ? (
-                      <img 
-                        src={getUserProfile().picture} 
-                        alt="Profile" 
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                    {getSafeUserProfile().picture ? (
+                      <div className="relative">
+                        <img 
+                          src={getSafeUserProfile().picture} 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm"
+                          onError={(e) => {
+                            // Hide the image and show gradient fallback if image fails to load
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        {/* Hidden gradient fallback that shows if image fails */}
+                        <div 
+                          className={`w-10 h-10 rounded-full ${getUserGradient(user)} items-center justify-center text-white font-medium text-sm shadow-sm ring-2 ring-white transition-all duration-200 hover:scale-105 hover:shadow-md hidden`}
+                        >
+                          {getUserInitials(user)}
+                        </div>
+                      </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">
+                      <div className={`w-10 h-10 rounded-full ${getUserGradient(user)} flex items-center justify-center text-white font-medium text-sm shadow-sm ring-2 ring-white transition-all duration-200 hover:scale-105 hover:shadow-md`}>
                         {getUserInitials(user)}
                       </div>
                     )}
@@ -177,10 +228,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   {/* User Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">
-                      {getUserProfile().name || 'User'}
+                      {getSafeUserProfile().name || 'User'}
                     </p>
                     <p className="text-xs text-gray-600 truncate">
-                      {getUserProfile().email}
+                      {getSafeUserProfile().email || 'No email'}
                     </p>
                   </div>
                 </div>

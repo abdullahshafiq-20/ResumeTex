@@ -12,9 +12,24 @@ export const AuthProvider = ({ children }) => {
   
   const apiUrl = import.meta.env.VITE_API_URL;
 
+  // Add function to fetch user profile from server
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get(`${apiUrl}/user`);
+      if (response.status === 200) {
+        setUserProfile(response.data);
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      // If profile fetch fails, fall back to JWT data
+      return null;
+    }
+  };
+
   useEffect(() => {
     // Check for token in localStorage on initial load
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
@@ -28,8 +43,14 @@ export const AuthProvider = ({ children }) => {
             logoutUser();
           } else {
             setUser(decoded);
-            setUserProfile(decoded);
             setIsAuthenticated(true);
+            
+            // Fetch fresh user profile data from server
+            const profileData = await fetchUserProfile();
+            if (!profileData) {
+              // If server fetch fails, fall back to JWT data
+              setUserProfile(decoded);
+            }
           }
         } catch (error) {
           console.error("Error decoding token:", error);
@@ -38,9 +59,8 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
-
+    
     checkAuth();
-    checkConnection();
   }, []);
 
   const checkConnection = async () => {
@@ -59,11 +79,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Login user and store token
-  const loginUser = (token) => {
+  const loginUser = async (token) => {
     localStorage.setItem("token", token);
     const decoded = jwtDecode(token);
     setUser(decoded);
     setIsAuthenticated(true);
+    
+    // Fetch fresh user profile data after login
+    const profileData = await fetchUserProfile();
+    if (!profileData) {
+      // If server fetch fails, fall back to JWT data
+      setUserProfile(decoded);
+    }
   };
 
   // Logout user and remove token
