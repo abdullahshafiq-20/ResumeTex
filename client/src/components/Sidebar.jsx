@@ -128,7 +128,30 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     className="w-10 h-10 object-contain"
                   />
                 </motion.div>
-                <span className="font-semibold text-lg text-gray-800">ResumeTex</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-semibold text-lg text-gray-800">ResumeTex</span>
+                  
+                  {/* Blinking dot when AI is processing */}
+                  <AnimatePresence>
+                    {isProcessing && (
+                      <motion.div
+                        className="w-2 h-2 bg-purple-500 rounded-full"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ 
+                          opacity: [1, 0.2, 1],
+                          scale: [1, 0.8, 1]
+                        }}
+                        exit={{ opacity: 0, scale: 0 }}
+                        transition={{ 
+                          duration: Math.random() * 2 + 1,
+                          repeat: Infinity, 
+                          ease: "easeInOut",
+                          delay: Math.random() * 2
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
               </Link>
             </div>
             
@@ -188,36 +211,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 );
               })}
             </nav>
-
-            {/* Simple AI Processing Indicator - Above Logout */}
-            <AnimatePresence>
-              {isProcessing && (
-                <motion.div
-                  className="mb-3 p-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-600 text-white"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-center space-x-3">
-                    {/* Simple Spinning Icon */}
-                    <motion.div
-                      className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
-                    
-                    {/* Simple Text */}
-                    <div className="flex-1">
-                      <p className="text-xs font-medium">AI Working...</p>
-                      <p className="text-xs opacity-90 truncate">
-                        {processingMessage || 'Processing...'}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Logout Button */}
             <div className="pt-3 border-t border-gray-200">

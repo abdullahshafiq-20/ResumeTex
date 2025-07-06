@@ -384,6 +384,7 @@ export default function FileUploader({
           if (event.data && event.data !== "undefined") {
             const errorData = JSON.parse(event.data);
             console.error("Error processing resume:", errorData);
+            stopProcessing()
 
             if (errorData.errorCode === "EMAIL_MISMATCH") {
               toast.error(`${errorData.error}`, {
@@ -396,20 +397,28 @@ export default function FileUploader({
               });
             } else {
               toast.error(`Processing failed: ${errorData.error}`);
+            stopProcessing()
+
             }
           } else {
             console.error("SSE Error: No valid data received");
             toast.error("Processing failed: Connection error");
+            stopProcessing()
+
           }
         } catch (parseError) {
           console.error("Failed to parse error data:", parseError);
           toast.error("Processing failed: Invalid response format");
+          stopProcessing()
+
         }
 
         source.close();
         setIsProcessing(false);
         setProcessingStep("idle");
         setProcessingMessage("");
+        stopProcessing()
+
       });
 
       // source.onerror = (event) => {
@@ -426,6 +435,8 @@ export default function FileUploader({
       setIsProcessing(false);
       setProcessingStep("idle");
       setProcessingMessage("");
+      stopProcessing()
+
     }
   };
 
