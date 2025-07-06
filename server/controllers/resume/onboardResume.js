@@ -22,6 +22,10 @@ export const onboardResume = async (req, res) => {
     };
     try {
         const { pdfUrl, pref, apiKey, genmodel } = req.query; // Extract the PDF URL from the request body
+        const  userId  = req.user.id;
+
+        const getUserEmail = await User.findById(userId);
+        const emailExists = getUserEmail.email;
 
 
         if (!pdfUrl) {
@@ -49,9 +53,7 @@ export const onboardResume = async (req, res) => {
         send("Extracting data", { step: "extractpdf", status: "completed", data: extractedData });
         console.log("extractedData", extractedData.email)
 
-        const emailExists = await User.findOne({ email: extractedData.email });
-        console.log("emailExists", emailExists)
-        if (!emailExists) {
+        if (extractedData.email !== emailExists) {
             send("error", { 
                 step: "email_validation", 
                 status: "error", 
@@ -59,8 +61,9 @@ export const onboardResume = async (req, res) => {
                 errorCode: 'EMAIL_MISMATCH'
             });
             res.end();
-            return;
+            return; 
         }
+
 
 
 
@@ -98,7 +101,7 @@ export const onboardResume = async (req, res) => {
 
         // Update or create user preferences with the extracted data
         const userPreferences = await UserPreferences.create({
-            userId: user._id,
+            userId: userId,
             preferences: pref,
             summary: summary || "",
             skills: flattenedSkills,
@@ -122,7 +125,7 @@ export const onboardResume = async (req, res) => {
 
 
 
-        const updateOnborad = await User.findOneAndUpdate({ userId: user._id }, { $set: { onboarded: true } }, { new: true });
+        const updateOnborad = await User.findOneAndUpdate({ userId: userId }, { $set: { onboarded: true } }, { new: true });
 
 
         const thumbnail = await pdfToImage(pdf.pdfUrl);
@@ -130,7 +133,7 @@ export const onboardResume = async (req, res) => {
 
         send(`Adding resume to user`, { step: `Adding resume to user`, status: "started" });
         const userResume = await UserResume.create({
-            userId: user._id,
+            userId: userId,
             resume_link: pdf.pdfUrl,
             resume_title: pref,
             thumbnail: imageUrl,
@@ -142,8 +145,8 @@ export const onboardResume = async (req, res) => {
         send(`Adding resume to user`, { step: `Adding resume to user`, status: "completed", data: { pdfUrl: pdf.pdfUrl } });
         console.log("userResume", userResume)
 
-        emitResumeCreated(user._id, userResume);
-        triggerStatsUpdate(user._id);
+        emitResumeCreated(userId, userResume);
+        triggerStatsUpdate(userId);
         
         // Emit dashboard updates after resume creation
         

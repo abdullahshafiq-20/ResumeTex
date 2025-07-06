@@ -24,9 +24,167 @@ import {
   Clock,
   Plus,
   Target,
+  Users,
+  Loader2,
 } from "lucide-react";
 import axios from "axios";
 import api from "../utils/api";
+
+// Recipients Modal Component
+const RecipientsModal = ({ isOpen, onClose, currentRecipients, onSave, isLoading, emailSuggestions = [] }) => {
+  const [recipientsInput, setRecipientsInput] = useState("");
+  const [selectedSuggestions, setSelectedSuggestions] = useState([]);
+
+  const handleSave = () => {
+    if (recipientsInput.trim() || selectedSuggestions.length > 0) {
+      const inputRecipients = recipientsInput
+        .split(",")
+        .map(email => email.trim())
+        .filter(email => email.length > 0 && isValidEmail(email));
+      
+      const allRecipients = [...new Set([...inputRecipients, ...selectedSuggestions])];
+      onSave(allRecipients);
+      setRecipientsInput("");
+      setSelectedSuggestions([]);
+    }
+  };
+
+  const handleClose = () => {
+    setRecipientsInput("");
+    setSelectedSuggestions([]);
+    onClose();
+  };
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const toggleSuggestion = (email) => {
+    setSelectedSuggestions(prev => 
+      prev.includes(email) 
+        ? prev.filter(e => e !== email)
+        : [...prev, email]
+    );
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md mx-4 max-h-[90vh] overflow-y-auto relative z-[10000]"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
+              Add Recipients
+            </h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Email Suggestions */}
+          {emailSuggestions.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Suggested Recipients
+              </label>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {emailSuggestions.map((email, index) => (
+                  <div key={index} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`suggestion-${index}`}
+                      checked={selectedSuggestions.includes(email)}
+                      onChange={() => toggleSuggestion(email)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label 
+                      htmlFor={`suggestion-${index}`}
+                      className="ml-2 text-sm text-gray-700 cursor-pointer"
+                    >
+                      {email}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter email addresses separated by commas
+            </label>
+            <textarea
+              value={recipientsInput}
+              onChange={(e) => setRecipientsInput(e.target.value)}
+              placeholder="john@company.com, jane@company.com, hr@company.com"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={4}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Separate multiple email addresses with commas
+            </p>
+          </div>
+
+          {/* Current Recipients Preview */}
+          {currentRecipients.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Current Recipients
+              </label>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {currentRecipients.map((email, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
+                  >
+                    {email}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={isLoading || (!recipientsInput.trim() && selectedSuggestions.length === 0)}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Adding...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  <span>Add Recipients</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
 
 const EmailPage = () => {
   const { getUserId, getUserProfile } = useAuth();
@@ -46,7 +204,38 @@ const EmailPage = () => {
   const [regenerating, setRegenerating] = useState(false);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // New state for multiple recipients
+  const [recipients, setRecipients] = useState([]);
+  const [showRecipientsModal, setShowRecipientsModal] = useState(false);
+  const [isAddingRecipients, setIsAddingRecipients] = useState(false);
+  
   const apiUrl = import.meta.env.VITE_API_URL;
+
+  // Add these animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.2 },
+    },
+  };
+
+  // Helper function to validate email
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -111,6 +300,7 @@ const EmailPage = () => {
       setGeneratedEmail(null);
       setEmailDetails(null);
       setError(null);
+      setRecipients([]);
       return;
     }
 
@@ -119,6 +309,13 @@ const EmailPage = () => {
     setEmailDetails(null);
     setError(null);
     setEmailSent(false);
+    
+    // Initialize recipients with the first extracted email
+    if (post.extractedEmails && post.extractedEmails.length > 0) {
+      setRecipients([post.extractedEmails[0]]);
+    } else {
+      setRecipients([]);
+    }
 
     // Open modal on mobile devices
     if (isMobile) {
@@ -229,142 +426,24 @@ const EmailPage = () => {
     }
   };
 
-  const sendEmailWithAttachment = async () => {
-    const emailToSend = emailDetails || generatedEmail;
-    if (!emailToSend) return;
-
+  // Modified functions to handle multiple recipients
+  const handleAddRecipients = async (newRecipients) => {
+    setIsAddingRecipients(true);
     try {
-      setSendingEmail(true);
-      setError(null);
-
-      // If we have a direct attachment URL from emailDetails, use it
-      let attachmentUrl = emailToSend.attachment;
-
-      // Otherwise, find the selected resume to get its attachment URL
-      if (!attachmentUrl) {
-        const resumeId = emailToSend.resumeId;
-        const selectedResume = Array.isArray(resumes)
-          ? resumes.find((resume) => resume._id === resumeId)
-          : resumes;
-
-        // Check for cloudinaryUrl or resume_link
-        attachmentUrl =
-          selectedResume?.cloudinaryUrl || selectedResume?.resume_link;
-      }
-
-      if (!attachmentUrl) {
-        throw new Error("Resume attachment not found");
-      }
-
-      const emailWithAttachment = {
-        to: emailToSend.to,
-        subject: emailToSend.subject,
-        message: emailToSend.body,
-        pdfUrl: attachmentUrl,
-      };
-
-      console.log("Sending email with attachment:", emailWithAttachment);
-
-      const response = await api.post(
-        `${apiUrl}/send-email-with-attachment`,
-        emailWithAttachment
-      );
-      console.log("Email send response:", response.data);
-
-      if (response.data.success) {
-        setEmailSent(true); // Mark as sent to disable UI elements
-        await saveEmail(emailWithAttachment); // Save email after sending
-        await refreshPosts(); // Refresh posts to update UI
-      } else {
-        throw new Error("Failed to send email");
-      }
-    } catch (err) {
-      console.error("Error sending email with attachment:", err);
-      setError("Failed to send email. Please try again.");
+      // Combine existing recipients with new ones, removing duplicates
+      const updatedRecipients = [...new Set([...recipients, ...newRecipients])];
+      setRecipients(updatedRecipients);
+      setShowRecipientsModal(false);
+    } catch (error) {
+      console.error("Error adding recipients:", error);
     } finally {
-      setSendingEmail(false);
+      setIsAddingRecipients(false);
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.2, staggerChildren: 0.05 },
-    },
+  const removeRecipient = (index) => {
+    setRecipients(prev => prev.filter((_, i) => i !== index));
   };
-
-  const itemVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.2 } },
-  };
-
-  // Render a post card
-  const renderPostCard = (post, status = null) => (
-    <motion.div
-      key={post?._id || Math.random()}
-      className={`bg-white rounded-lg border overflow-hidden flex flex-col cursor-pointer transition-all duration-200 relative group ${
-        selectedPost && selectedPost._id === post._id
-          ? "ring-1 ring-blue-300 border-blue-200"
-          : status === "generated"
-          ? "border-purple-200 hover:border-purple-300"
-          : status === "sent"
-          ? "border-green-200 hover:border-green-300"
-          : "border-gray-200 hover:border-gray-300"
-      }`}
-      onClick={() => post && selectPost(post)}
-      variants={itemVariants}
-    >
-      {/* Subtle gradient blob */}
-      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-
-      {status && (
-        <div
-          className={`py-1.5 px-3 text-xs font-medium text-white ${
-            status === "generated" ? "bg-purple-500" : "bg-green-500"
-          }`}
-        >
-          {status === "generated" ? "Email Generated" : "Email Sent"}
-        </div>
-      )}
-
-      <div className="p-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-800 line-clamp-1">
-          {post?.jobTitle || "Untitled Position"}
-        </h3>
-      </div>
-
-      <div className="p-3 flex-grow">
-        <div className="flex items-start mb-3">
-          <Mail className="h-3 w-3 text-purple-500 mt-0.5 mr-2 flex-shrink-0" />
-          <div className="flex flex-col space-y-1">
-            {Array.isArray(post?.extractedEmails) &&
-            post.extractedEmails.length > 0 ? (
-              post.extractedEmails.map((email, index) => (
-                <span key={index} className="text-xs text-purple-600">
-                  {email}
-                </span>
-              ))
-            ) : (
-              <span className="text-xs text-gray-400">No email found</span>
-            )}
-          </div>
-        </div>
-
-        <p className="text-xs text-gray-600 line-clamp-3">
-          {post?.content || "No description available."}
-        </p>
-      </div>
-    </motion.div>
-  );
-
-  // Render email inbox view
-  const renderEmailInbox = () => {
-    if (!selectedPost) return null;
-
-    const activeEmail = emailDetails || generatedEmail;
-    if (!activeEmail && !isLoading) return null;
 
     const getResumeNameById = (id) => {
       if (!resumes) return "Selected Resume";
@@ -380,93 +459,43 @@ const EmailPage = () => {
       );
     };
 
+  const renderEmailInbox = () => {
+    // Get the active email data
+    const activeEmail = emailDetails || generatedEmail;
+    if (!activeEmail) return null;
+
+    // Convert recipients array to comma-separated string for backward compatibility
+    const recipientsString = recipients.join(', ');
+
     return (
       <motion.div
-        className="bg-white border border-gray-200 rounded-lg overflow-hidden relative"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
+        className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        {/* Gradient blobs */}
-        <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-xl"></div>
-        <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-gradient-to-br from-green-200/15 to-blue-200/10 blur-lg"></div>
-
         {/* Email header */}
-        <div className="bg-gray-50/50 border-b border-gray-200 p-4 relative z-10">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center">
-              <Briefcase className="h-4 w-4 text-gray-500 mr-2" />
-              <h2 className="text-sm font-semibold text-gray-800">
-                {selectedPost.jobTitle || "Job Position"}
-              </h2>
-            </div>
-          </div>
-
-          {/* Updated layout: PDF dropdown on left, email on right */}
-          <div className="flex flex-col md:flex-row gap-3 text-xs">
-            {/* PDF Resume Selection - moved to left */}
-            <div className="flex items-center">
-              <FileText className="h-3 w-3 text-blue-500 mr-2" />
-              <span className="text-gray-700 font-medium mr-2">Resume:</span>
-              <select
-                className="border border-gray-200 rounded-md py-1 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 bg-white min-w-[180px]"
-                value={selectedResumeId}
-                onChange={(e) => setSelectedResumeId(e.target.value)}
-                disabled={emailSent}
-              >
-                {Array.isArray(resumes) ? (
-                  resumes.map((resume) => (
-                    <option key={resume._id} value={resume._id}>
-                      {resume.personalInfo?.name ||
-                        resume.resume_title ||
-                        "Unnamed Resume"}
-                    </option>
-                  ))
-                ) : (
-                  <option value={resumes?._id}>
-                    {resumes?.personalInfo?.name ||
-                      resumes?.resume_title ||
-                      "Your Resume"}
-                  </option>
-                )}
-              </select>
-            </div>
-
-            {/* Email address on right */}
-            <div className="flex items-center">
-              <Mail className="h-3 w-3 text-purple-500 mr-2" />
-              <span className="text-gray-700 font-medium mr-2">To:</span>
-              <span className="text-gray-600 truncate">
-                {selectedPost.extractedEmails &&
-                selectedPost.extractedEmails.length > 0
-                  ? selectedPost.extractedEmails[0]
-                  : "No email found"}
+        <div className="bg-gray-50 p-3 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Mail className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-gray-900">
+                Email Preview
               </span>
+              {emailSent && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <Check className="h-3 w-3 mr-1" />
+                  Sent
+                </span>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              Resume: {getResumeNameById(selectedResumeId)}
             </div>
           </div>
         </div>
 
-        {/* Loading state */}
-        {(isLoading || regenerating) && (
-          <div className="flex flex-col items-center justify-center p-8 relative z-10">
-            <div className="w-8 h-8 border border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-            <p className="text-xs text-gray-600">
-              {regenerating
-                ? "AI is regenerating your email..."
-                : "Loading email..."}
-            </p>
-          </div>
-        )}
-
-        {/* Error message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-3 m-4 rounded-md text-xs">
-            {error}
-          </div>
-        )}
-
         {/* Email content */}
-        {!isLoading && activeEmail && (
           <div className="divide-y divide-gray-200 relative z-10">
             {/* Email sent success message */}
             {emailSent && (
@@ -478,7 +507,18 @@ const EmailPage = () => {
                   </p>
                   <p className="text-xs">
                     Your email with resume attachment has been sent to{" "}
-                    {activeEmail.to}.
+                    {(() => {
+                      // Get recipients from database (emailDetails) when email is sent
+                      const sentRecipients = emailDetails?.to ? 
+                        emailDetails.to.split(', ').filter(email => email.trim()) : 
+                        recipients;
+                      
+                      if (sentRecipients.length > 1) {
+                        return `${sentRecipients.length} recipients: ${sentRecipients.join(', ')}`;
+                      } else {
+                        return sentRecipients[0] || 'recipient';
+                      }
+                    })()}
                   </p>
                 </div>
               </div>
@@ -488,37 +528,71 @@ const EmailPage = () => {
             <div className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm font-medium text-gray-700">From:</div>
-                <span className="text-xs text-gray-600">You</span>
+              <span className="text-xs text-gray-600">
+                {getUserProfile()?.email || "Your Email"}
+              </span>
               </div>
             </div>
 
+          {/* Modified To section with multiple recipients support */}
             <div className="p-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-gray-700">To:</div>
-                <input
-                  type="email"
-                  value={activeEmail.to}
-                  onChange={(e) => {
-                    if (emailDetails && !emailSent) {
-                      setEmailDetails({ ...emailDetails, to: e.target.value });
-                    } else if (!emailSent) {
-                      setGeneratedEmail({
-                        ...generatedEmail,
-                        to: e.target.value,
-                      });
-                    }
-                  }}
-                  disabled={emailSent}
-                  className={`flex-1 ml-4 border-b text-xs ${
-                    emailSent
-                      ? "bg-gray-50 border-gray-200 text-gray-700"
-                      : "bg-transparent border-gray-200 focus:border-blue-300"
-                  } focus:outline-none px-1 py-0.5`}
-                  readOnly={emailSent}
-                />
+                {!emailSent && (
+                  <button
+                    onClick={() => setShowRecipientsModal(true)}
+                    className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-200 transition-colors flex items-center space-x-1"
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span>Add Recipients</span>
+                  </button>
+                )}
+              </div>
+              
+              {/* Recipients display */}
+              <div className="flex flex-wrap gap-1.5">
+                {(() => {
+                  // Get recipients from database when email is sent, otherwise use local state
+                  const displayRecipients = emailSent && emailDetails?.to ? 
+                    emailDetails.to.split(', ').filter(email => email.trim()) : 
+                    recipients;
+                  
+                  return displayRecipients.map((email, index) => (
+                    <span
+                      key={index}
+                      className={`px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium ${
+                        !emailSent ? 'flex items-center space-x-1' : ''
+                      }`}
+                    >
+                      <span>{email}</span>
+                      {!emailSent && (
+                        <button
+                          onClick={() => removeRecipient(index)}
+                          className="ml-1 text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                    </span>
+                  ));
+                })()}
+                {(() => {
+                  const displayRecipients = emailSent && emailDetails?.to ? 
+                    emailDetails.to.split(', ').filter(email => email.trim()) : 
+                    recipients;
+                  
+                  return displayRecipients.length === 0 && (
+                    <span className="text-xs text-gray-500 italic">
+                      No recipients added
+                    </span>
+                  );
+                })()}
+              </div>
               </div>
             </div>
 
+          {/* Subject field - unchanged */}
             <div className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm font-medium text-gray-700">
@@ -610,7 +684,7 @@ const EmailPage = () => {
                 }}
                 disabled={emailSent}
                 readOnly={emailSent}
-                rows={10}
+                rows={20}
                 className={`w-full text-xs ${
                   emailSent
                     ? "bg-gray-50 text-gray-700"
@@ -689,7 +763,7 @@ const EmailPage = () => {
             {!emailSent && (
               <div className="p-4 bg-gray-50/50 flex justify-between items-center">
                 <a
-                  href={`mailto:${activeEmail.to}?subject=${encodeURIComponent(
+                href={`mailto:${recipientsString}?subject=${encodeURIComponent(
                     activeEmail.subject
                   )}&body=${encodeURIComponent(activeEmail.body)}`}
                   className="inline-flex items-center gap-1.5 px-3 py-2 bg-transparent border border-gray-300 text-gray-700 rounded-md transition-colors hover:bg-gray-50 text-xs font-medium"
@@ -699,7 +773,7 @@ const EmailPage = () => {
                 </a>
 
                 <button
-                  onClick={sendEmailWithAttachment}
+                onClick={() => sendEmailWithAttachment()}
                   disabled={sendingEmail}
                   className={`group relative px-4 py-2 bg-transparent border border-blue-500 text-blue-600 rounded-md transition-all duration-200 text-xs font-medium overflow-hidden ${
                     sendingEmail
@@ -736,9 +810,68 @@ const EmailPage = () => {
               </div>
             )}
           </div>
-        )}
       </motion.div>
     );
+  };
+
+  // Modified sendEmailWithAttachment to handle multiple recipients
+  const sendEmailWithAttachment = async () => {
+    if (!selectedPost || !selectedResumeId || recipients.length === 0) {
+      alert("Please ensure you have selected a post, resume, and at least one recipient.");
+      return;
+    }
+
+    // Get the active email data
+    const activeEmail = emailDetails || generatedEmail;
+    if (!activeEmail) return;
+
+    try {
+      setSendingEmail(true);
+
+      // For multiple recipients, we can either:
+      // 1. Send individual emails to each recipient
+      // 2. Send one email with all recipients in the 'to' field
+      // Let's go with option 2 for simplicity
+      
+      const emailData = {
+        to: recipients, // Send array of recipients
+        subject: activeEmail.subject,
+        message: activeEmail.body,
+        pdfUrl: activeEmail.attachment,
+      };
+
+      const response = await api.post(`${apiUrl}/send-email-with-attachment`, emailData);
+      
+      if (response.data.success) {
+        // Save email record
+        const saveEmailData = {
+          postId: selectedPost._id,
+          resumeId: selectedResumeId,
+          to: recipients.join(', '), // Store as comma-separated string
+          subject: activeEmail.subject,
+          body: activeEmail.body,
+          pdfUrl: activeEmail.attachment,
+        };
+
+        await api.post(`${apiUrl}/save-email`, saveEmailData);
+
+        setEmailSent(true);
+        await refreshPosts();
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      setError("Failed to send email. Please try again.");
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
+  // Get email suggestions from the selected post
+  const getEmailSuggestions = () => {
+    if (selectedPost && selectedPost.extractedEmails) {
+      return selectedPost.extractedEmails.filter(email => !recipients.includes(email));
+    }
+    return [];
   };
 
   // Add function to close mobile modal
@@ -802,6 +935,102 @@ const EmailPage = () => {
     );
   };
 
+  // Add this missing renderPostCard function
+  const renderPostCard = (post, status = null) => (
+    <motion.div
+      key={post._id}
+      className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 relative overflow-hidden ${
+        selectedPost && selectedPost._id === post._id
+          ? "border-blue-500 bg-blue-50 shadow-md"
+          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+      }`}
+      onClick={() => selectPost(post)}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      {/* Status indicator */}
+      {status && (
+        <div className="absolute top-2 right-2">
+          {status === "generated" && (
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+          )}
+          {status === "sent" && (
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          )}
+        </div>
+      )}
+
+      {/* Background gradient */}
+      <div className="absolute top-2 left-2 w-8 h-8 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-lg"></div>
+
+      <div className="relative z-10">
+        {/* Job title */}
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2">
+          {post.jobTitle || "Job Position"}
+        </h3>
+
+        {/* Company info */}
+        {post.company && (
+          <p className="text-xs text-gray-600 mb-2">{post.company}</p>
+        )}
+
+        {/* Content preview */}
+        <p className="text-xs text-gray-600 mb-3 line-clamp-3">
+          {post.content?.substring(0, 120)}
+          {post.content?.length > 120 ? "..." : ""}
+        </p>
+
+        {/* Email count and status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Mail className="h-3 w-3 text-blue-500" />
+            <span className="text-xs text-gray-500">
+              {post.extractedEmails?.length || 0} email
+              {post.extractedEmails?.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          {/* Status badges */}
+          <div className="flex items-center space-x-1">
+            {status === "generated" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <Bot className="h-3 w-3 mr-1" />
+                Generated
+              </span>
+            )}
+            {status === "sent" && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <Check className="h-3 w-3 mr-1" />
+                Sent
+              </span>
+            )}
+            {!status && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <Clock className="h-3 w-3 mr-1" />
+                Pending
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Email preview */}
+        {post.extractedEmails && post.extractedEmails.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center space-x-1">
+              <Target className="h-3 w-3 text-gray-400" />
+              <span className="text-xs text-gray-500 truncate">
+                {post.extractedEmails[0]}
+                {post.extractedEmails.length > 1 && 
+                  ` +${post.extractedEmails.length - 1} more`
+                }
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+
   // If no resumes are loaded yet
   if (!resumes || resumes.length === 0) {
     return (
@@ -834,6 +1063,16 @@ const EmailPage = () => {
 
   return (
     <div className="relative">
+      {/* Recipients Modal */}
+      <RecipientsModal
+        isOpen={showRecipientsModal}
+        onClose={() => setShowRecipientsModal(false)}
+        currentRecipients={recipients}
+        onSave={handleAddRecipients}
+        isLoading={isAddingRecipients}
+        emailSuggestions={getEmailSuggestions()}
+      />
+
       {/* Background gradient blobs */}
       <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-10 blur-3xl -z-10"></div>
       <div className="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-8 blur-2xl -z-10"></div>

@@ -49,7 +49,7 @@ function extractContentInfo(content) {
     };
 }
 
-const getJobTitle = async (content, userPrefrence) => {
+const getJobTitle = async (content, userSkills) => {
     //create gemini client
     const apiKey = process.env.GEMINI_API_KEY_4;
     console.log(apiKey);
@@ -57,16 +57,16 @@ const getJobTitle = async (content, userPrefrence) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     //create gemini prompt
-    const prompt = `You are a job matching specialist. Your task is to analyze job listings and match them with user preferences.
+    const prompt = `You are a job matching specialist. Your task is to analyze job listings and match them with user skills.
 
-    USER PREFERENCES: ${userPrefrence}
+    USER SKILLS: ${userSkills}
     
     JOB LISTINGS TEXT: ${content}
     
     INSTRUCTIONS:
     1. Analyze all job titles in the provided text
-    2. Compare each job title against the user's stated preferences
-    3. Select the ONE job title that best aligns with the user's preferences
+    2. Compare each job title against the user's stated skills
+    3. Select the ONE job title that best aligns with the user's skills
     4. Consider factors like: skills, experience level, industry, role type, and career goals
     
     RESPONSE FORMAT:
@@ -74,6 +74,7 @@ const getJobTitle = async (content, userPrefrence) => {
     - No explanations, descriptions, or additional text
     - Return the job title if at least one skill matches
     - If no suitable match exists or no skills are matching, return "no match found"
+    - keep the matching factor polite and not too aggressive
     
     Example output: "Senior Software Engineer" or "Marketing Manager" or "no match found"`;
 
@@ -81,7 +82,7 @@ const getJobTitle = async (content, userPrefrence) => {
     console.log("prompt", prompt)
     const result = await model.generateContent(prompt);
     console.log(result.response.text());
-    return result.response.text();
+    return result.response.text().trim();
 
 
 }
@@ -127,10 +128,10 @@ export const savePost = async (req, res) => {
             if (response.status === 200) {
                 console.log("Using external API");
                 const { extracted_urls, extracted_emails, extracted_hashtags} = response.data;
-                const userPrefrence = await UserPreferences.find({ userId: id });
-                const prefrences = userPrefrence.map(pref => pref.preferences);
-                console.log("prefrences", prefrences)
-                const jobTitle = await getJobTitle(cleanedContent, prefrences);
+                const userSkills = await UserPreferences.find({ userId: id });
+                const skills = userSkills.map(skill => skill.skills);
+                console.log("skills", skills)
+                const jobTitle = await getJobTitle(cleanedContent, skills);
 
                 data = await extensionSchema.create({
                     userId: userid,

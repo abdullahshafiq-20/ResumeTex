@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload,
   FileText,
@@ -16,8 +17,201 @@ import {
   Target,
   Wand2,
   Bot,
+  X,
+  Info,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { useProcessing } from "../context/ProcessingContext"; 
+
+// Target Role Title Modal Component
+const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
+  const [titleInput, setTitleInput] = useState(currentTitle || "");
+  const [isValid, setIsValid] = useState(false);
+
+  useEffect(() => {
+    setTitleInput(currentTitle || "");
+  }, [currentTitle, isOpen]);
+
+  useEffect(() => {
+    // Validation: at least 3 characters, not just spaces, and contains letters
+    const trimmed = titleInput.trim();
+    setIsValid(
+      trimmed.length >= 3 && 
+      /[a-zA-Z]/.test(trimmed) && 
+      trimmed.length <= 100
+    );
+  }, [titleInput]);
+
+  const handleSave = () => {
+    if (isValid) {
+      onSave(titleInput.trim());
+      onClose();
+    }
+  };
+
+  const handleClose = (e) => {
+    // Prevent closing if clicking on modal content
+    if (e.target === e.currentTarget && !isValid) {
+      return;
+    }
+    
+    // Only allow closing if there's a valid title
+    if (isValid) {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        onClick={handleClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          className="bg-white rounded-xl p-5 sm:p-6 w-full max-w-md mx-4 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Target Role Title
+                </h3>
+                <p className="text-xs text-gray-500">Required for AI transformation</p>
+              </div>
+            </div>
+            {isValid && (
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+
+          {/* Explanation */}
+          <div className="mb-5">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <div className="flex items-start">
+                <Info className="h-4 w-4 text-purple-600 mt-0.5 mr-2 flex-shrink-0" />
+                <div className="text-xs text-purple-800">
+                  <p className="font-medium mb-2">Why is this important?</p>
+                  <ul className="space-y-1 list-disc list-inside">
+                    <li>Tailors your resume content to match the specific role</li>
+                    <li>Optimizes keywords for ATS (Applicant Tracking Systems)</li>
+                    <li>Highlights relevant skills and experiences</li>
+                    <li>Increases your chances of getting noticed by recruiters</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Input Field */}
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter your target role title
+            </label>
+            <input
+              type="text"
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
+              placeholder="e.g., Senior Software Engineer, Data Scientist, Product Manager..."
+              className={`w-full px-3 py-3 border rounded-lg text-sm transition-all duration-200 focus:ring-2 focus:outline-none ${
+                titleInput && isValid
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                  : titleInput && !isValid
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-purple-500 focus:border-purple-500'
+              }`}
+              autoFocus
+            />
+            
+            {/* Validation feedback */}
+            <div className="mt-2 flex items-center space-x-2">
+              {titleInput && (
+                isValid ? (
+                  <div className="flex items-center text-xs text-green-600">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <span>Great! This title looks professional</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    <span>Please enter at least 3 characters with letters</span>
+                  </div>
+                )
+              )}
+            </div>
+            
+            {/* Examples */}
+            <div className="mt-3">
+              <p className="text-xs font-medium text-gray-600 mb-1">Examples:</p>
+              <div className="flex flex-wrap gap-1">
+                {[
+                  "Full Stack Developer",
+                  "Marketing Manager", 
+                  "Data Analyst",
+                  "UX Designer"
+                ].map((example, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setTitleInput(example)}
+                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs transition-colors"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={!isValid}
+              className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-purple-600"
+            >
+              <Target className="h-4 w-4" />
+              <span>Set Target Role</span>
+            </button>
+            
+            {/* Only show cancel if there's already a valid title */}
+            {currentTitle && currentTitle.trim() && (
+              <button
+                onClick={onClose}
+                className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+
+          {/* Bottom note */}
+          {!isValid && titleInput.length > 0 && (
+            <div className="mt-3 text-center">
+              <p className="text-xs text-gray-500">
+                You must enter a valid title to continue
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
 
 export default function FileUploader({
   onFileUpload,
@@ -37,6 +231,7 @@ export default function FileUploader({
   const [selectedApi, setSelectedApi] = useState("api_1");
   const [pId, setpId] = useState(null);
   const [resumeTitle, setResumeTitle] = useState("");
+  const [showTitleModal, setShowTitleModal] = useState(false);
   const { getUserId, isAuthenticated } = useAuth();
   const { startProcessing, stopProcessing, updateProcessingMessage } = useProcessing();
 
@@ -70,8 +265,8 @@ export default function FileUploader({
       setUploadProgress(0);
       setIsUploading(false);
       setIsUploaded(false);
-      // Auto-generate title from filename
-      setResumeTitle(file.name.replace(/\.[^/.]+$/, ""));
+      // Remove auto-generation of title - let user fill manually
+      setResumeTitle("");
     }
   };
 
@@ -88,7 +283,8 @@ export default function FileUploader({
       setUploadProgress(0);
       setIsUploading(false);
       setIsUploaded(false);
-      setResumeTitle(file.name.replace(/\.[^/.]+$/, ""));
+      // Remove auto-generation of title - let user fill manually
+      setResumeTitle("");
     }
   };
 
@@ -119,6 +315,12 @@ export default function FileUploader({
         setPdfurl(response.data.data.url);
         setpId(response.data.data.publicId);
       }
+      
+      // Automatically show title modal after successful upload
+      setTimeout(() => {
+        setShowTitleModal(true);
+      }, 500); // Small delay to let the upload success animation complete
+      
     } catch (error) {
       console.error("Upload failed:", error);
       setIsUploading(false);
@@ -143,7 +345,7 @@ export default function FileUploader({
       startProcessing("AI is analyzing your resume...");
 
       const source = new EventSource(
-        `${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}&apiKey=${selectedApi}&genmodel=${selectedModel}`
+        `${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}&apiKey=${selectedApi}&genmodel=${selectedModel}&token=${localStorage.getItem("token")}`,
       );
 
       source.addEventListener("Extracting data", (event) => {
@@ -225,6 +427,17 @@ export default function FileUploader({
       setProcessingStep("idle");
       setProcessingMessage("");
     }
+  };
+
+  const handleTitleClick = () => {
+    if (!disable) {
+      setShowTitleModal(true);
+    }
+  };
+
+  const handleTitleSave = (newTitle) => {
+    setResumeTitle(newTitle);
+    setShowTitleModal(false);
   };
 
   return (
@@ -374,25 +587,36 @@ export default function FileUploader({
               {/* Resume Title */}
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
-                  <div className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={handleTitleClick}
+                    disabled={disable}
+                    className="flex items-center hover:text-purple-600 transition-colors cursor-pointer disabled:cursor-default disabled:hover:text-gray-700"
+                  >
                     <Target className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-gray-600" />
                     Target Role Title
-                  </div>
+                  </button>
                   <span className="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full sm:ml-2 self-start sm:self-auto">
                     Transforms entire resume
                   </span>
                 </label>
-                <input
-                  type="text"
-                  value={resumeTitle}
-                  onChange={(e) => setResumeTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm transition-all duration-200"
-                  placeholder="e.g., AI Automation Engineer, Data Scientist, Full Stack Developer..."
-                  disabled={disable}
-                />
+                <div 
+                  onClick={handleTitleClick}
+                  className={`w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm transition-all duration-200 ${
+                    !disable ? 'cursor-pointer hover:border-purple-400 hover:shadow-sm' : 'cursor-default'
+                  } ${resumeTitle ? 'focus:ring-2 focus:ring-purple-500 focus:border-purple-500' : ''}`}
+                >
+                  <input
+                    type="text"
+                    value={resumeTitle}
+                    readOnly
+                    placeholder="Click to set your target role title..."
+                    className="w-full bg-transparent outline-none cursor-pointer placeholder-gray-400"
+                    disabled={disable}
+                  />
+                </div>
                 <p className="text-xs text-gray-500 mt-1.5">
-                  💡 Tip: Be specific with the role title to get the best
-                  transformation results
+                  💡 Tip: Be specific with the role title to get the best transformation results
                 </p>
               </div>
             </div>
@@ -503,6 +727,14 @@ export default function FileUploader({
           </div>
         )}
       </div>
+
+      {/* Target Role Title Modal */}
+      <TargetRoleTitleModal
+        isOpen={showTitleModal}
+        onClose={() => setShowTitleModal(false)}
+        currentTitle={resumeTitle}
+        onSave={handleTitleSave}
+      />
     </div>
   );
 }

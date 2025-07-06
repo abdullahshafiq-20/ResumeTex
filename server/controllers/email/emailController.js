@@ -235,7 +235,7 @@ export const sendEmail = async (req, res) => {
 // Send an email with attachments
 export const sendEmailWithAttachment = async (req, res) => {
   try {
-    const { to, subject, message, pdfUrl } = req.body;
+    const { to, cc, bcc, subject, message, pdfUrl } = req.body;
     const attachment = req.file; // For file uploads with multer
     const userId = req.user.id;
     
@@ -253,6 +253,36 @@ export const sendEmailWithAttachment = async (req, res) => {
     // Check if attachment or pdfUrl exists
     if (!attachment && !pdfUrl) {
       return res.status(400).json({ error: 'No attachment provided. Please include either a file upload or provide a PDF URL.' });
+    }
+    
+    // Helper function to validate and format recipients
+    const formatRecipients = (recipients) => {
+      if (!recipients) return '';
+      
+      // Handle both string and array inputs
+      const recipientArray = Array.isArray(recipients) ? recipients : [recipients];
+      
+      // Basic email validation regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      // Validate all email addresses
+      const invalidEmails = recipientArray.filter(email => !emailRegex.test(email.trim()));
+      if (invalidEmails.length > 0) {
+        throw new Error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
+      }
+      
+      // Return comma-separated string of trimmed emails
+      return recipientArray.map(email => email.trim()).join(', ');
+    };
+    
+    // Format recipients
+    const formattedTo = formatRecipients(to);
+    const formattedCc = formatRecipients(cc);
+    const formattedBcc = formatRecipients(bcc);
+    
+    // Validate that at least one recipient is provided
+    if (!formattedTo) {
+      return res.status(400).json({ error: 'At least one recipient in "to" field is required' });
     }
     
     // Set up OAuth2 client with user's refresh token
@@ -278,7 +308,19 @@ export const sendEmailWithAttachment = async (req, res) => {
     // Build the email headers and HTML content
     const messageParts = [
       `From: ${user.email}`,
-      `To: ${to}`,
+      `To: ${formattedTo}`,
+    ];
+    
+    // Add CC and BCC headers if provided
+    if (formattedCc) {
+      messageParts.push(`Cc: ${formattedCc}`);
+    }
+    if (formattedBcc) {
+      messageParts.push(`Bcc: ${formattedBcc}`);
+    }
+    
+    // Continue with the rest of the headers
+    messageParts.push(
       `Subject: ${subject}`,
       'MIME-Version: 1.0',
       `Content-Type: multipart/mixed; boundary="${boundary}"`,
@@ -289,7 +331,7 @@ export const sendEmailWithAttachment = async (req, res) => {
       '',
       formattedMessage,
       ''
-    ];
+    );
     
     // Handle attachment scenarios
     if (attachment) {
@@ -351,10 +393,23 @@ export const sendEmailWithAttachment = async (req, res) => {
       }
     });
     
+    // Count total recipients for response
+    const totalRecipients = [
+      ...(Array.isArray(to) ? to : [to]),
+      ...(Array.isArray(cc) ? cc : cc ? [cc] : []),
+      ...(Array.isArray(bcc) ? bcc : bcc ? [bcc] : [])
+    ].length;
+    
     return res.status(200).json({ 
       success: true, 
       messageId: result.data.id,
-      attachmentType: attachment ? 'file' : 'url'
+      attachmentType: attachment ? 'file' : 'url',
+      recipients: {
+        to: formattedTo,
+        cc: formattedCc || undefined,
+        bcc: formattedBcc || undefined,
+        totalCount: totalRecipients
+      }
     });
   } catch (error) {
     console.error('Send email with attachment error:', error);
