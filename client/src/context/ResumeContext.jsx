@@ -91,13 +91,13 @@ export const ResumeProvider = ({ children }) => {
 
     // Handle resume created event
     const handleResumeCreated = (data) => {
-      //console.log('Resume created via socket:', data);
+      console.log('Resume created via socket:', data);
       setResumes(prev => [...prev, data.data]);
     };
 
     // Handle resume updated event
     const handleResumeUpdated = (data) => {
-      //console.log('Resume updated via socket:', data);
+      console.log('Resume updated via socket:', data);
       setResumes(prev => 
         prev.map(resume => 
           resume._id === data.data._id ? data.data : resume
@@ -107,14 +107,14 @@ export const ResumeProvider = ({ children }) => {
 
     // Handle resume deleted event
     const handleResumeDeleted = (data) => {
-      //console.log('Resume deleted via socket:', data);
+      console.log('Resume deleted via socket:', data);
       setResumes(prev => 
         prev.filter(resume => resume._id !== data.data.resumeId)
       );
     };
 
     const handlePreferencesUpdated = (data) => {
-      //console.log('Preferences updated via socket:', data);
+      console.log('Preferences updated via socket:', data);
       setPreferences(data.data);
     };
 

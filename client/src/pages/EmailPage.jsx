@@ -1481,7 +1481,7 @@ const EmailPage = () => {
           >
             <div className="absolute top-2 right-2 w-12 h-12 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-xl"></div>
             <div className="relative z-10">
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full  mx-auto mb-4">
                 <Mail className="h-6 w-6 text-gray-400" />
               </div>
               <h2 className="text-lg font-semibold text-center text-gray-700 mb-2">

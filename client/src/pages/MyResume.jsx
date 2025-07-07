@@ -514,22 +514,22 @@ const itemVariants = {
                   <Target className="h-3 w-3 text-gray-500" />
                   <span className="text-gray-500">Example: "AI Engineer" → Complete resume refactoring</span>
                 </div>
-
-                {/* FileUploader goes here */}
-                <div className="mt-4">
-                  <FileUploader
-                    apiUrl={apiUrl}
-                    template="v2"
-                    onFileUpload={handleFileUpload}
-                    onUploadStart={handleUploadStart}
-                    onUploadError={handleUploadError}
-                  />
-                </div>
               </div>
               
               <div className="flex-shrink-0">
                 <Zap className="h-4 w-4 text-purple-600 animate-pulse delay-500" />
               </div>
+            </div>
+
+            {/* FileUploader spans full width */}
+            <div className="w-full mt-4">
+              <FileUploader
+                apiUrl={apiUrl}
+                template="v2"
+                onFileUpload={handleFileUpload}
+                onUploadStart={handleUploadStart}
+                onUploadError={handleUploadError}
+              />
             </div>
           </div>
         </motion.div>

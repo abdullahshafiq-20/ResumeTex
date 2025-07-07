@@ -20,11 +20,11 @@ export const DashbaordProvider = ({ children }) => {
     const fetchDashboardData = useCallback(async (limit = 10) => {
         // Don't fetch if auth is still loading or user is not authenticated
         if (authLoading || !isAuthenticated || !user) {
-            //console.log('Skipping fetch - auth loading:', authLoading, 'authenticated:', isAuthenticated, 'user:', !!user);
+            console.log('Skipping fetch - auth loading:', authLoading, 'authenticated:', isAuthenticated, 'user:', !!user);
             return;
         }
         
-        //console.log('Starting dashboard data fetch for user:', user.email || user.id);
+        console.log('Starting dashboard data fetch for user:', user.email || user.id);
         setLoading(true);
         setError(null);
         
@@ -32,7 +32,7 @@ export const DashbaordProvider = ({ children }) => {
             // Single API call to get all dashboard data
             const response = await api.get(`/user/all-stats?limit=${limit}`);
 
-            //console.log('API Response:', response.data);
+            console.log('API Response:', response.data);
 
             if (response.data.success) {
                 const data = response.data.data;
@@ -51,7 +51,7 @@ export const DashbaordProvider = ({ children }) => {
                 setPreferences(data.preferences || null);
                 setLastUpdated(new Date().toISOString());
                 
-                //console.log('Dashboard data fetch completed successfully');
+                console.log('Dashboard data fetch completed successfully');
             } else {
                 console.warn('Stats fetch failed:', response.data.message || response.data.error);
                 setError(response.data.message || 'Failed to fetch dashboard data');
@@ -69,10 +69,10 @@ export const DashbaordProvider = ({ children }) => {
     useEffect(() => {
         if (!socket || !isConnected) return;
 
-        //console.log('Setting up dashboard socket listeners...');
+        console.log('Setting up dashboard socket listeners...');
 
         const handleStatsUpdate = (data) => {
-            //console.log('Received live stats update:', data);
+            console.log('Received live stats update:', data);
             if (data.type === 'stats_dashboard' && data.data) {
                 const statsData = data.data;
                 
@@ -105,21 +105,21 @@ export const DashbaordProvider = ({ children }) => {
 
         // Keep individual listeners for compatibility with existing socket events
         const handleActivityUpdate = (data) => {
-            //console.log('Received live activity update:', data);
+            console.log('Received live activity update:', data);
             if (data.type === 'activity_dashboard' && data.data) {
                 setActivity(data.data);
             }
         };
 
         const handleComparisonUpdate = (data) => {
-            //console.log('Received live comparison update:', data);
+            console.log('Received live comparison update:', data);
             if (data.type === 'comparison_dashboard' && data.data) {
                 setComparison(data.data);
             }
         };
 
         const handlePreferencesUpdate = (data) => {
-            //console.log('Received live preferences update:', data);
+            console.log('Received live preferences update:', data);
             if (data.type === 'preferences_dashboard' && data.data) {
                 setPreferences(data.data);
             }
@@ -131,7 +131,7 @@ export const DashbaordProvider = ({ children }) => {
         socket.on('preferences_dashboard', handlePreferencesUpdate);
 
         socket.on('dashboard_update', (data) => {
-            //console.log('Received dashboard update:', data);
+            console.log('Received dashboard update:', data);
             switch (data.type) {
                 case 'stats':
                     setStats(data.data);
@@ -146,13 +146,13 @@ export const DashbaordProvider = ({ children }) => {
                     setPreferences(data.data);
                     break;
                 default:
-                    //console.log('Unknown dashboard update type:', data.type);
+                    console.log('Unknown dashboard update type:', data.type);
             }
             setLastUpdated(data.timestamp || new Date().toISOString());
         });
 
         return () => {
-            //console.log('Cleaning up dashboard socket listeners...');
+            console.log('Cleaning up dashboard socket listeners...');
             socket.off('stats_dashboard', handleStatsUpdate);
             socket.off('activity_dashboard', handleActivityUpdate);
             socket.off('comparison_dashboard', handleComparisonUpdate);
@@ -163,7 +163,7 @@ export const DashbaordProvider = ({ children }) => {
 
     // Main effect to fetch data when authentication is ready
     useEffect(() => {
-        // //console.log('Auth state changed:', {
+        // console.log('Auth state changed:', {
         //     authLoading,
         //     isAuthenticated,
         //     hasUser: !!user,
@@ -171,7 +171,7 @@ export const DashbaordProvider = ({ children }) => {
         // });
 
         if (!authLoading && isAuthenticated && user) {
-            //console.log('Auth ready, fetching dashboard data...');
+            console.log('Auth ready, fetching dashboard data...');
             fetchDashboardData();
         }
     }, [authLoading, isAuthenticated, user, fetchDashboardData]);

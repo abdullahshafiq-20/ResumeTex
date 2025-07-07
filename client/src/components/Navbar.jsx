@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { FileText } from "lucide-react";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -24,68 +25,74 @@ const Navbar = () => {
   // Navigation links
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Builder", path: "/builder" },
     { name: "Templates", path: "/templates" },
-    { name: "About", path: "/about" },
+    { name: "Examples", path: "/examples" },
+    { name: "Pricing", path: "/pricing" },
   ];
 
   return (
-    <div className="flex justify-center fixed top-4 left-0 right-0 z-50">
-      <motion.nav
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-[90%] max-w-7xl rounded-xl border border-gray-200/60 bg-white/80 relative"
-      >
-        {/* Background with blurred blobs - contained within the navbar */}
-        <div className="absolute inset-0 overflow-hidden rounded-xl">
-          {/* Positioned blobs that stay within the container */}
-          <div className="absolute top-0 left-0 w-48 h-48 rounded-full bg-blue-300/20 blur-3xl transform translate-x-[-30%] translate-y-[-30%]"></div>
-          <div className="absolute bottom-0 right-20 w-32 h-32 rounded-full bg-blue-400/20 blur-2xl"></div>
-          <div className="absolute bottom-4 left-10 w-24 h-24 rounded-full bg-indigo-300/20 blur-2xl"></div>
-          <div className="absolute top-1/2 left-1/3 w-16 h-16 rounded-full bg-blue-500/10 blur-xl"></div>
-          
-          {/* Backdrop overlay */}
-          <motion.div
-            className="absolute inset-0 bg-white/60 backdrop-blur-md rounded-xl"
-            animate={{
-              opacity: scrolled ? 0.8 : 0.7,
-            }}
-            transition={{ duration: 0.3 }}
-          ></motion.div>
-        </div>
-
+    <motion.nav
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? "bg-white/95 backdrop-blur-md border-b border-gray-200/50" 
+          : "bg-white/90 backdrop-blur-sm"
+      }`}
+    >
+      <div className={`transition-all duration-300 ${
+        scrolled ? "max-w-6xl mx-auto px-4" : "max-w-7xl mx-auto px-6"
+      }`}>
         <motion.div
-          className="relative flex items-center justify-between"
+          className="flex items-center justify-between"
           animate={{
-            padding: scrolled ? "0.5rem 1rem" : "0.75rem 1rem",
+            padding: scrolled ? "0.75rem 0" : "1rem 0",
           }}
           transition={{ duration: 0.3 }}
         >
           {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <motion.div
-                className="bg-[#2563EB] rounded-md flex items-center justify-center text-white font-bold text-xl"
-                animate={{
-                  height: scrolled ? "2rem" : "2.25rem",
-                  width: scrolled ? "2rem" : "2.25rem",
+          <Link to="/" className="flex items-center space-x-3">
+            <motion.div
+              className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center overflow-hidden"
+              animate={{
+                height: scrolled ? "2rem" : "2.5rem",
+                width: scrolled ? "2rem" : "2.5rem",
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <img
+                src="/logo.png"
+                alt="ResumeTex Logo"
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
                 }}
-                transition={{ duration: 0.3 }}
-              >
-                R
-              </motion.div>
+              />
+              <FileText className="w-5 h-5 text-white hidden" />
+            </motion.div>
+            <motion.div
+              className="hidden sm:block"
+              animate={{
+                opacity: scrolled ? 0.9 : 1,
+              }}
+              transition={{ duration: 0.3 }}
+            >
               <motion.span
-                className="font-semibold hidden sm:block"
+                className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
                 animate={{
-                  fontSize: scrolled ? "0.95rem" : "1.125rem",
+                  fontSize: scrolled ? "1.125rem" : "1.25rem",
                 }}
                 transition={{ duration: 0.3 }}
               >
-                ResumeWizard
+                ResumeTex
               </motion.span>
-            </Link>
-          </div>
+              <div className="text-xs text-gray-500 font-medium">
+                AI Resume Enhancement
+              </div>
+            </motion.div>
+          </Link>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-1">
@@ -93,10 +100,10 @@ const Navbar = () => {
               <Link
                 key={link.name}
                 to={link.path}
-                className={`px-4 py-2 rounded-md transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   location.pathname === link.path
-                    ? "text-[#2563EB] font-medium bg-blue-50/80"
-                    : "text-gray-600 hover:text-[#2563EB] hover:bg-blue-50/60"
+                    ? "text-purple-600 bg-purple-50"
+                    : "text-gray-600 hover:text-purple-600 hover:bg-purple-50/50"
                 }`}
               >
                 {link.name}
@@ -104,27 +111,20 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* User Profile & Mobile Menu Button */}
+          {/* CTA Button & Mobile Menu */}
           <div className="flex items-center space-x-4">
             <Link
-              to="/profile"
-              className="relative rounded-full overflow-hidden border-2 border-gray-200 hover:border-[#2563EB] transition-colors"
+              to="/dashboard"
+              className={`px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold transition-all duration-200 hover:shadow-lg hover:scale-105 ${
+                scrolled ? "text-sm" : "text-sm"
+              }`}
             >
-              <motion.div
-                className="bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium"
-                animate={{
-                  height: scrolled ? "2rem" : "2.25rem",
-                  width: scrolled ? "2rem" : "2.25rem",
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                U
-              </motion.div>
+              Get Started
             </Link>
 
             {/* Mobile menu button */}
             <motion.button
-              className="md:hidden text-gray-600 hover:text-[#2563EB]"
+              className="md:hidden text-gray-600 hover:text-purple-600 p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               whileTap={{ scale: 0.95 }}
             >
@@ -134,7 +134,7 @@ const Navbar = () => {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                 >
                   <path
                     strokeLinecap="round"
@@ -149,7 +149,7 @@ const Navbar = () => {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                 >
                   <path
                     strokeLinecap="round"
@@ -163,17 +163,17 @@ const Navbar = () => {
           </div>
         </motion.div>
 
-        {/* Mobile Navigation Menu - with animation */}
+        {/* Mobile Navigation Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              className="relative md:hidden border-t border-gray-200/60"
+              className="md:hidden border-t border-gray-200/50 bg-white/95"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <div className="py-2">
+              <div className="py-4 space-y-2">
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.name}
@@ -183,10 +183,10 @@ const Navbar = () => {
                   >
                     <Link
                       to={link.path}
-                      className={`block px-4 py-2 rounded-md my-1 mx-2 ${
+                      className={`block px-4 py-3 rounded-lg mx-2 text-sm font-medium transition-colors ${
                         location.pathname === link.path
-                          ? "bg-blue-50/80 text-[#2563EB] font-medium"
-                          : "text-gray-600 hover:bg-blue-50/60"
+                          ? "bg-purple-50 text-purple-600"
+                          : "text-gray-600 hover:bg-purple-50/50 hover:text-purple-600"
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -194,23 +194,21 @@ const Navbar = () => {
                     </Link>
                   </motion.div>
                 ))}
+                <div className="px-2 pt-2">
+                  <Link
+                    to="/dashboard"
+                    className="block w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center rounded-lg font-semibold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Get Started
+                  </Link>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Shadow effect when scrolled */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none rounded-xl"
-          animate={{
-            boxShadow: scrolled
-              ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
-              : "0 0 0 0 rgba(0, 0, 0, 0)",
-          }}
-          transition={{ duration: 0.3 }}
-        ></motion.div>
-      </motion.nav>
-    </div>
+      </div>
+    </motion.nav>
   );
 };
 
