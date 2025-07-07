@@ -242,7 +242,7 @@ const ExtractPrefrences = (extractedData) => {
   const prompt = `
   you are given a task to extract the prefrences from the extracted data.
   the extracted data is: ${extractedData}
-  you need to resturn the respoosne in the followinf format
+  you need to return the respoosne in the followig format
   `
 }
 
@@ -262,8 +262,11 @@ export const ConvertLatex = async (extractedData, jobTitle, apiKey, genmodel, ma
 
     // Clean up the response - remove markdown code blocks and any extra whitespace
     latexContent = latexContent.replace(/```json\n?/g, '')  // Remove ```json
-      .replace(/```\n?/g, '')        // Remove closing ```
-      .trim();                       // Remove extra whitespace
+      .replace(/```\n?/g, '')
+      .replace(/\*\*/g, '')       // Remove closing ```
+      .trim(); 
+
+      
 
     let parsedData;
     try {

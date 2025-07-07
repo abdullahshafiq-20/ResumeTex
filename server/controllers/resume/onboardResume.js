@@ -51,7 +51,7 @@ export const onboardResume = async (req, res) => {
         send("Extracting data", { step: "extractpdf", status: "started" });
         const { extractedData } = await extractPdfData(pdfUrl);
         send("Extracting data", { step: "extractpdf", status: "completed", data: extractedData });
-        console.log("extractedData", extractedData.email)
+        //console.log("extractedData", extractedData.email)
 
         if (extractedData.email !== emailExists) {
             send("error", { 
@@ -67,10 +67,10 @@ export const onboardResume = async (req, res) => {
 
 
 
-        console.log("pdfUrl", pdfUrl)
-        console.log("pref", pref)
-        console.log("apiKey", api)
-        console.log("genmodel", genmodel)
+        //console.log("pdfUrl", pdfUrl)
+        //console.log("pref", pref)
+        //console.log("apiKey", api)
+        //console.log("genmodel", genmodel)
 
         send(`Fetching data for : ${pref}`, { step: `FetchingData ${pref}`, status: "started" });
         // const apiKey1 = process.env.GEMINI_API_KEY_1;
@@ -81,8 +81,8 @@ export const onboardResume = async (req, res) => {
 
 
 
-        console.log("formattedLatex", formattedLatex)
-        console.log("starting pdf conversion")
+        //console.log("formattedLatex", formattedLatex)
+        //console.log("starting pdf conversion")
 
 
 
@@ -111,11 +111,11 @@ export const onboardResume = async (req, res) => {
 
         emitPreferencesDashboard(user._id, userPreferences);
 
-        console.log(`Saved user preferences for ${email}:`, {
-            summary: summary ? summary.substring(0, 50) + "..." : "None provided",
-            skills: `${flattenedSkills.length} skills saved`,
-            projects: `${simplifiedProjects.length} projects saved`
-        });
+        // //console.log(`Saved user preferences for ${email}:`, {
+        //     summary: summary ? summary.substring(0, 50) + "..." : "None provided",
+        //     skills: `${flattenedSkills.length} skills saved`,
+        //     projects: `${simplifiedProjects.length} projects saved`
+        // });
 
 
         const pdf = await convertJsonTexToPdfLocally(formattedLatex);
@@ -143,7 +143,7 @@ export const onboardResume = async (req, res) => {
             createdAt: new Date()
         })
         send(`Adding resume to user`, { step: `Adding resume to user`, status: "completed", data: { pdfUrl: pdf.pdfUrl } });
-        console.log("userResume", userResume)
+        //console.log("userResume", userResume)
 
         emitResumeCreated(userId, userResume);
         triggerStatsUpdate(userId);
@@ -153,7 +153,7 @@ export const onboardResume = async (req, res) => {
         res.write(`event: complete\n`);
         res.write(`data: ${JSON.stringify({ pdfUrl: pdf.pdfUrl, updateOnborad, userResume })}\n\n`);
         res.end(); // Close the connection after sending the final data
-        console.log("Response sent to client");
+        //console.log("Response sent to client");
         // res.json({ pref1, pref2, pref3 });
 
     } catch (error) {
@@ -227,7 +227,7 @@ export const pdfToImage = async (pdfUrl) => {
             throw new Error('PDF URL is required');
         }
 
-        console.log('Starting PDF to image conversion');
+        //console.log('Starting PDF to image conversion');
 
         // Fetch the PDF
         const pdfResponse = await fetch(pdfUrl);
@@ -267,7 +267,7 @@ export const pdfToImage = async (pdfUrl) => {
             uploadStream.end(Buffer.from(singlePagePdfBytes));
         });
 
-        console.log('PDF to image conversion completed successfully');
+        //console.log('PDF to image conversion completed successfully');
         return {
             pdfUrl: pdfUrl,
             imageUrl: result.secure_url,

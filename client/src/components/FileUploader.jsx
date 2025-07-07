@@ -22,7 +22,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { useProcessing } from "../context/ProcessingContext"; 
+import { useProcessing } from "../context/ProcessingContext";
 
 // Target Role Title Modal Component
 const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
@@ -37,9 +37,7 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
     // Validation: at least 3 characters, not just spaces, and contains letters
     const trimmed = titleInput.trim();
     setIsValid(
-      trimmed.length >= 3 && 
-      /[a-zA-Z]/.test(trimmed) && 
-      trimmed.length <= 100
+      trimmed.length >= 3 && /[a-zA-Z]/.test(trimmed) && trimmed.length <= 100
     );
   }, [titleInput]);
 
@@ -55,7 +53,7 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
     if (e.target === e.currentTarget && !isValid) {
       return;
     }
-    
+
     // Only allow closing if there's a valid title
     if (isValid) {
       onClose();
@@ -66,7 +64,7 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
 
   return (
     <AnimatePresence>
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
         onClick={handleClose}
       >
@@ -87,7 +85,9 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
                 <h3 className="text-lg font-semibold text-gray-900">
                   Target Role Title
                 </h3>
-                <p className="text-xs text-gray-500">Required for AI transformation</p>
+                <p className="text-xs text-gray-500">
+                  Required for AI transformation
+                </p>
               </div>
             </div>
             {isValid && (
@@ -108,10 +108,16 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
                 <div className="text-xs text-purple-800">
                   <p className="font-medium mb-2">Why is this important?</p>
                   <ul className="space-y-1 list-disc list-inside">
-                    <li>Tailors your resume content to match the specific role</li>
-                    <li>Optimizes keywords for ATS (Applicant Tracking Systems)</li>
+                    <li>
+                      Tailors your resume content to match the specific role
+                    </li>
+                    <li>
+                      Optimizes keywords for ATS (Applicant Tracking Systems)
+                    </li>
                     <li>Highlights relevant skills and experiences</li>
-                    <li>Increases your chances of getting noticed by recruiters</li>
+                    <li>
+                      Increases your chances of getting noticed by recruiters
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -130,18 +136,18 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
               placeholder="e.g., Senior Software Engineer, Data Scientist, Product Manager..."
               className={`w-full px-3 py-3 border rounded-lg text-sm transition-all duration-200 focus:ring-2 focus:outline-none ${
                 titleInput && isValid
-                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                  ? "border-green-300 focus:ring-green-500 focus:border-green-500"
                   : titleInput && !isValid
-                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                  : 'border-gray-300 focus:ring-purple-500 focus:border-purple-500'
+                  ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:ring-purple-500 focus:border-purple-500"
               }`}
               autoFocus
             />
-            
+
             {/* Validation feedback */}
             <div className="mt-2 flex items-center space-x-2">
-              {titleInput && (
-                isValid ? (
+              {titleInput &&
+                (isValid ? (
                   <div className="flex items-center text-xs text-green-600">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     <span>Great! This title looks professional</span>
@@ -151,19 +157,24 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
                     <AlertCircle className="h-3 w-3 mr-1" />
                     <span>Please enter at least 3 characters with letters</span>
                   </div>
-                )
-              )}
+                ))}
             </div>
-            
+
             {/* Examples */}
             <div className="mt-3">
-              <p className="text-xs font-medium text-gray-600 mb-1">Examples:</p>
+              <p className="text-xs font-medium text-gray-600 mb-1">
+                Examples:
+              </p>
               <div className="flex flex-wrap gap-1">
                 {[
                   "Full Stack Developer",
-                  "Marketing Manager", 
-                  "Data Analyst",
-                  "UX Designer"
+                  "Frontend Developer",
+                  "Backend Developer",
+                  "AI Engineer",
+                  "Data Scientist",
+                  "Machine Learning Engineer",
+                  "Cybersecurity Engineer",
+                  "DevOps Engineer"
                 ].map((example, index) => (
                   <button
                     key={index}
@@ -187,7 +198,7 @@ const TargetRoleTitleModal = ({ isOpen, onClose, currentTitle, onSave }) => {
               <Target className="h-4 w-4" />
               <span>Set Target Role</span>
             </button>
-            
+
             {/* Only show cancel if there's already a valid title */}
             {currentTitle && currentTitle.trim() && (
               <button
@@ -233,7 +244,8 @@ export default function FileUploader({
   const [resumeTitle, setResumeTitle] = useState("");
   const [showTitleModal, setShowTitleModal] = useState(false);
   const { getUserId, isAuthenticated } = useAuth();
-  const { startProcessing, stopProcessing, updateProcessingMessage } = useProcessing();
+  const { startProcessing, stopProcessing, updateProcessingMessage } =
+    useProcessing();
 
   const modelOptions = [
     { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", type: "Fast" },
@@ -315,12 +327,11 @@ export default function FileUploader({
         setPdfurl(response.data.data.url);
         setpId(response.data.data.publicId);
       }
-      
+
       // Automatically show title modal after successful upload
       setTimeout(() => {
         setShowTitleModal(true);
       }, 500); // Small delay to let the upload success animation complete
-      
     } catch (error) {
       console.error("Upload failed:", error);
       setIsUploading(false);
@@ -345,7 +356,9 @@ export default function FileUploader({
       startProcessing("AI is analyzing your resume...");
 
       const source = new EventSource(
-        `${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}&apiKey=${selectedApi}&genmodel=${selectedModel}&token=${localStorage.getItem("token")}`,
+        `${apiUrl}/onboard-resume?pdfUrl=${pdfurl}&pref=${resumeTitle}&apiKey=${selectedApi}&genmodel=${selectedModel}&token=${localStorage.getItem(
+          "token"
+        )}`
       );
 
       source.addEventListener("Extracting data", (event) => {
@@ -384,7 +397,7 @@ export default function FileUploader({
           if (event.data && event.data !== "undefined") {
             const errorData = JSON.parse(event.data);
             console.error("Error processing resume:", errorData);
-            stopProcessing()
+            stopProcessing();
 
             if (errorData.errorCode === "EMAIL_MISMATCH") {
               toast.error(`${errorData.error}`, {
@@ -397,28 +410,24 @@ export default function FileUploader({
               });
             } else {
               toast.error(`Processing failed: ${errorData.error}`);
-            stopProcessing()
-
+              stopProcessing();
             }
           } else {
             console.error("SSE Error: No valid data received");
             toast.error("Processing failed: Connection error");
-            stopProcessing()
-
+            stopProcessing();
           }
         } catch (parseError) {
           console.error("Failed to parse error data:", parseError);
           toast.error("Processing failed: Invalid response format");
-          stopProcessing()
-
+          stopProcessing();
         }
 
         source.close();
         setIsProcessing(false);
         setProcessingStep("idle");
         setProcessingMessage("");
-        stopProcessing()
-
+        stopProcessing();
       });
 
       // source.onerror = (event) => {
@@ -435,8 +444,7 @@ export default function FileUploader({
       setIsProcessing(false);
       setProcessingStep("idle");
       setProcessingMessage("");
-      stopProcessing()
-
+      stopProcessing();
     }
   };
 
@@ -611,11 +619,17 @@ export default function FileUploader({
                     Transforms entire resume
                   </span>
                 </label>
-                <div 
+                <div
                   onClick={handleTitleClick}
                   className={`w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm transition-all duration-200 ${
-                    !disable ? 'cursor-pointer hover:border-purple-400 hover:shadow-sm' : 'cursor-default'
-                  } ${resumeTitle ? 'focus:ring-2 focus:ring-purple-500 focus:border-purple-500' : ''}`}
+                    !disable
+                      ? "cursor-pointer hover:border-purple-400 hover:shadow-sm"
+                      : "cursor-default"
+                  } ${
+                    resumeTitle
+                      ? "focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      : ""
+                  }`}
                 >
                   <input
                     type="text"
@@ -627,7 +641,8 @@ export default function FileUploader({
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1.5">
-                  💡 Tip: Be specific with the role title to get the best transformation results
+                  💡 Tip: Be specific with the role title to get the best
+                  transformation results
                 </p>
               </div>
             </div>

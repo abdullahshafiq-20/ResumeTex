@@ -83,14 +83,14 @@ export const SocketProvider = ({ children }) => {
 
       // Connection event handlers
       newSocket.on('connect', () => {
-        console.log('Socket connected:', newSocket.id);
+        //console.log('Socket connected:', newSocket.id);
         setIsConnected(true);
         setConnectionError(null);
         reconnectAttemptsRef.current = 0;
       });
 
       newSocket.on('disconnect', (reason) => {
-        console.log('Socket disconnected:', reason);
+        //console.log('Socket disconnected:', reason);
         setIsConnected(false);
         
         // Only attempt reconnection for certain disconnect reasons
@@ -107,7 +107,7 @@ export const SocketProvider = ({ children }) => {
         // Implement exponential backoff for reconnection
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
-          console.log(`Retrying connection in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
+          //console.log(`Retrying connection in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
           
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectAttemptsRef.current++;
@@ -131,7 +131,7 @@ export const SocketProvider = ({ children }) => {
   const emitEvent = useCallback((event, data) => {
     if (socket && isConnected) {
       socket.emit(event, data);
-      console.log(`Emitted ${event}:`, data);
+      //console.log(`Emitted ${event}:`, data);
     } else {
       console.warn('Socket not connected, cannot emit event:', event);
     }
@@ -141,7 +141,7 @@ export const SocketProvider = ({ children }) => {
   const onEvent = useCallback((event, callback) => {
     if (socket) {
       socket.on(event, callback);
-      console.log(`Listening for ${event} events`);
+      //console.log(`Listening for ${event} events`);
       
       // Return cleanup function
       return () => {
@@ -197,11 +197,11 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    console.log('Setting up global socket listeners...');
+    //console.log('Setting up global socket listeners...');
 
     // Listen for notifications
     const handleNotification = (data) => {
-      console.log('Received notification:', data);
+      //console.log('Received notification:', data);
       setNotifications(prev => [data, ...prev.slice(0, 9)]); // Keep last 10 notifications
       
       // You can add toast notification here
@@ -212,7 +212,7 @@ export const SocketProvider = ({ children }) => {
 
     // Cleanup function
     return () => {
-      console.log('Cleaning up global socket listeners...');
+      //console.log('Cleaning up global socket listeners...');
       socket.off('notification', handleNotification);
     };
   }, [socket, isConnected]);

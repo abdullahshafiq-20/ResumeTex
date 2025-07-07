@@ -12,6 +12,6 @@ resumeRoutes.get("/pdf-to-img", convertPdfToImage);
 resumeRoutes.post("/addresume", verifyToken, addResume);
 resumeRoutes.post("/extract-data", extractData);
 resumeRoutes.post("/delete-resume", verifyToken, deleteResume);
-resumeRoutes.post("/manual-resume", manualResumeController);
+resumeRoutes.post("/manual-resume", verifyToken, manualResumeController);
 
 export default resumeRoutes;

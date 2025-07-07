@@ -7,6 +7,7 @@ import { PostsProvider } from "./context/PostsContext";
 import { DashbaordProvider } from "./context/DashbaordContext";
 import { SocketProvider } from "./context/SocketContext";
 import { ProcessingProvider } from "./context/ProcessingContext";
+import { JobsProvider } from "./context/LinkedinJobs";
 import App from "./App";
 import "./index.css";
 
@@ -18,9 +19,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <PostsProvider>
             <DashbaordProvider>
               <ResumeProvider>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
+                <JobsProvider>
+                  <BrowserRouter>
+                    <App />
+                  </BrowserRouter>
+                </JobsProvider>
               </ResumeProvider>
             </DashbaordProvider>
           </PostsProvider>

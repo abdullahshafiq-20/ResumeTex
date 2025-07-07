@@ -1,11 +1,20 @@
-import express from 'express';
 import { extractPdfData } from "../extractPdfData.js";
+import { convertJsonTexToPdfLocally } from "../latexToPdf.js";
+import { User, UserPreferences, UserResume } from "../../models/userSchema.js";
+import { emitResumeCreated, emitPreferencesDashboard, emitResumeDeleted } from "../../config/socketConfig.js";
+import { triggerStatsUpdate } from "../../utils/trigger.js";
+import { pdfToImage } from "./onboardResume.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from "dotenv";
 
-function extractResumeDetails(text) {
+dotenv.config();
+
+function extractResumeDetails(text, pref) {
     const result = {
         summary: '',
         skills: [],
-        projects: []
+        projects: [],
+        job_title: pref
     };
 
     // Extract summary
@@ -49,8 +58,12 @@ function extractResumeDetails(text) {
     return result;
 }
 
-async function parseResumeWithAI(resumeText, apiKey) {
+async function parseResumeWithAI(resumeText, pref) {
     try {
+        const apiKey = process.env.GEMINI_API_KEY_4;
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
         const prompt = `
 You are an expert resume parser. Analyze the following resume text and extract information in the exact JSON format specified below.
 
@@ -60,53 +73,59 @@ Required JSON format:
 {
   "summary": "A concise professional summary paragraph",
   "skills": ["skill1", "skill2", "skill3", ...],
-  "projects": ["Project Name 1", "Project Name 2", ...]
+  "projects": ["Project Name 1", "Project Name 2", ...],
+  "job_title": "Job Title"
 }
 
 Guidelines:
 1. Summary: Extract same summary as in the resume text
 2. Skills: Extract ALL technical skills, programming languages, frameworks, tools, and soft skills mentioned
 3. Projects: List project names/titles only (not descriptions)
-4. Ensure all arrays are properly formatted
-5. Remove any duplicate skills
+4. Suggest a good job title for the user based on the skills and projects for example "Software Engineer", "Data Scientist", "Product Manager", "etc."
+5. Ensure all arrays are properly formatted
+6. Remove any duplicate skills
 
 Resume text to analyze:
 ${resumeText}
 
 Return only the JSON object:`;
 
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "model": "google/gemma-3n-e4b-it:free",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            })
-        });
+        // const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        //     method: "POST",
+        //     headers: {
+        //         "Authorization": `Bearer ${apiKey}`,
+        //         "Content-Type": "application/json"
+        //     },
+        //     body: JSON.stringify({
+        //         "model": "google/gemma-3n-e4b-it:free",
+        //         "messages": [
+        //             {
+        //                 "role": "user",
+        //                 "content": prompt
+        //             }
+        //         ]
+        //     })
+        // });
+        const response = await model.generateContent(prompt);
+        //console.log(response.response.text());
 
-        if (!response.ok) {
-            throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-        }
+        
 
-        const data = await response.json();
-        console.log(data);
+        // if (!response.ok) {
+        //     throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        // }
 
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-            throw new Error('Invalid API response format');
-        }
+        // const data = response.response.text();
+        // //console.log(data);
 
-        const aiResponse = data.choices[0].message.content.trim();
+        // if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        //     throw new Error('Invalid API response format');
+        // }
+
+        // const aiResponse = data.choices[0].message.content.trim();
 
         // Clean the response to extract just the JSON
-        let jsonString = aiResponse;
+        let jsonString = response.response.text();
 
         // Remove markdown code blocks if present
         jsonString = jsonString.replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -131,22 +150,55 @@ Return only the JSON object:`;
         console.error('Error parsing resume with AI:', error);
 
         // Fallback to basic parsing if AI fails
-        return extractResumeDetails(resumeText);
+        return extractResumeDetails(resumeText, pref);
     }
 }
 
 
 export const manualResumeController = async (req, res) => {
 
-    const { pdfUrl } = req.body;
+    const { pdfUrl, pref } = req.body;
     const userId = req.user.id;
-    const { extractedData } = await extractPdfData(pdfUrl);
-    const text = extractedData.text;
-    const result = await parseResumeWithAI(text, process.env.OPENROUTER_API_KEY_1);
-    triggerStatsUpdate(userId);
+    try {
+        const { extractedData } = await extractPdfData(pdfUrl);
+        const text = extractedData.text;
+        const result = await parseResumeWithAI(text, pref);
 
-    // const validatedResult = validateAndCleanResult(result);
+        // res.json({ result });
 
-    res.json({ result });
+        const userPreferences = await UserPreferences.create({
+            userId: userId,
+            preferences: result.job_title,
+            summary: result.summary || "",
+            skills: result.skills,
+            projects: result.projects,
+            updatedAt: Date.now()
+        });
+
+        // res.json({ result, userPreferences });
+        const thumbnail = await pdfToImage(pdfUrl);
+        const { imageUrl, publicId: thumbnailPublicId, size, format } = thumbnail;
+        const userResume = await UserResume.create({
+            userId: userId,
+            resume_link: pdfUrl,
+            resume_title: result.job_title,
+            thumbnail: imageUrl,
+            file_type: 'pdf',
+            description: '',
+            publicId: thumbnailPublicId,
+            size: size,
+            format: format
+        });
+
+        emitResumeCreated(userId, userResume);
+        emitPreferencesDashboard(userId, userPreferences);
+        triggerStatsUpdate(userId);
+        res.status(200).json(userResume);
+
+
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 
 }

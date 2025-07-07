@@ -196,13 +196,13 @@ const PostsPage = () => {
                           post.jobTitle?.toLowerCase()?.trim() === "no match found";
   
     // Enhanced debugging
-    console.log("Post ID:", post._id);
-    console.log("Job Title:", `"${post.jobTitle}"`);
-    console.log("Job Title Length:", post.jobTitle?.length);
-    console.log("Trimmed Job Title:", `"${post.jobTitle?.trim()}"`);
-    console.log("Lowercase Job Title:", `"${post.jobTitle?.toLowerCase()?.trim()}"`);
-    console.log("Is No Match Found:", isNoMatchFound);
-    console.log("---");
+    //console.log("Post ID:", post._id);
+    //console.log("Job Title:", `"${post.jobTitle}"`);
+    //console.log("Job Title Length:", post.jobTitle?.length);
+    //console.log("Trimmed Job Title:", `"${post.jobTitle?.trim()}"`);
+    //console.log("Lowercase Job Title:", `"${post.jobTitle?.toLowerCase()?.trim()}"`);
+    //console.log("Is No Match Found:", isNoMatchFound);
+    //console.log("---");
 
     return (
       <motion.div

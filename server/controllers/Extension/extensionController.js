@@ -40,7 +40,7 @@ function extractContentInfo(content) {
     const uniqueUrls = [...new Set(extractedUrls)];
     const uniqueEmails = [...new Set(extractedEmails)];
 
-    console.log(content)
+    //console.log(content)
 
     return {
         content,
@@ -52,7 +52,7 @@ function extractContentInfo(content) {
 const getJobTitle = async (content, userSkills) => {
     //create gemini client
     const apiKey = process.env.GEMINI_API_KEY_4;
-    console.log(apiKey);
+    //console.log(apiKey);
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
@@ -79,9 +79,9 @@ const getJobTitle = async (content, userSkills) => {
     Example output: "Senior Software Engineer" or "Marketing Manager" or "no match found"`;
 
     //create gemini response
-    console.log("prompt", prompt)
+    //console.log("prompt", prompt)
     const result = await model.generateContent(prompt);
-    console.log(result.response.text());
+    //console.log(result.response.text());
     return result.response.text().trim();
 
 
@@ -94,7 +94,7 @@ export const savePost = async (req, res) => {
         const { content } = req.body;
         const id = req.user.id; // Assuming email is available in req.user from authentication middleware
         const timestamp = new Date().toISOString();
-        console.log("User ID:", id);
+        //console.log("User ID:", id);
 
         // Clean the content before processing - keep line breaks but remove extra spaces and lines
         const cleanedContent = content
@@ -126,11 +126,11 @@ export const savePost = async (req, res) => {
 
 
             if (response.status === 200) {
-                console.log("Using external API");
+                //console.log("Using external API");
                 const { extracted_urls, extracted_emails, extracted_hashtags} = response.data;
                 const userSkills = await UserPreferences.find({ userId: id });
                 const skills = userSkills.map(skill => skill.skills);
-                console.log("skills", skills)
+                //console.log("skills", skills)
                 const jobTitle = await getJobTitle(cleanedContent, skills);
 
                 data = await extensionSchema.create({
@@ -143,7 +143,7 @@ export const savePost = async (req, res) => {
                     timestamp: timestamp
                 });
 
-                // console.log("Data saved successfully:", data);
+                // //console.log("Data saved successfully:", data);
             } else {
                 throw new Error("API returned non-200 status");
             }
@@ -199,7 +199,7 @@ export const createSecret = async (req, res) => {
             { secret: hashedSecret },
             { new: true }
         );
-        console.log("Updated user with new secret:", updatedUser);
+        //console.log("Updated user with new secret:", updatedUser);
 
         res.status(200).json({
             success: true,

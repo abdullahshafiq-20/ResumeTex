@@ -83,7 +83,7 @@ export const sendEmail = async (req, res) => {
     const pdfUrl = attachment || attachement; // Handle both spellings
     const userId = req.user.id;
 
-    console.log('Email request received:', { to, subject, hasAttachment: !!pdfUrl });
+    // //console.log('Email request received:', { to, subject, hasAttachment: !!pdfUrl });
 
     // Get user from database with tokens
     const user = await User.findById(userId);
@@ -123,7 +123,7 @@ export const sendEmail = async (req, res) => {
     // Add attachment if provided
     if (pdfUrl) {
       try {
-        console.log('Downloading attachment from URL:', pdfUrl);
+        // //console.log('Downloading attachment from URL:', pdfUrl);
 
         // Download the PDF from the URL with improved options
         const response = await axios.get(pdfUrl, {
@@ -134,7 +134,7 @@ export const sendEmail = async (req, res) => {
           maxContentLength: 10485760 // 10MB max
         });
 
-        console.log('Download successful, data size:', response.data.length, 'bytes');
+        //console.log('Download successful, data size:', response.data.length, 'bytes');
 
         // Get filename from URL or use default
         const fileName = pdfUrl.split('/').pop() || 'document.pdf';
@@ -149,7 +149,7 @@ export const sendEmail = async (req, res) => {
         }
         const pdfEncoded = chunks.join('\r\n');
 
-        console.log('Attachment prepared with filename:', fileName);
+        //console.log('Attachment prepared with filename:', fileName);
 
         // Add attachment part to email
         messageParts = messageParts.concat([
@@ -171,7 +171,7 @@ export const sendEmail = async (req, res) => {
         }
 
         // Continue sending email without attachment
-        console.log('Sending email without attachment due to download error');
+        //console.log('Sending email without attachment due to download error');
       }
     }
 
@@ -181,7 +181,7 @@ export const sendEmail = async (req, res) => {
     const emailContent = messageParts.join('\r\n');
 
     // For debugging, log the size of the raw email
-    console.log('Email content length:', emailContent.length, 'bytes');
+    //console.log('Email content length:', emailContent.length, 'bytes');
 
     // Encode the email to base64url format
     const encodedMessage = Buffer.from(emailContent)
@@ -190,7 +190,7 @@ export const sendEmail = async (req, res) => {
       .replace(/\//g, '_')
       .replace(/=+$/, '');
 
-    console.log('Sending email to Gmail API...');
+    //console.log('Sending email to Gmail API...');
 
     // Send the email
     const result = await gmail.users.messages.send({
@@ -200,7 +200,7 @@ export const sendEmail = async (req, res) => {
       }
     });
 
-    console.log('Email sent successfully, ID:', result.data.id);
+    //console.log('Email sent successfully, ID:', result.data.id);
 
     // Save email record with sent status
     const emailRecord = await Email.create({
@@ -242,7 +242,7 @@ export const sendEmailWithAttachment = async (req, res) => {
     const user = await User.findById(userId);
     const name = user.name;
     const userResume = await UserResume.findOne({ userId, resume_link: pdfUrl });
-    console.log("userResume", userResume)
+    //console.log("userResume", userResume)
     const resume_title = userResume.resume_title;
 
     
@@ -492,21 +492,21 @@ export const createEmail = async (req, res) => {
     const { email, jobTitle, jobDescription,companyName, resume_id, postId } = req.body;
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
-    // console.log("req.body", req.body)
+    // //console.log("req.body", req.body)
 
     // Get user from database with tokens
-    // console.log("userId", userId)
-    // console.log("resume_id", resume_id)
-    // console.log("jobTitle", jobTitle)
-    // console.log("jobDescription", jobDescription)
+    // //console.log("userId", userId)
+    // //console.log("resume_id", resume_id)
+    // //console.log("jobTitle", jobTitle)
+    // //console.log("jobDescription", jobDescription)
 
     const user = await User.findById(userId);
-    console.log("user", user)
+    //console.log("user", user)
     const userResume = await UserResume.findById(resume_id);
-    console.log("userResume", userResume)
+    //console.log("userResume", userResume)
     const { resume_title, resume_link } = userResume;
-    console.log("resume_title", resume_title)
-    console.log("resume_link", resume_link)
+    //console.log("resume_title", resume_title)
+    //console.log("resume_link", resume_link)
     const userPreferences = await UserPreferences.findOne({ preferences: resume_title });
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
@@ -515,7 +515,7 @@ export const createEmail = async (req, res) => {
       return res.status(400).json({ error: 'User preferences not found' });
     }
 
-    console.log("userPreferences", userPreferences)
+    //console.log("userPreferences", userPreferences)
     const emailParams = {
       to: email || "email@gmail.com",
       jobTitle: jobTitle || "Senior Frontend Developer",
@@ -528,11 +528,11 @@ export const createEmail = async (req, res) => {
       recruiterName: "Hiring Manager"
     };
 
-    console.log("emailParams")
+    //console.log("emailParams")
 
     
     const data = generateEmailTemplate(emailParams);
-    console.log("Gmail Created:", data)
+    //console.log("Gmail Created:", data)
 
     const { to, subject, body } = data;
     const saveEmail = await Email.findOneAndUpdate(
@@ -540,11 +540,11 @@ export const createEmail = async (req, res) => {
       { $set: { userId, linkedInId:postId, resumeId: resume_id,  isEmailGenerated: true, isEmailSent: false, to: email, subject, body, attachment: resume_link } },
       { upsert: true , new: true }
     )
-    console.log("saveEmail", saveEmail)
+    //console.log("saveEmail", saveEmail)
 
-    console.log("=== EMITTING EMAIL CREATED EVENT ===");
-    console.log("userId:", userId);
-    console.log("saveEmail:", saveEmail);
+    //console.log("=== EMITTING EMAIL CREATED EVENT ===");
+    //console.log("userId:", userId);
+    //console.log("saveEmail:", saveEmail);
     
     // Emit socket event with proper data structure
     emitEmailCreated(userId, {
@@ -590,7 +590,7 @@ export const saveEmail = async (req, res) => {
       { $set: { userId, linkedInId: postId, resumeId, isEmailGenerated: true, isEmailSent: true, to, subject, body, attachment: pdfUrl } },
       { upsert: true, new: true }
     );
-    console.log("saveEmail", saveEmail)
+    //console.log("saveEmail", saveEmail)
     if (!saveEmail) {
       return res.status(404).json({ error: 'Email not found' });
     }
@@ -605,7 +605,7 @@ export const saveEmail = async (req, res) => {
 export const getEmails = async (req, res) => {
   try {
     const { postId } = req.query || req.params;
-    // console.log("postId", postId)
+    // //console.log("postId", postId)
     const userId = req.user.id; // Assuming you have user ID from auth middleware
 
     // Fetch emails from the database (you need to implement this part)

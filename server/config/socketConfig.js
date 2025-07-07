@@ -26,7 +26,7 @@ const initSocket = (server) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.userId = decoded.id;
       socket.userEmail = decoded.email; // Assuming email is part of the token payload      
-      console.log(`User ${socket.userEmail} connected with socket ID: ${socket.id}`);
+      //console.log(`User ${socket.userEmail} connected with socket ID: ${socket.id}`);
       next();
     } catch (error) {
       console.error('Socket authentication error:', error.message);
@@ -36,7 +36,7 @@ const initSocket = (server) => {
 
   // Handle socket connections
   io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id} for user: ${socket.userEmail}`);
+    //console.log(`Socket connected: ${socket.id} for user: ${socket.userEmail}`);
     
     // Join user to their personal room
     socket.join(`user_${socket.userId}`);
@@ -46,18 +46,18 @@ const initSocket = (server) => {
 
     // Handle disconnection
     socket.on('disconnect', (reason) => {
-      console.log(`Socket disconnected: ${socket.id}, Reason: ${reason}`);
+      //console.log(`Socket disconnected: ${socket.id}, Reason: ${reason}`);
     });
 
     // Handle custom events (you can add more as needed)
     socket.on('join_room', (roomName) => {
       socket.join(roomName);
-      console.log(`User ${socket.userEmail} joined room: ${roomName}`);
+      //console.log(`User ${socket.userEmail} joined room: ${roomName}`);
     });
 
     socket.on('leave_room', (roomName) => {
       socket.leave(roomName);
-      console.log(`User ${socket.userEmail} left room: ${roomName}`);
+      //console.log(`User ${socket.userEmail} left room: ${roomName}`);
     });
   });
 
@@ -76,19 +76,19 @@ const getIO = () => {
 const emitToUser = (userId, event, data) => {
   const socketIO = getIO();
   socketIO.to(`user_${userId}`).emit(event, data);
-  console.log(`Emitted ${event} to user ${userId}:`, data);
+  //console.log(`Emitted ${event} to user ${userId}:`, data);
 };
 
 const emitToRoom = (roomName, event, data) => {
   const socketIO = getIO();
   socketIO.to(roomName).emit(event, data);
-  console.log(`Emitted ${event} to room ${roomName}:`, data);
+  //console.log(`Emitted ${event} to room ${roomName}:`, data);
 };
 
 const emitToAll = (event, data) => {
   const socketIO = getIO();
   socketIO.emit(event, data);
-  console.log(`Broadcasted ${event} to all users:`, data);
+  //console.log(`Broadcasted ${event} to all users:`, data);
 };
 
 // Specific resume-related emit functions

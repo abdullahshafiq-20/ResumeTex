@@ -26,9 +26,221 @@ import {
   Target,
   Users,
   Loader2,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Calendar,
+  Building,
 } from "lucide-react";
 import axios from "axios";
 import api from "../utils/api";
+
+// Custom Resume Selector Component
+const ResumeSelector = ({ 
+  selectedResumeId, 
+  onResumeChange, 
+  resumes, 
+  getUserProfile, 
+  getResumeNameById,
+  disabled = false,
+  compact = false 
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const getResumeOptions = () => {
+    if (Array.isArray(resumes)) {
+      return resumes.map((resume) => ({
+        id: resume._id,
+        name: `${getUserProfile()?.name} - ${resume.resume_title}`,
+        title: resume.resume_title,
+        lastModified: resume.updatedAt || resume.createdAt
+      }));
+    } else if (resumes) {
+      return [{
+        id: "single-resume",
+        name: resumes?.personalInfo?.name || resumes?.resume_title || "My Resume",
+        title: resumes?.resume_title || "My Resume",
+        lastModified: resumes?.updatedAt || resumes?.createdAt
+      }];
+    }
+    return [];
+  };
+
+  const resumeOptions = getResumeOptions();
+  const selectedResume = resumeOptions.find(r => r.id === selectedResumeId);
+
+  const handleSelect = (resumeId) => {
+    onResumeChange(resumeId);
+    setIsOpen(false);
+  };
+
+  if (compact) {
+    return (
+      <div className="relative">
+        <select
+          value={selectedResumeId}
+          onChange={(e) => onResumeChange(e.target.value)}
+          disabled={disabled}
+          className="text-xs border border-gray-300 rounded px-2 py-1 pr-6 focus:ring-1 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-gray-50 disabled:text-gray-500 appearance-none"
+        >
+          <option value="">Select...</option>
+          {resumeOptions.map((resume) => (
+            <option key={resume.id} value={resume.id}>
+              {resume.name}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {/* Dropdown Button */}
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between p-3 sm:p-4 border border-gray-300 rounded-lg bg-white text-left focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+          disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : 'hover:border-gray-400 cursor-pointer'
+        } ${isOpen ? 'ring-2 ring-blue-500 border-transparent' : ''}`}
+      >
+        <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <div className="flex-shrink-0">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${
+              selectedResume ? 'bg-blue-100' : 'bg-gray-100'
+            }`}>
+              <FileText className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                selectedResume ? 'text-blue-600' : 'text-gray-400'
+              }`} />
+            </div>
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            {selectedResume ? (
+              <div>
+                <p className="text-sm sm:text-base font-medium text-gray-900 truncate">
+                  {selectedResume.title}
+                </p>
+                <div className="flex items-center space-x-2 mt-1">
+                  <User className="h-3 w-3 text-gray-400" />
+                  <p className="text-xs text-gray-500 truncate">
+                    {getUserProfile()?.name}
+                  </p>
+                  {selectedResume.lastModified && (
+                    <>
+                      <Calendar className="h-3 w-3 text-gray-400" />
+                      <p className="text-xs text-gray-500">
+                        {new Date(selectedResume.lastModified).toLocaleDateString()}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm sm:text-base text-gray-500">
+                  Select a resume...
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Choose which resume to use for email generation
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex-shrink-0 ml-2">
+          {isOpen ? (
+            <ChevronUp className="h-5 w-5 text-gray-400" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-gray-400" />
+          )}
+        </div>
+      </button>
+
+      {/* Dropdown Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          >
+            {resumeOptions.length === 0 ? (
+              <div className="p-4 text-center">
+                <FileText className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No resumes available</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Please create a resume first
+                </p>
+              </div>
+            ) : (
+              resumeOptions.map((resume) => (
+                <button
+                  key={resume.id}
+                  onClick={() => handleSelect(resume.id)}
+                  className={`w-full flex items-center space-x-3 p-3 sm:p-4 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0 ${
+                    selectedResumeId === resume.id ? 'bg-blue-50 border-blue-100' : ''
+                  }`}
+                >
+                  <div className="flex-shrink-0">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      selectedResumeId === resume.id ? 'bg-blue-100' : 'bg-gray-100'
+                    }`}>
+                      <FileText className={`h-4 w-4 ${
+                        selectedResumeId === resume.id ? 'text-blue-600' : 'text-gray-500'
+                      }`} />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium truncate ${
+                      selectedResumeId === resume.id ? 'text-blue-900' : 'text-gray-900'
+                    }`}>
+                      {resume.title}
+                    </p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <User className="h-3 w-3 text-gray-400" />
+                      <p className="text-xs text-gray-500 truncate">
+                        {getUserProfile()?.name}
+                      </p>
+                      {resume.lastModified && (
+                        <>
+                          <Calendar className="h-3 w-3 text-gray-400" />
+                          <p className="text-xs text-gray-500">
+                            {new Date(resume.lastModified).toLocaleDateString()}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {selectedResumeId === resume.id && (
+                    <div className="flex-shrink-0">
+                      <Check className="h-4 w-4 text-blue-600" />
+                    </div>
+                  )}
+                </button>
+              ))
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
 
 // Recipients Modal Component
 const RecipientsModal = ({ isOpen, onClose, currentRecipients, onSave, isLoading, emailSuggestions = [] }) => {
@@ -250,7 +462,7 @@ const EmailPage = () => {
 
   useEffect(() => {
     if (posts && posts.length > 0) {
-      console.log("Posts in EmailPage:", posts);
+      //console.log("Posts in EmailPage:", posts);
 
       // Filter posts that contain emails AND exclude "no match found" posts
       const postsWithEmails = posts.filter(
@@ -279,8 +491,8 @@ const EmailPage = () => {
           !sentPostIds.includes(post._id)
       );
 
-      console.log("Posts with emails (excluding no match found):", postsWithEmails);
-      console.log("Pending posts:", pendingPosts);
+      //console.log("Posts with emails (excluding no match found):", postsWithEmails);
+      //console.log("Pending posts:", pendingPosts);
       setPendingEmailPosts(pendingPosts);
     }
 
@@ -367,7 +579,7 @@ const EmailPage = () => {
       };
 
       const response = await api.post(`${apiUrl}/create-email`, emailData);
-      console.log("response", response)
+      //console.log("response", response)
 
       // Format the email data properly
       const newEmail = {
@@ -413,10 +625,10 @@ const EmailPage = () => {
         resumeId: selectedResumeId,
         ...emailWithAttachment,
       };
-      console.log("Saving email data:", emailData);
+      //console.log("Saving email data:", emailData);
 
       const response = await api.post(`${apiUrl}/save-email`, emailData);
-      console.log("Email saved:", response.data);
+      //console.log("Email saved:", response.data);
 
       // Refresh posts to update the UI with the newly saved email
       await refreshPosts();
@@ -462,7 +674,221 @@ const EmailPage = () => {
   const renderEmailInbox = () => {
     // Get the active email data
     const activeEmail = emailDetails || generatedEmail;
-    if (!activeEmail) return null;
+    
+    // If no email exists, show the email generation interface
+    if (!activeEmail) {
+      return (
+        <motion.div
+          className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                  AI Email Generator
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create personalized emails with AI assistance
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-4 sm:p-6 space-y-6">
+            {/* Job Post Info */}
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <Briefcase className="h-5 w-5 text-blue-600 mt-1" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-blue-900 mb-2">Selected Job Post</h3>
+                  <p className="text-sm sm:text-base text-blue-800 font-medium break-words">
+                    {selectedPost?.title}
+                  </p>
+                  {selectedPost?.company && (
+                    <div className="flex items-center space-x-1 mt-1">
+                      <Building className="h-3 w-3 text-blue-600" />
+                      <p className="text-xs sm:text-sm text-blue-700">{selectedPost.company}</p>
+                    </div>
+                  )}
+                  {selectedPost?.extractedEmails && selectedPost.extractedEmails.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <div className="flex items-center space-x-1 mb-1">
+                        <Target className="h-3 w-3 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-700">Target Emails:</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-blue-600 break-all">
+                        {selectedPost.extractedEmails[0]}
+                        {selectedPost.extractedEmails.length > 1 && 
+                          ` +${selectedPost.extractedEmails.length - 1} more`
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Resume Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4 text-gray-600" />
+                <label className="text-sm font-semibold text-gray-900">
+                  Select Resume for Email Generation
+                </label>
+                <span className="text-red-500 text-sm">*</span>
+              </div>
+              
+              <ResumeSelector
+                selectedResumeId={selectedResumeId}
+                onResumeChange={setSelectedResumeId}
+                resumes={resumes}
+                getUserProfile={getUserProfile}
+                getResumeNameById={getResumeNameById}
+              />
+              
+              {selectedResumeId && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-green-50 border border-green-200 rounded-lg"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <p className="text-sm text-green-800 font-medium">
+                      Resume Selected
+                    </p>
+                  </div>
+                  <p className="text-xs text-green-700 mt-1">
+                    {getResumeNameById(selectedResumeId)} will be attached to your email
+                  </p>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Recipients Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Users className="h-4 w-4 text-gray-600" />
+                <label className="text-sm font-semibold text-gray-900">
+                  Email Recipients
+                </label>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <span className="text-sm text-gray-600">
+                  {recipients.length === 0 ? 'No recipients added' : `${recipients.length} recipient(s) selected`}
+                </span>
+                <button
+                  onClick={() => setShowRecipientsModal(true)}
+                  className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 justify-center sm:justify-start"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Recipients</span>
+                </button>
+              </div>
+              
+              {/* Recipients display */}
+              {recipients.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {recipients.map((email, index) => (
+                    <motion.span
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium flex items-center space-x-2"
+                    >
+                      <span className="truncate max-w-[150px] sm:max-w-none">{email}</span>
+                      <button
+                        onClick={() => removeRecipient(index)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </motion.span>
+                  ))}
+                </div>
+              )}
+              
+              {recipients.length === 0 && selectedPost?.extractedEmails && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <Target className="h-4 w-4 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">Suggested Recipients</p>
+                      <p className="text-xs text-yellow-700 mt-1 break-all">
+                        {selectedPost.extractedEmails.join(', ')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => generateEmail(selectedPost)}
+                disabled={!selectedResumeId || isLoading}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    <span>Generating Email...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span>Generate AI Email</span>
+                  </>
+                )}
+              </button>
+              
+              {/* Auto-add recipients button */}
+              {selectedPost?.extractedEmails && selectedPost.extractedEmails.length > 0 && recipients.length === 0 && (
+                <button
+                  onClick={() => {
+                    const newRecipients = [...recipients, ...selectedPost.extractedEmails];
+                    setRecipients([...new Set(newRecipients)]);
+                  }}
+                  className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center justify-center space-x-2 text-sm sm:text-base"
+                >
+                  <Target className="h-4 w-4" />
+                  <span className="hidden sm:inline">Auto-add Recipients</span>
+                  <span className="sm:hidden">Auto-add</span>
+                </button>
+              )}
+            </div>
+
+            {/* Help text */}
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <Wand2 className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-purple-900 mb-2">AI Email Generation</p>
+                  <p className="text-xs sm:text-sm text-purple-700 leading-relaxed">
+                    Our AI will create a personalized cover letter email using your selected resume and the job post details. 
+                    You can edit the generated email before sending.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
 
     // Convert recipients array to comma-separated string for backward compatibility
     const recipientsString = recipients.join(', ');
@@ -475,8 +901,8 @@ const EmailPage = () => {
         transition={{ duration: 0.3 }}
       >
         {/* Email header */}
-        <div className="bg-gray-50 p-3 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="bg-gray-50 p-3 sm:p-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div className="flex items-center space-x-2">
               <Mail className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-medium text-gray-900">
@@ -489,8 +915,19 @@ const EmailPage = () => {
                 </span>
               )}
             </div>
-            <div className="text-xs text-gray-500">
-              Resume: {getResumeNameById(selectedResumeId)}
+            
+            {/* Resume Selection in Header */}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-500 hidden sm:inline">Resume:</span>
+              <ResumeSelector
+                selectedResumeId={selectedResumeId}
+                onResumeChange={setSelectedResumeId}
+                resumes={resumes}
+                getUserProfile={getUserProfile}
+                getResumeNameById={getResumeNameById}
+                disabled={emailSent}
+                compact={true}
+              />
             </div>
           </div>
         </div>
@@ -1044,8 +1481,8 @@ const EmailPage = () => {
           >
             <div className="absolute top-2 right-2 w-12 h-12 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/15 blur-xl"></div>
             <div className="relative z-10">
-              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mx-auto mb-4">
-                <FileText className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-6 w-6 text-gray-400" />
               </div>
               <h2 className="text-lg font-semibold text-center text-gray-700 mb-2">
                 Resume Required

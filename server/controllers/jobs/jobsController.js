@@ -106,7 +106,7 @@ function parseJobs(html) {
         agoTimeInSeconds 
       });
     } catch (err) {
-      console.log('Error parsing job:', err.message);
+      //console.log('Error parsing job:', err.message);
     }
   });
 
