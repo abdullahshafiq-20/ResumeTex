@@ -45,6 +45,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
 app.use("/api", routes);
 app.use("/api", authRoutes);
 app.use("/api", emailRoutes);

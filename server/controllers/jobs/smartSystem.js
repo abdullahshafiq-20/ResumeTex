@@ -310,7 +310,7 @@ export const getJobs = async (req, res) => {
           "User-Agent": USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
           "Accept": "application/json, text/javascript, */*; q=0.01",
           "X-Requested-With": "XMLHttpRequest",
-          "Referer": "https://www.linkedin.com/jobs",
+          "Referer": "https://www.linkedin.com/jobs/collections/recommended",
         },
         timeout: 10000,
       });
