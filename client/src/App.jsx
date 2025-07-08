@@ -25,6 +25,8 @@ const EmailPage = lazy(() => import("./pages/EmailPage"));
 const JobPage = lazy(() => import("./pages/JobPage"));
 const PrefPage = lazy(() => import("./pages/PrefPage"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
 
 
 export default function App() {
@@ -36,10 +38,11 @@ export default function App() {
         <Suspense fallback={<div className="loading">Loading...</div>}>
           <Routes>
             {/* Public routes */}
-
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/" element={<LandingPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             {/* <Route path="/response" element={<ResponsePage />} /> */}
             {/* <Route path="/bug-report" element={<BugReportPage />} /> */}
             {/* <Route path="/documentation" element={<DocumentationPage />} /> */}

@@ -22,12 +22,10 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Navigation links
+  // Navigation links - Privacy Policy and Terms of Service
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Templates", path: "/templates" },
-    { name: "Examples", path: "/examples" },
-    { name: "Pricing", path: "/pricing" },
+    { name: "Privacy Policy", path: "/privacy-policy" },
+    { name: "Terms of Service", path: "/terms-of-service" },
   ];
 
   return (
@@ -51,10 +49,10 @@ const Navbar = () => {
           }}
           transition={{ duration: 0.3 }}
         >
-          {/* Logo */}
+          {/* Logo - Removed background gradient */}
           <Link to="/" className="flex items-center space-x-3">
             <motion.div
-              className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center overflow-hidden"
+              className="flex items-center justify-center overflow-hidden"
               animate={{
                 height: scrolled ? "2rem" : "2.5rem",
                 width: scrolled ? "2rem" : "2.5rem",
@@ -64,13 +62,13 @@ const Navbar = () => {
               <img
                 src="/logo.png"
                 alt="ResumeTex Logo"
-                className="w-full h-full object-contain p-1"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   e.target.style.display = "none";
                   e.target.nextSibling.style.display = "flex";
                 }}
               />
-              <FileText className="w-5 h-5 text-white hidden" />
+              <FileText className="w-5 h-5 text-purple-600 hidden" />
             </motion.div>
             <motion.div
               className="hidden sm:block"
