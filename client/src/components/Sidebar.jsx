@@ -138,7 +138,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+      {/* Sidebar - Compact mobile-friendly design */}
       <motion.div
         className="fixed inset-y-4 left-4 z-30 w-64 lg:w-64 overflow-y-auto lg:relative lg:inset-auto"
         variants={sidebarVariants}
@@ -147,33 +147,33 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         transition={sidebarTransition}
       >
         <div className="h-full rounded-lg border border-gray-200 bg-white shadow-lg relative overflow-hidden">
-          {/* Reduced gradient blobs - fewer and less blur for mobile performance */}
-          <div className="absolute top-4 left-4 w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-40 blur-lg md:w-32 md:h-32 md:blur-2xl md:opacity-50"></div>
-          <div className="absolute bottom-8 right-2 w-20 h-20 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-35 blur-md md:w-28 md:h-28 md:blur-xl md:opacity-45"></div>
-          <div className="hidden md:block absolute top-24 right-4 w-24 h-24 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-40 blur-xl"></div>
+          {/* Reduced gradient blobs - smaller and less opacity for cleaner mobile look */}
+          <div className="absolute top-2 left-2 w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-25 blur-md lg:opacity-40 lg:blur-lg"></div>
+          <div className="absolute bottom-4 right-1 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-20 blur-sm lg:opacity-35 lg:blur-md"></div>
+          <div className="hidden lg:block absolute top-16 right-2 w-16 h-16 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-30 blur-md"></div>
           
-          {/* Content */}
-          <div className="relative flex flex-col h-full py-6 px-4">
-            {/* Brand Logo */}
-            <div className="flex items-center justify-start mb-8">
-              <Link to="/dashboard" className="flex items-center space-x-2" onClick={handleLinkClick}>
+          {/* Content - Compact spacing */}
+          <div className="relative flex flex-col h-full py-3 sm:py-4 lg:py-6 px-3 sm:px-4">
+            {/* Compact Brand Logo */}
+            <div className="flex items-center justify-start mb-4 sm:mb-6 lg:mb-8">
+              <Link to="/dashboard" className="flex items-center space-x-1.5 sm:space-x-2" onClick={handleLinkClick}>
                 <motion.div
-                  className="w-14 h-14 rounded-lg bg-transparent flex items-center border border-gray-200 justify-center"
+                  className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 rounded-md lg:rounded-lg bg-transparent flex items-center border border-gray-200 justify-center"
                 >
                   <img 
                     src="/logo.png" 
                     alt="ResumeTex Logo" 
-                    className="w-10 h-10 object-contain"
+                    className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 object-contain"
                   />
                 </motion.div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-lg text-gray-800">ResumeTex</span>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <span className="font-semibold text-sm sm:text-base lg:text-lg text-gray-800">ResumeTex</span>
                   
-                  {/* Blinking dot when AI is processing */}
+                  {/* Compact blinking dot when AI is processing */}
                   <AnimatePresence>
                     {isProcessing && (
                       <motion.div
-                        className="w-2 h-2 bg-purple-500 rounded-full"
+                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full"
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ 
                           opacity: [1, 0.2, 1],
@@ -193,18 +193,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </Link>
             </div>
             
-            {/* Simple User Profile Card */}
+            {/* Compact User Profile Card */}
             {user && (
-              <div className="mb-6 p-3 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  {/* Profile Avatar */}
+              <div className="mb-3 sm:mb-4 lg:mb-6 p-2 sm:p-3 border border-gray-200 rounded-md lg:rounded-lg">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  {/* Compact Profile Avatar */}
                   <div className="flex-shrink-0">
                     {getSafeUserProfile().picture ? (
                       <div className="relative">
                         <img 
                           src={getSafeUserProfile().picture} 
                           alt="Profile" 
-                          className="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm"
+                          className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-full object-cover ring-1 lg:ring-2 ring-white shadow-sm"
                           onError={(e) => {
                             // Hide the image and show gradient fallback if image fails to load
                             e.target.style.display = 'none';
@@ -213,21 +213,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                         />
                         {/* Hidden gradient fallback that shows if image fails */}
                         <div 
-                          className={`w-10 h-10 rounded-full ${getUserGradient(user)} items-center justify-center text-white font-medium text-sm shadow-sm ring-2 ring-white transition-all duration-200 hover:scale-105 hover:shadow-md hidden`}
+                          className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-full ${getUserGradient(user)} items-center justify-center text-white font-medium text-xs sm:text-sm shadow-sm ring-1 lg:ring-2 ring-white transition-all duration-200 hover:scale-105 hover:shadow-md hidden`}
                         >
                           {getUserInitials(user)}
                         </div>
                       </div>
                     ) : (
-                      <div className={`w-10 h-10 rounded-full ${getUserGradient(user)} flex items-center justify-center text-white font-medium text-sm shadow-sm ring-2 ring-white transition-all duration-200 hover:scale-105 hover:shadow-md`}>
+                      <div className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-full ${getUserGradient(user)} flex items-center justify-center text-white font-medium text-xs sm:text-sm shadow-sm ring-1 lg:ring-2 ring-white transition-all duration-200 hover:scale-105 hover:shadow-md`}>
                         {getUserInitials(user)}
                       </div>
                     )}
                   </div>
                   
-                  {/* User Info */}
+                  {/* Compact User Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
+                    <p className="text-xs sm:text-sm font-medium text-gray-800 truncate">
                       {getSafeUserProfile().name || 'User'}
                     </p>
                     <p className="text-xs text-gray-600 truncate">
@@ -238,8 +238,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </div>
             )}
             
-            {/* Navigation */}
-            <nav className="flex-1 space-y-1">
+            {/* Compact Navigation */}
+            <nav className="flex-1 space-y-0.5 sm:space-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
@@ -247,30 +247,30 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <Link
                       to={item.href}
                       onClick={handleLinkClick}
-                      className={`flex items-center px-3 py-2 rounded-md transition-colors duration-150 group relative text-sm ${
+                      className={`flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-md transition-colors duration-150 group relative text-xs sm:text-sm ${
                         isActive
                           ? 'bg-blue-50 text-blue-600 border border-blue-500 font-medium'
                           : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600 border border-transparent'
                       }`}
                     >
-                      <item.icon className={`h-4 w-4 mr-2.5 transition-colors duration-150 ${
+                      <item.icon className={`h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2.5 transition-colors duration-150 ${
                         isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
                       }`} />
-                      <span className={`text-sm ${isActive ? 'font-medium' : 'font-normal'}`}>{item.name}</span>
+                      <span className={`text-xs sm:text-sm ${isActive ? 'font-medium' : 'font-normal'}`}>{item.name}</span>
                     </Link>
                   </div>
                 );
               })}
             </nav>
 
-            {/* Logout Button */}
-            <div className="pt-3 border-t border-gray-200">
+            {/* Compact Logout Button */}
+            <div className="pt-2 sm:pt-3 border-t border-gray-200">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-150 group border border-transparent hover:border-red-200 text-sm"
+                className="w-full flex items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-150 group border border-transparent hover:border-red-200 text-xs sm:text-sm"
               >
-                <LogoutIcon className="h-4 w-4 mr-2.5 text-gray-500 group-hover:text-red-600 transition-colors duration-150" />
-                <span className="font-normal text-sm">Logout</span>
+                <LogoutIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2.5 text-gray-500 group-hover:text-red-600 transition-colors duration-150" />
+                <span className="font-normal text-xs sm:text-sm">Logout</span>
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   );
 };
 
-// Professional matched icons
+// Compact professional matched icons
 const DashboardIcon = (props) => (
   <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />

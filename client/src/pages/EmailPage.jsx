@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { usePosts } from "../context/PostsContext";
 import { useResumes } from "../context/ResumeContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-hot-toast";
 import {
   Mail,
   Briefcase,
@@ -1343,7 +1344,10 @@ const EmailPage = () => {
         await api.post(`${apiUrl}/save-email`, saveEmailData);
 
         setEmailSent(true);
+        toast.success("Email sent successfully!");
         await refreshPosts();
+        closeMobileModal();
+        
       }
     } catch (error) {
       console.error("Error sending email:", error);

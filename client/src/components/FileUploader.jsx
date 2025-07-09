@@ -344,6 +344,7 @@ export default function FileUploader({
         const data = JSON.parse(event.data);
         setProcessingStep("complete");
         setProcessingMessage("Process complete!");
+        toast.success("Resume processed successfully!");
         source.close();
         setIsProcessing(false);
         stopProcessing();

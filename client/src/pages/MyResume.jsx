@@ -11,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-// Simple Resume Upload Modal Component
+// Mobile-Optimized Simple Resume Upload Modal Component
 const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
   const [titleInput, setTitleInput] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -21,16 +21,14 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isValid, setIsValid] = useState(false);
 
-  // Title suggestions for simple resume names
+  // Compact title suggestions for mobile
   const titleSuggestions = [
-    "Full Stack Developer",
-    "Frontend Developer",
-    "Backend Developer",
+    "Full Stack Dev",
+    "Frontend Dev", 
+    "Backend Dev",
     "AI Engineer",
     "Data Scientist",
-    "Machine Learning Engineer",
-    "Cybersecurity Engineer",
-    "DevOps Engineer",
+    "ML Engineer",
   ];
 
   useEffect(() => {
@@ -126,25 +124,25 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl max-h-[90vh] overflow-y-auto"
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-6 w-full max-w-xs sm:max-w-lg mx-2 sm:mx-4 shadow-xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
+          {/* Compact Header */}
+          <div className="flex justify-between items-start mb-3 sm:mb-6">
             <div className="flex items-center">
-              <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center mr-3">
-                <FileText className="h-5 w-5 text-blue-600" />
+              <div className="flex-shrink-0 w-6 h-6 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center mr-2 sm:mr-3">
+                <FileText className="h-3 w-3 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Simple Resume Upload
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900">
+                  Simple Upload
                 </h3>
-                <p className="text-xs text-gray-500">Upload resume as-is to your collection</p>
+                <p className="text-xs text-gray-500 hidden sm:block">Upload resume as-is to collection</p>
               </div>
             </div>
             {!isAnalyzing && (
@@ -152,43 +150,42 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 transition-colors p-1"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             )}
           </div>
 
-          {/* Simple Upload Explanation */}
-          <div className="mb-6">
-            <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-4">
+          {/* Compact Upload Explanation */}
+          <div className="mb-3 sm:mb-6">
+            <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-md sm:rounded-lg p-2 sm:p-4">
               <div className="flex items-start">
-                <Info className="h-4 w-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
+                <Info className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" />
                 <div className="text-xs text-blue-800">
-                  <p className="font-medium mb-2">Simple Upload Mode:</p>
-                  <ul className="space-y-1 list-disc list-inside text-xs">
-                    <li><strong>No AI transformation</strong> - Your resume stays exactly as it is</li>
-                    <li>Basic analysis extracts summary, skills, and projects</li>
-                    <li>Perfect for storing resumes without modifications</li>
-                    <li>Quick way to add existing resumes to your collection</li>
+                  <p className="font-medium mb-1 sm:mb-2">Simple Upload Mode:</p>
+                  <ul className="space-y-0.5 sm:space-y-1 list-disc list-inside text-xs">
+                    <li><strong>No AI transformation</strong> - Stays as-is</li>
+                    <li>Basic analysis extracts key info</li>
+                    <li>Quick way to store existing resumes</li>
                   </ul>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* File Upload Section */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+          {/* Compact File Upload Section */}
+          <div className="mb-3 sm:mb-6">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
               Upload Resume (PDF)
             </label>
             
             {!selectedFile ? (
               <div 
-                className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                className="border-2 border-dashed border-blue-300 rounded-md sm:rounded-lg p-3 sm:p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
                 onClick={() => document.getElementById("simpleUploadFileInput").click()}
               >
-                <Upload className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Click to upload your resume</p>
-                <p className="text-xs text-gray-400">PDF files only, max 10MB</p>
+                <Upload className="h-5 w-5 sm:h-8 sm:w-8 text-blue-500 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm text-gray-600">Click to upload resume</p>
+                <p className="text-xs text-gray-400">PDF only, max 10MB</p>
                 <input
                   id="simpleUploadFileInput"
                   type="file"
@@ -198,32 +195,32 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
                 />
               </div>
             ) : (
-              <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="bg-gray-50 p-2 sm:p-3 rounded-md sm:rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="p-2 rounded-md bg-red-100">
-                      <svg className="h-6 w-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="p-1 sm:p-2 rounded-md bg-red-100">
+                      <svg className="h-4 w-4 sm:h-6 sm:w-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
+                    <div className="ml-2 sm:ml-3 min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{selectedFile.name}</p>
                       <p className="text-xs text-gray-500">
                         {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
                     </div>
                   </div>
                   {pdfUrl ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
                   ) : (
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-blue-600 flex-shrink-0"></div>
                   )}
                 </div>
                 
                 {/* Upload Progress */}
                 {isUploading && (
-                  <div className="mt-3">
-                    <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                  <div className="mt-2 sm:mt-3">
+                    <div className="h-1 sm:h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-blue-500 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
@@ -235,17 +232,17 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
             )}
           </div>
 
-          {/* Resume Title Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Compact Resume Title Input */}
+          <div className="mb-3 sm:mb-6">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Resume Title
             </label>
             <input
               type="text"
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
-              placeholder="e.g., My Current Resume, Professional Resume..."
-              className={`w-full px-3 py-3 border rounded-lg text-sm transition-all duration-200 focus:ring-2 focus:outline-none ${
+              placeholder="e.g., My Current Resume..."
+              className={`w-full px-2 sm:px-3 py-2 sm:py-3 border rounded-md sm:rounded-lg text-xs sm:text-sm transition-all duration-200 focus:ring-2 focus:outline-none ${
                 titleInput && isValid
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : titleInput && !isValid
@@ -255,32 +252,32 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
               disabled={isAnalyzing}
             />
             
-            {/* Validation feedback */}
-            <div className="mt-2 flex items-center space-x-2">
-              {titleInput && (
-                isValid ? (
+            {/* Compact Validation feedback */}
+            {titleInput && (
+              <div className="mt-1 sm:mt-2 flex items-center space-x-1 sm:space-x-2">
+                {isValid ? (
                   <div className="flex items-center text-xs text-green-600">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    <span>Perfect title for your resume collection</span>
+                    <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                    <span>Good title!</span>
                   </div>
                 ) : (
                   <div className="flex items-center text-xs text-red-600">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    <span>Please enter at least 3 characters with letters</span>
+                    <AlertCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                    <span>Need 3+ characters</span>
                   </div>
-                )
-              )}
-            </div>
+                )}
+              </div>
+            )}
             
-            {/* Title Suggestions */}
-            <div className="mt-3">
-              <p className="text-xs font-medium text-gray-600 mb-2">Quick suggestions:</p>
+            {/* Compact Title Suggestions */}
+            <div className="mt-2 sm:mt-3">
+              <p className="text-xs font-medium text-gray-600 mb-1 sm:mb-2">Quick suggestions:</p>
               <div className="flex flex-wrap gap-1">
-                {titleSuggestions.slice(0, 6).map((suggestion, index) => (
+                {titleSuggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => setTitleInput(suggestion)}
-                    className="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs transition-colors"
+                    className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs transition-colors"
                     disabled={isAnalyzing}
                   >
                     {suggestion}
@@ -290,21 +287,21 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+          {/* Compact Action Buttons */}
+          <div className="flex flex-col space-y-2">
             <button
               onClick={handleAnalyze}
               disabled={!isValid || !pdfUrl || isAnalyzing}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-all duration-200 text-sm font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-green-600"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-md sm:rounded-lg hover:from-blue-700 hover:to-green-700 transition-all duration-200 text-xs sm:text-sm font-medium flex items-center justify-center space-x-1 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-blue-600 disabled:hover:to-green-600"
             >
               {isAnalyzing ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Adding to Collection...</span>
+                  <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                  <span>Adding...</span>
                 </>
               ) : (
                 <>
-                  <FileText className="h-4 w-4" />
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>Add to Collection</span>
                 </>
               )}
@@ -313,7 +310,7 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
             {!isAnalyzing && (
               <button
                 onClick={handleClose}
-                className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-md sm:rounded-lg hover:bg-gray-200 transition-colors text-xs sm:text-sm"
               >
                 Cancel
               </button>

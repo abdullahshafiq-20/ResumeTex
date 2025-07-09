@@ -24,6 +24,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useDashboard } from "../context/DashbaordContext";
+import { toast } from "react-hot-toast";
 
 const PostsPage = () => {
   const {
@@ -76,6 +77,7 @@ const PostsPage = () => {
       await savePost(newPostContent.trim());
       setNewPostContent("");
       showNotification("Post saved successfully!", "success");
+      toast.success("Post saved successfully!");
     } catch (error) {
       console.error("Error saving post:", error);
       showNotification("Failed to save post. Please try again.", "error");

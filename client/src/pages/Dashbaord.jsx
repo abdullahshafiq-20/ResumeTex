@@ -154,32 +154,31 @@ const itemVariants = {
 
       {/* Live Status Indicator */}
       <motion.div
-        className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
+        className="mb-3 sm:mb-6 p-2 sm:p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
         variants={itemVariants}
         initial="hidden"
         animate="visible"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
-            <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
+          <div className="flex items-center space-x-1.5 sm:space-x-2">
+            <div className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
+            <span className={`text-xs sm:text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
               Live Update
             </span>
             {lastUpdated && (
-              <span className="text-xs text-gray-500">
+              <span className="text-[10px] sm:text-xs text-gray-500">
                 • {new Date(lastUpdated).toLocaleTimeString()}
               </span>
             )}
           </div>
           <button 
             onClick={fetchDashboardData}
-            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+            className="text-blue-600 hover:text-blue-800 text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
           >
             Refresh
           </button>
         </div>
       </motion.div>
-
       {/* Header - More compact for mobile */}
       <motion.div 
         className="mb-4 sm:mb-6"
