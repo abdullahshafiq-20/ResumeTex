@@ -26,6 +26,12 @@ export const googleCallback = async (req, res) => {
       idToken: tokens.id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
+    let gmail_permission = false;
+    if (!tokens.scope || !tokens.scope.includes('https://www.googleapis.com/auth/gmail.send')) {
+      gmail_permission = false;
+    } else {
+      gmail_permission = true;
+    }
 
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
@@ -37,16 +43,18 @@ export const googleCallback = async (req, res) => {
         name,
         email,
         picture,
-        googleRefreshToken: tokens.refresh_token // Store refresh token
+        googleRefreshToken: tokens.refresh_token,
+        gmail_permission: gmail_permission // Store refresh token
       });
     } else if (tokens.refresh_token) {
       // Update refresh token if provided
       user.googleRefreshToken = tokens.refresh_token;
+      user.gmail_permission = gmail_permission;
       await user.save();
     }
 
     // Create JWT
-    const token = jwt.sign({ id: user._id, email: user.email, name: user.name, picture: user.picture, onboarded: user.onboarded }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, email: user.email, name: user.name, picture: user.picture, onboarded: user.onboarded, gmail_permission: gmail_permission }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
 

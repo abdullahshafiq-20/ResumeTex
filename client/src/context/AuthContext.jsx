@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [gmailPermission, setGmailPermission] = useState(false);
   
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
           } else {
             setUser(decoded);
             setIsAuthenticated(true);
-            
+            setGmailPermission(decoded.gmail_permission);
             // Fetch fresh user profile data from server
             const profileData = await fetchUserProfile();
             if (!profileData) {
@@ -84,7 +85,8 @@ export const AuthProvider = ({ children }) => {
     const decoded = jwtDecode(token);
     setUser(decoded);
     setIsAuthenticated(true);
-    
+    setGmailPermission(decoded.gmail_permission);
+    console.log(decoded.gmail_permission);
     // Fetch fresh user profile data after login
     const profileData = await fetchUserProfile();
     if (!profileData) {
@@ -114,6 +116,10 @@ export const AuthProvider = ({ children }) => {
     return userProfile;
   };
 
+  const getGmailPermission = () => {
+    return gmailPermission;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -126,6 +132,7 @@ export const AuthProvider = ({ children }) => {
         getUserId,
         checkConnection,
         getUserProfile,
+        getGmailPermission,
       }}
     >
       {children}

@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    gmail_permission: {
+        type: Boolean,
+        default: false
+    },
     secret: {
         type: String,
         default: null

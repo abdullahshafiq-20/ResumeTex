@@ -32,6 +32,8 @@ import {
   User,
   Calendar,
   Building,
+  LogOut,
+  AlertTriangle,
 } from "lucide-react";
 import axios from "axios";
 import api from "../utils/api";
@@ -47,6 +49,8 @@ const ResumeSelector = ({
   compact = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { getGmailPermission, logoutUser } = useAuth();
+  console.log(getGmailPermission());
 
   const getResumeOptions = () => {
     if (Array.isArray(resumes)) {
@@ -408,8 +412,129 @@ const RecipientsModal = ({
   );
 };
 
+// Add Gmail Permission Modal Component
+const GmailPermissionModal = ({ isOpen, onClose, onLogout }) => {
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-2 sm:p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-white rounded-lg p-3 sm:p-4 w-full max-w-xs sm:max-w-sm mx-2 max-h-[85vh] overflow-y-auto relative z-[10000]"
+        >
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-red-600" />
+              </div>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+                Gmail Permission Required
+              </h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {/* Warning message */}
+            <div className="p-2.5 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <Mail className="h-3.5 w-3.5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-yellow-800 mb-1">
+                    Email Sending Permission Required
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-yellow-700 leading-relaxed">
+                    To send emails directly to recruiters, you need to grant Gmail permission during signup.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="space-y-2.5">
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-900">
+                How to enable email sending:
+              </h4>
+              
+              <div className="space-y-2">
+                <div className="flex items-start space-x-2">
+                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[10px] font-medium text-blue-600">1</span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-gray-700">
+                    Log out from your current session using the button below
+                  </p>
+                </div>
+                
+                <div className="flex items-start space-x-2">
+                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[10px] font-medium text-blue-600">2</span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-gray-700">
+                    Sign in again with your Google account
+                  </p>
+                </div>
+                
+                <div className="flex items-start space-x-2">
+                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[10px] font-medium text-blue-600">3</span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-gray-700">
+                    <strong>Grant Gmail permission</strong> when prompted during login
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Alternative option */}
+            <div className="p-2.5 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-start space-x-2">
+                <Clipboard className="h-3.5 w-3.5 text-gray-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] sm:text-xs font-medium text-gray-800 mb-0.5">
+                    Alternative: Copy Email Content
+                  </p>
+                  <p className="text-[9px] sm:text-[10px] text-gray-600">
+                    You can copy the generated email and send it manually through your email client.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+              <button
+                onClick={onLogout}
+                className="w-full px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-medium flex items-center justify-center space-x-1.5"
+              >
+                <LogOut className="h-3 w-3" />
+                <span>Logout & Re-authenticate</span>
+              </button>
+              
+              <button
+                onClick={onClose}
+                className="w-full px-3 py-1.5 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-xs font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
+
 const EmailPage = () => {
-  const { getUserId, getUserProfile } = useAuth();
+  const { getUserId, getUserProfile, getGmailPermission, logoutUser } = useAuth();
   const { posts, emailsGenerated, emailsSent, refreshPosts, fetchEmailbyId } =
     usePosts();
   const { resumes } = useResumes();
@@ -431,6 +556,9 @@ const EmailPage = () => {
   const [recipients, setRecipients] = useState([]);
   const [showRecipientsModal, setShowRecipientsModal] = useState(false);
   const [isAddingRecipients, setIsAddingRecipients] = useState(false);
+
+  // Add state for Gmail permission modal
+  const [showGmailPermissionModal, setShowGmailPermissionModal] = useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -1258,19 +1386,30 @@ const EmailPage = () => {
               <button
                 onClick={() => sendEmailWithAttachment()}
                 disabled={sendingEmail}
-                className={`group relative px-2 py-1.5 sm:px-4 sm:py-2 bg-transparent border border-blue-500 text-blue-600 rounded-md transition-all duration-200 text-[10px] sm:text-xs font-medium overflow-hidden ${
-                  sendingEmail
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-50"
+                className={`group relative px-2 py-1.5 sm:px-4 sm:py-2 border rounded-md transition-all duration-200 text-[10px] sm:text-xs font-medium overflow-hidden ${
+                  !getGmailPermission()
+                    ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                    : "bg-transparent border-blue-500 text-blue-600 hover:bg-blue-50"
+                } ${
+                  sendingEmail ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 via-blue-100/30 to-blue-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+                  !getGmailPermission()
+                    ? "bg-gradient-to-r from-red-50/0 via-red-100/30 to-red-50/0"
+                    : "bg-gradient-to-r from-blue-50/0 via-blue-100/30 to-blue-50/0"
+                }`}></div>
                 <div className="relative flex items-center space-x-1">
                   {sendingEmail ? (
                     <>
                       <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 animate-spin rounded-full border border-blue-500 border-t-transparent"></div>
                       <span>Sending...</span>
                       <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 animate-pulse" />
+                    </>
+                  ) : !getGmailPermission() ? (
+                    <>
+                      <AlertTriangle size={12} />
+                      <span>Permission Required</span>
                     </>
                   ) : (
                     <>
@@ -1297,8 +1436,14 @@ const EmailPage = () => {
     );
   };
 
-  // Modified sendEmailWithAttachment to handle multiple recipients
+  // Modified sendEmailWithAttachment to handle Gmail permission
   const sendEmailWithAttachment = async () => {
+    // Check Gmail permission first
+    if (!getGmailPermission()) {
+      setShowGmailPermissionModal(true);
+      return;
+    }
+
     if (!selectedPost || !selectedResumeId || recipients.length === 0) {
       alert(
         "Please ensure you have selected a post, resume, and at least one recipient."
@@ -1355,6 +1500,14 @@ const EmailPage = () => {
     } finally {
       setSendingEmail(false);
     }
+  };
+
+  // Add handler for Gmail permission modal logout
+  const handleGmailPermissionLogout = () => {
+    setShowGmailPermissionModal(false);
+    logoutUser();
+    // Redirect to login page or handle as needed
+    window.location.href = '/login'; // Adjust this path as needed
   };
 
   // Get email suggestions from the selected post
@@ -1557,6 +1710,13 @@ const EmailPage = () => {
 
   return (
     <div className="relative">
+      {/* Gmail Permission Modal */}
+      <GmailPermissionModal
+        isOpen={showGmailPermissionModal}
+        onClose={() => setShowGmailPermissionModal(false)}
+        onLogout={handleGmailPermissionLogout}
+      />
+
       {/* Recipients Modal */}
       <RecipientsModal
         isOpen={showRecipientsModal}
