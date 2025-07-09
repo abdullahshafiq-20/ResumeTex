@@ -426,103 +426,102 @@ const itemVariants = {
 
   return (
     <div className="relative">
-      {/* Background gradient blobs */}
-      <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-20 blur-3xl -z-10"></div>
-      <div className="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-15 blur-2xl -z-10"></div>
-      <div className="absolute top-32 left-1/3 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-10 blur-xl -z-10"></div>
+      {/* Reduced background elements for mobile */}
+      <div className="absolute top-0 right-0 w-20 h-20 sm:w-40 sm:h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-20 blur-3xl -z-10"></div>
+      <div className="absolute bottom-20 left-10 w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-15 blur-2xl -z-10"></div>
 
-      {/* Live Status Indicator */}
+      {/* Live Status Indicator - Compact */}
       <motion.div
-        className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
+        className="mb-3 sm:mb-6 p-2 sm:p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
         variants={itemVariants}
         initial="hidden"
         animate="visible"
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
-            <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
+          <div className="flex items-center space-x-1.5 sm:space-x-2">
+            <div className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
+            <span className={`text-xs sm:text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
               Live Update
             </span>
             {lastUpdated && (
-              <span className="text-xs text-gray-500">
+              <span className="text-[10px] sm:text-xs text-gray-500">
                 • {new Date(lastUpdated).toLocaleTimeString()}
               </span>
             )}
           </div>
           <button 
             onClick={() => window.location.reload()}
-            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+            className="text-blue-600 hover:text-blue-800 text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
           >
             Refresh
           </button>
         </div>
       </motion.div>
 
-      {/* Header */}
+      {/* Header - Compact */}
       <motion.div
-        className="mb-6"
+        className="mb-3 sm:mb-6"
         variants={itemVariants}
         initial="hidden"
         animate="visible"
       >
-        <h2 className="text-xl font-semibold text-gray-800 mb-1">My Resumes</h2>
-        <p className="text-sm text-gray-600">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">My Resumes</h2>
+        <p className="text-xs sm:text-sm text-gray-600">
           Upload and manage your resume collection with AI-powered tools
         </p>
       </motion.div>
 
-      {/* Upload Options Section */}
-      <div className="mb-6 grid grid-cols-1 lg:grid-cols-1 gap-6">
+      {/* Upload Options Section - Mobile Optimized */}
+      <div className="mb-4 sm:mb-6 grid grid-cols-1 gap-3 sm:gap-6">
         
-        {/* AI Resume Transformation */}
+        {/* AI Resume Transformation - Compact */}
         <motion.div
           className="relative overflow-hidden"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="border border-purple-200 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 rounded-lg p-4 relative overflow-hidden">
-            {/* Subtle animated background elements */}
+          <div className="border border-purple-200 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 rounded-lg p-2.5 sm:p-4 relative overflow-hidden">
+            {/* Smaller animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute top-2 left-1/4 w-4 h-4 bg-purple-200/40 rounded-full animate-pulse delay-300"></div>
-              <div className="absolute bottom-2 right-1/3 w-3 h-3 bg-blue-200/30 rounded-full animate-pulse delay-700"></div>
-              <div className="absolute top-1/2 right-6 w-2 h-2 bg-indigo-200/50 rounded-full animate-pulse delay-1000"></div>
+              <div className="absolute top-1 left-1/4 w-2 h-2 sm:w-4 sm:h-4 bg-purple-200/40 rounded-full animate-pulse delay-300"></div>
+              <div className="absolute bottom-1 right-1/3 w-1.5 h-1.5 sm:w-3 sm:h-3 bg-blue-200/30 rounded-full animate-pulse delay-700"></div>
+              <div className="absolute top-1/2 right-3 w-1 h-1 sm:w-2 sm:h-2 bg-indigo-200/50 rounded-full animate-pulse delay-1000"></div>
             </div>
             
-            <div className="relative flex items-start space-x-3">
+            <div className="relative flex items-start space-x-2 sm:space-x-3">
               <div className="flex-shrink-0 mt-0.5">
-                <Wand2 className="h-5 w-5 text-purple-600 animate-pulse" />
+                <Wand2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 animate-pulse" />
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2 mb-2">
-                  <h3 className="text-sm font-semibold text-gray-800">AI Resume Transformation</h3>
-                  <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse delay-200"></div>
-                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse delay-400"></div>
+                <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-800">AI Resume Transformation</h3>
+                  <div className="flex space-x-0.5 sm:space-x-1">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full animate-pulse delay-200"></div>
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-500 rounded-full animate-pulse delay-400"></div>
                   </div>
                 </div>
                 
-                <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed mb-2 sm:mb-3">
                   <strong>Smart AI tweaking:</strong> Upload your resume and target job title. 
                   AI will transform and optimize your entire resume content to match the position perfectly.
                 </p>
                 
-                <div className="flex items-center space-x-2 text-xs mb-3">
-                  <Target className="h-3 w-3 text-gray-500" />
+                <div className="flex items-center space-x-1.5 sm:space-x-2 text-[10px] sm:text-xs mb-2 sm:mb-3">
+                  <Target className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-500" />
                   <span className="text-gray-500">Example: "AI Engineer" → Complete resume refactoring</span>
                 </div>
               </div>
               
               <div className="flex-shrink-0">
-                <Zap className="h-4 w-4 text-purple-600 animate-pulse delay-500" />
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 animate-pulse delay-500" />
               </div>
             </div>
 
-            {/* FileUploader spans full width */}
-            <div className="w-full mt-4">
+            {/* FileUploader with reduced margin */}
+            <div className="w-full mt-2 sm:mt-4">
               <FileUploader
                 apiUrl={apiUrl}
                 template="v2"
@@ -534,61 +533,60 @@ const itemVariants = {
           </div>
         </motion.div>
 
-        {/* Simple Resume Upload */}
+        {/* Simple Resume Upload - Compact */}
         <motion.div
           className="relative overflow-hidden"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-4 relative h-full">
-            {/* Background decoration */}
-            <div className="absolute top-2 right-2 w-12 h-12 rounded-full bg-gradient-to-br from-blue-200 to-green-200 opacity-20 blur-xl"></div>
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-2.5 sm:p-4 relative">
+            {/* Smaller background decoration */}
+            <div className="absolute top-1 right-1 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-200 to-green-200 opacity-20 blur-xl"></div>
             
-            <div className="relative flex items-start space-x-4 h-full">
+            <div className="relative flex items-start space-x-2 sm:space-x-4">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-blue-600" />
+                <div className="w-6 h-6 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center">
+                  <FileText className="h-3 w-3 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
               </div>
               
-              <div className="flex-1 min-w-0 flex flex-col h-full">
+              <div className="flex-1 min-w-0 flex flex-col">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h3 className="text-sm font-semibold text-gray-800">
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800">
                       Simple Resume Upload
                     </h3>
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse delay-200"></div>
+                    <div className="flex space-x-0.5 sm:space-x-1">
+                      <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                      <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-green-500 rounded-full animate-pulse delay-200"></div>
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-600 leading-relaxed mb-3">
+                  <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed mb-2 sm:mb-3">
                     <strong>No modifications:</strong> Upload your existing resume as-is to your collection. 
                     Perfect for storing resumes without any AI tweaking or changes.
                   </p>
                   
-                  <div className="flex items-center space-x-2 text-xs mb-4">
-                    <Info className="h-3 w-3 text-gray-500" />
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 text-[10px] sm:text-xs mb-3 sm:mb-4">
+                    <Info className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-500" />
                     <span className="text-gray-500">Basic analysis + secure storage</span>
                   </div>
-                  
                 </div>
                 
                 <button
                   onClick={() => setShowSimpleUploadModal(true)}
                   disabled={isAnalyzing}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-all duration-200 text-sm font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
+                  className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg hover:from-blue-700 hover:to-green-700 transition-all duration-200 text-xs sm:text-sm font-medium flex items-center justify-center space-x-1.5 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAnalyzing ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
                       <span>Processing...</span>
                     </>
                   ) : (
                     <>
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>Simple Upload</span>
                     </>
                   )}
@@ -599,53 +597,53 @@ const itemVariants = {
         </motion.div>
       </div>
 
-      {/* Show uploading indicator */}
+      {/* Show uploading indicator - Compact */}
       {isUploading && (
         <motion.div
-          className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+          className="mb-3 sm:mb-6 p-2.5 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-blue-700 text-sm font-medium">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+            <span className="text-blue-700 text-xs sm:text-sm font-medium">
               AI is transforming your resume... This may take a few moments.
             </span>
           </div>
         </motion.div>
       )}
 
-      {/* Show success message */}
+      {/* Show success message - Compact */}
       {uploadSuccess && (
         <motion.div
-          className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg"
+          className="mb-3 sm:mb-6 p-2.5 sm:p-4 bg-green-50 border border-green-200 rounded-lg"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="flex items-center space-x-3">
-            <div className="h-4 w-4 text-green-600">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="h-3 w-3 sm:h-4 sm:w-4 text-green-600">
               <svg fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
-            <span className="text-green-700 text-sm font-medium">
+            <span className="text-green-700 text-xs sm:text-sm font-medium">
               Resume processed and added to your collection!
             </span>
           </div>
         </motion.div>
       )}
 
-      {/* Resume Grid */}
+      {/* Resume Grid - Mobile Optimized */}
       <motion.div
-        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 lg:gap-4"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {loading ? (
-          // Loading skeleton
+          // Loading skeleton - More compact
           [...Array(6)].map((_, index) => (
             <motion.div
               key={index}
@@ -654,8 +652,8 @@ const itemVariants = {
               style={{ aspectRatio: '1/1.4' }}
             >
               <div className="h-4/5 bg-gray-200"></div>
-              <div className="p-3 space-y-2">
-                <div className="h-3 bg-gray-200 rounded"></div>
+              <div className="p-2 sm:p-3 space-y-1.5 sm:space-y-2">
+                <div className="h-2.5 sm:h-3 bg-gray-200 rounded"></div>
                 <div className="h-2 bg-gray-200 rounded w-3/4"></div>
               </div>
             </motion.div>
@@ -677,14 +675,14 @@ const itemVariants = {
         ) : (
           <motion.div
             variants={itemVariants}
-            className="col-span-full text-center py-12"
+            className="col-span-full text-center py-8 sm:py-12"
           >
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-gray-400 mb-3 sm:mb-4">
+              <svg className="mx-auto h-8 w-8 sm:h-12 sm:w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p className="text-gray-500 text-sm">No resumes found. Upload your first resume to get started!</p>
+            <p className="text-gray-500 text-xs sm:text-sm">No resumes found. Upload your first resume to get started!</p>
           </motion.div>
         )}
       </motion.div>

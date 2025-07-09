@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import axios from "axios";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from "dotenv";
+import { getLinkedInPost } from "./postController.js";
 dotenv.config();
 
 
@@ -87,14 +88,32 @@ const getJobTitle = async (content, userSkills) => {
 
 }
 
+export const savePostFromLink = async (req, res) => {
+    try {
+        const { url } = req.body;
+        const post = await getLinkedInPost(url);
+        const content = post.content.commentary;
+        return post;
+    } catch (error) {
+        console.error("Error saving post from link:", error);
+    }
+}
 
 
 export const savePost = async (req, res) => {
     try {
-        const { content } = req.body;
+        const { text } = req.body;
+        let content;
         const id = req.user.id; // Assuming email is available in req.user from authentication middleware
         const timestamp = new Date().toISOString();
         //console.log("User ID:", id);
+        if (text.includes("https://www.linkedin.com/posts/")) {
+            const post = await getLinkedInPost(text);
+            content = post.content.commentary;
+        }
+        else {
+            content = text;
+        }
 
         // Clean the content before processing - keep line breaks but remove extra spaces and lines
         const cleanedContent = content

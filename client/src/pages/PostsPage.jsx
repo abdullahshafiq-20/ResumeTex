@@ -43,6 +43,7 @@ const PostsPage = () => {
   const [activeTab, setActiveTab] = useState("not-sent");
   const [deleteConfirmPost, setDeleteConfirmPost] = useState(null);
   const { lastUpdated, isLive } = useDashboard();
+
   // Function to emit notification
   const showNotification = (message, type = "info") => {
     if (socket) {
@@ -146,11 +147,11 @@ const PostsPage = () => {
     !isSaving
   ) {
     return (
-      <div className="relative min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="relative min-h-screen p-2 sm:p-4">
         <div className="flex justify-center items-center min-h-[60vh]">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border border-blue-600 border-t-transparent"></div>
-            <p className="text-sm text-gray-600">Loading your posts...</p>
+          <div className="flex flex-col items-center space-y-2 sm:space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border border-blue-600 border-t-transparent"></div>
+            <p className="text-xs sm:text-sm text-gray-600">Loading your posts...</p>
           </div>
         </div>
       </div>
@@ -194,15 +195,6 @@ const PostsPage = () => {
     // More robust comparison for "no match found"
     const isNoMatchFound = post.jobTitle?.toLowerCase()?.trim()?.includes("no match found") || 
                           post.jobTitle?.toLowerCase()?.trim() === "no match found";
-  
-    // Enhanced debugging
-    //console.log("Post ID:", post._id);
-    //console.log("Job Title:", `"${post.jobTitle}"`);
-    //console.log("Job Title Length:", post.jobTitle?.length);
-    //console.log("Trimmed Job Title:", `"${post.jobTitle?.trim()}"`);
-    //console.log("Lowercase Job Title:", `"${post.jobTitle?.toLowerCase()?.trim()}"`);
-    //console.log("Is No Match Found:", isNoMatchFound);
-    //console.log("---");
 
     return (
       <motion.div
@@ -213,38 +205,25 @@ const PostsPage = () => {
             : "bg-white border-gray-200"
         }`}
         variants={itemVariants}
-
       >
-        {/* Debug indicator - remove this once working */}
-
-
-        {/* Subtle background blob */}
-        <div className={`absolute top-2 right-2 w-6 h-6 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+        {/* Smaller background blob for mobile */}
+        <div className={`absolute top-1 right-1 w-2 h-2 sm:w-4 sm:h-4 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
           isNoMatchFound 
             ? "bg-gradient-to-br from-red-200/30 to-orange-200/20" 
             : "bg-gradient-to-br from-blue-200/20 to-purple-200/15"
         }`}></div>
 
-        {/* Warning indicator for no match found */}
-        {/* {isNoMatchFound && (
-          <div className="absolute top-1 left-1 z-10">
-            <div className="bg-red-500 text-white rounded-full p-1" title="No match found - Email cannot be generated">
-              <AlertTriangle size={12} />
-            </div>
-          </div>
-        )} */}
-
-        {/* Status indicators at the top of card */}
-        <div className={`flex items-center justify-between p-4 border-b border-gray-100 ${
+        {/* Status indicators - More compact */}
+        <div className={`flex items-center justify-between p-2 sm:p-3 border-b border-gray-100 ${
           isNoMatchFound ? "bg-red-50/50" : "bg-gray-50/50"
         }`}>
-          <div className="flex gap-3">
+          <div className="flex gap-1 sm:gap-2">
             <div
               className="flex flex-col items-center"
               title={hasJobTitle ? "Job title available" : "No job title"}
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center ${
                   hasJobTitle 
                     ? isNoMatchFound 
                       ? "bg-red-100" 
@@ -253,7 +232,7 @@ const PostsPage = () => {
                 }`}
               >
                 <Briefcase
-                  size={12}
+                  size={8}
                   className={
                     hasJobTitle 
                       ? isNoMatchFound 
@@ -263,8 +242,8 @@ const PostsPage = () => {
                   }
                 />
               </div>
-              <span className="text-xs mt-1 text-gray-600">
-                {hasJobTitle ? "Title" : "No title"}
+              <span className="text-[8px] sm:text-xs mt-0.5 text-gray-600">
+                {hasJobTitle ? "Title" : "No"}
               </span>
             </div>
 
@@ -275,16 +254,16 @@ const PostsPage = () => {
               }
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center ${
                   hasUrls ? "bg-blue-100" : "bg-gray-100"
                 }`}
               >
                 <ExternalLink
-                  size={12}
+                  size={8}
                   className={hasUrls ? "text-blue-600" : "text-gray-400"}
                 />
               </div>
-              <span className="text-xs mt-1 text-gray-600">
+              <span className="text-[8px] sm:text-xs mt-0.5 text-gray-600">
                 {hasUrls ? `${post.extractedUrls.length}` : "0"}
               </span>
             </div>
@@ -298,16 +277,16 @@ const PostsPage = () => {
               }
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center ${
                   hasEmails ? "bg-purple-100" : "bg-gray-100"
                 }`}
               >
                 <Mail
-                  size={12}
+                  size={8}
                   className={hasEmails ? "text-purple-600" : "text-gray-400"}
                 />
               </div>
-              <span className="text-xs mt-1 text-gray-600">
+              <span className="text-[8px] sm:text-xs mt-0.5 text-gray-600">
                 {hasEmails ? `${post.extractedEmails.length}` : "0"}
               </span>
             </div>
@@ -321,24 +300,24 @@ const PostsPage = () => {
               }
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center ${
                   hasHashtags ? "bg-indigo-100" : "bg-gray-100"
                 }`}
               >
                 <Hash
-                  size={12}
+                  size={8}
                   className={hasHashtags ? "text-indigo-600" : "text-gray-400"}
                 />
               </div>
-              <span className="text-xs mt-1 text-gray-600">
+              <span className="text-[8px] sm:text-xs mt-0.5 text-gray-600">
                 {hasHashtags ? `${post.extractedHashtags.length}` : "0"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <div
-              className={`flex items-center justify-center w-6 h-6 rounded-full transition-colors ${
+              className={`flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full transition-colors ${
                 post.isEmailSent
                   ? "bg-green-100 text-green-600"
                   : "bg-orange-100 text-orange-600"
@@ -346,24 +325,24 @@ const PostsPage = () => {
               title={post.isEmailSent ? "Sent" : "Not sent"}
             >
               {isUpdating ? (
-                <div className="animate-spin rounded-full h-3 w-3 border border-gray-500 border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-2 w-2 border border-gray-500 border-t-transparent"></div>
               ) : post.isEmailSent ? (
-                <Send size={12} />
+                <Send size={8} />
               ) : (
-                <Clock size={12} />
+                <Clock size={8} />
               )}
             </div>
 
             <button
-              className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-500 hover:text-blue-600 transition-colors"
+              className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-500 hover:text-blue-600 transition-colors"
               onClick={() => openModal(post)}
               disabled={isDeleting || isUpdating}
             >
-              <Eye size={12} />
+              <Eye size={8} />
             </button>
 
             <button
-              className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={(e) => {
                 e.stopPropagation();
                 openDeleteModal(post);
@@ -372,19 +351,19 @@ const PostsPage = () => {
               title="Delete post"
             >
               {isDeleting ? (
-                <div className="animate-spin rounded-full h-3 w-3 border border-red-500 border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-2 w-2 border border-red-500 border-t-transparent"></div>
               ) : (
-                <Trash2 size={12} />
+                <Trash2 size={8} />
               )}
             </button>
           </div>
         </div>
 
-        {/* Status badge */}
-        <div className="px-4 pt-3">
-          <div className="flex items-center gap-2 flex-wrap">
+        {/* Status badge - More compact */}
+        <div className="px-2 sm:px-3 pt-2">
+          <div className="flex items-center gap-1 flex-wrap">
             <span
-              className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+              className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] sm:text-xs font-medium ${
                 post.isEmailSent
                   ? "bg-green-100 text-green-800 border border-green-200"
                   : "bg-orange-100 text-orange-800 border border-orange-200"
@@ -392,53 +371,53 @@ const PostsPage = () => {
             >
               {isUpdating ? (
                 <>
-                  <div className="animate-spin rounded-full h-2 w-2 border border-current border-t-transparent mr-1"></div>
+                  <div className="animate-spin rounded-full h-1.5 w-1.5 border border-current border-t-transparent mr-1"></div>
                   Updating...
                 </>
               ) : post.isEmailSent ? (
                 <>
-                  <Send size={10} className="mr-1" />
+                  <Send size={8} className="mr-1" />
                   Sent
                 </>
               ) : (
                 <>
-                  <Clock size={10} className="mr-1" />
+                  <Clock size={8} className="mr-1" />
                   Pending
                 </>
               )}
             </span>
             {isNoMatchFound && (
-              <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                <AlertTriangle size={10} className="mr-1" />
+              <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] sm:text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                <AlertTriangle size={8} className="mr-1" />
                 No Email Generation
               </span>
             )}
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-2 sm:p-3">
           {post.jobTitle && (
-            <h3 className={`text-sm font-semibold line-clamp-1 mb-3 flex items-center ${
+            <h3 className={`text-xs sm:text-sm font-semibold line-clamp-1 mb-2 flex items-center ${
               isNoMatchFound ? "text-red-800" : "text-gray-800"
             }`}>
-              <Briefcase className={`h-3 w-3 mr-1.5 ${
+              <Briefcase className={`h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 ${
                 isNoMatchFound ? "text-red-600" : "text-blue-600"
               }`} />
               {post.jobTitle}
             </h3>
           )}
 
-          <div className="mb-4">
-            <p className="text-gray-600 text-xs line-clamp-4 leading-relaxed">
+          <div className="mb-2 sm:mb-3">
+            <p className="text-gray-600 text-[10px] sm:text-xs line-clamp-3 leading-relaxed">
               {post.content}
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {post.extractedUrls?.length > 0 && (
-              <div className="flex flex-wrap items-start gap-1">
-                <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-800 border border-blue-100">
-                  <ExternalLink size={10} className="mr-1" />
+              <div className="flex flex-wrap items-start gap-0.5 sm:gap-1">
+                <span className="inline-flex items-center rounded-full bg-blue-50 px-1.5 py-0.5 text-[8px] sm:text-xs font-medium text-blue-800 border border-blue-100">
+                  <ExternalLink size={8} className="mr-0.5" />
                   URLs:
                 </span>
                 {post.extractedUrls.slice(0, 1).map((url, index) => (
@@ -447,13 +426,13 @@ const PostsPage = () => {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block truncate max-w-[120px] text-xs text-blue-600 hover:underline"
+                    className="inline-block truncate max-w-[80px] sm:max-w-[120px] text-[8px] sm:text-xs text-blue-600 hover:underline"
                   >
                     {url}
                   </a>
                 ))}
                 {post.extractedUrls.length > 1 && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-[8px] sm:text-xs text-gray-500">
                     +{post.extractedUrls.length - 1} more
                   </span>
                 )}
@@ -461,22 +440,22 @@ const PostsPage = () => {
             )}
 
             {post.extractedEmails?.length > 0 && (
-              <div className="flex flex-wrap items-start gap-1">
-                <span className="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-800 border border-purple-100">
-                  <Mail size={10} className="mr-1" />
+              <div className="flex flex-wrap items-start gap-0.5 sm:gap-1">
+                <span className="inline-flex items-center rounded-full bg-purple-50 px-1.5 py-0.5 text-[8px] sm:text-xs font-medium text-purple-800 border border-purple-100">
+                  <Mail size={8} className="mr-0.5" />
                   Emails:
                 </span>
                 {post.extractedEmails.slice(0, 1).map((email, index) => (
                   <a
                     key={index}
                     href={`mailto:${email}`}
-                    className="inline-block truncate max-w-[120px] text-xs text-purple-600 hover:underline"
+                    className="inline-block truncate max-w-[80px] sm:max-w-[120px] text-[8px] sm:text-xs text-purple-600 hover:underline"
                   >
                     {email}
                   </a>
                 ))}
                 {post.extractedEmails.length > 1 && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-[8px] sm:text-xs text-gray-500">
                     +{post.extractedEmails.length - 1} more
                   </span>
                 )}
@@ -484,18 +463,18 @@ const PostsPage = () => {
             )}
 
             {post.extractedHashtags?.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-0.5 sm:gap-1">
                 {post.extractedHashtags.slice(0, 2).map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs text-gray-700 border border-gray-200"
+                    className="inline-flex items-center rounded-full bg-gray-50 px-1.5 py-0.5 text-[8px] sm:text-xs text-gray-700 border border-gray-200"
                   >
-                    <Hash size={10} className="mr-1" />
+                    <Hash size={8} className="mr-0.5" />
                     {tag}
                   </span>
                 ))}
                 {post.extractedHashtags.length > 2 && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-[8px] sm:text-xs text-gray-500">
                     +{post.extractedHashtags.length - 2} more
                   </span>
                 )}
@@ -504,14 +483,14 @@ const PostsPage = () => {
           </div>
         </div>
 
-        {/* View details button */}
-        <div className="p-3 pt-0">
+        {/* View details button - More compact */}
+        <div className="p-2 sm:p-3 pt-0">
           <button
             onClick={() => openModal(post)}
             disabled={isDeleting || isUpdating}
-            className="w-full flex items-center justify-center gap-2 text-xs text-blue-600 py-2 border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-1 text-[10px] sm:text-xs text-blue-600 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Eye size={12} />
+            <Eye size={10} />
             View Details
           </button>
         </div>
@@ -519,9 +498,9 @@ const PostsPage = () => {
         {/* Loading overlay for card */}
         {(isDeleting || isUpdating) && (
           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
-            <div className="flex flex-col items-center space-y-2">
-              <div className="animate-spin rounded-full h-6 w-6 border border-blue-600 border-t-transparent"></div>
-              <span className="text-xs text-gray-600">
+            <div className="flex flex-col items-center space-y-1 sm:space-y-2">
+              <div className="animate-spin rounded-full h-4 w-4 sm:h-6 sm:w-6 border border-blue-600 border-t-transparent"></div>
+              <span className="text-[8px] sm:text-xs text-gray-600">
                 {isDeleting ? "Deleting..." : "Updating..."}
               </span>
             </div>
@@ -533,144 +512,143 @@ const PostsPage = () => {
 
   return (
     <div className="relative">
-      {/* Background gradient blobs */}
-      <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-10 blur-3xl -z-10"></div>
-      <div className="absolute bottom-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-8 blur-2xl -z-10"></div>
-      <div className="absolute top-32 left-1/3 w-24 h-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-6 blur-xl -z-10"></div>
+      {/* Reduced background gradient blobs for mobile */}
+      <div className="absolute top-0 right-0 w-20 h-20 sm:w-40 sm:h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-10 blur-3xl -z-10"></div>
+      <div className="absolute bottom-20 left-10 w-16 h-16 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-8 blur-2xl -z-10"></div>
+      <div className="absolute top-32 left-1/3 w-12 h-12 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-6 blur-xl -z-10"></div>
 
       <motion.div
-        className=" "
+        className=""
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Live Status Indicator */}
-
-              {/* Live Status Indicator */}
-      <motion.div
-        className="mb-6 p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className={`h-2 w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
-            <span className={`text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
-              Live Update
-            </span>
-            {lastUpdated && (
-              <span className="text-xs text-gray-500">
-                • {new Date(lastUpdated).toLocaleTimeString()}
-              </span>
-            )}
-          </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
-          >
-            Refresh
-          </button>
-        </div>
-      </motion.div>
-
+        {/* Live Status Indicator - More compact */}
         <motion.div
-          className="mb-6 border border-purple-200 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 rounded-lg p-4 relative overflow-hidden"
+          className="mb-3 sm:mb-6 p-2 sm:p-3 rounded-lg border border-gray-200 bg-white relative overflow-hidden"
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${isLive ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}></div>
+              <span className={`text-xs sm:text-sm font-medium ${isLive ? "text-green-700" : "text-yellow-700"}`}>
+                Live Update
+              </span>
+              {lastUpdated && (
+                <span className="text-[10px] sm:text-xs text-gray-500">
+                  • {new Date(lastUpdated).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-blue-600 hover:text-blue-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Important Notice - More compact */}
+        <motion.div
+          className="mb-4 sm:mb-6 border border-purple-200 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 rounded-lg p-2 sm:p-4 relative overflow-hidden"
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Subtle animated background elements */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-2 left-1/4 w-4 h-4 bg-purple-200/40 rounded-full animate-pulse delay-300"></div>
-            <div className="absolute bottom-2 right-1/3 w-3 h-3 bg-blue-200/30 rounded-full animate-pulse delay-700"></div>
-            <div className="absolute top-1/2 right-6 w-2 h-2 bg-indigo-200/50 rounded-full animate-pulse delay-1000"></div>
+            <div className="absolute top-1 left-1/4 w-2 h-2 sm:w-4 sm:h-4 bg-purple-200/40 rounded-full animate-pulse delay-300"></div>
+            <div className="absolute bottom-1 right-1/3 w-1.5 h-1.5 sm:w-3 sm:h-3 bg-blue-200/30 rounded-full animate-pulse delay-700"></div>
+            <div className="absolute top-1/2 right-3 w-1 h-1 sm:w-2 sm:h-2 bg-indigo-200/50 rounded-full animate-pulse delay-1000"></div>
           </div>
 
-          <div className="relative flex items-start space-x-3">
+          <div className="relative flex items-start space-x-2 sm:space-x-3">
             <div className="flex-shrink-0 mt-0.5">
-              <Wand2 className="h-4 w-4 text-purple-600 animate-pulse" />
+              <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 animate-pulse" />
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-2">
-                <h3 className="text-sm font-semibold text-gray-800">
+              <div className="flex items-center space-x-2 mb-1 sm:mb-2">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-800">
                   Important Notice
                 </h3>
               </div>
 
-              <p className="text-xs text-gray-600 leading-relaxed mb-2">
-              Only posts that include an email address and relevant contact information will be displayed in the Email section. Posts without an email will not be shown in this section
+              <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed mb-1 sm:mb-2">
+                Only posts that include an email address and relevant contact information will be displayed in the Email section. Posts without an email will not be shown in this section
               </p>
             </div>
 
             <div className="flex-shrink-0">
-              <Sparkles className="h-4 w-4 text-blue-600 animate-pulse delay-500" />
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 animate-pulse delay-500" />
             </div>
           </div>
         </motion.div>
 
-        {/* Header */}
-        <motion.div className="mb-6" variants={itemVariants}>
-          <h1 className="text-xl font-semibold text-gray-800 mb-1 flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+        {/* Header - More compact */}
+        <motion.div className="mb-4 sm:mb-6" variants={itemVariants}>
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1 flex items-center">
+            <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
             Job Posts
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Manage and track your job post submissions
           </p>
         </motion.div>
 
-        {/* Add new post section */}
+        {/* Add new post section - More compact */}
         <motion.div
-          className="mb-8 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 border border-gray-200 rounded-lg relative overflow-hidden"
+          className="mb-4 sm:mb-8 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 border border-gray-200 rounded-lg relative overflow-hidden"
           variants={itemVariants}
         >
-          {/* Beautiful floating blobs */}
-          <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-gradient-to-br from-blue-200/40 to-purple-200/30 blur-2xl"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full bg-gradient-to-br from-indigo-200/30 to-pink-200/20 blur-xl"></div>
-          <div className="absolute top-1/2 left-1/3 w-16 h-16 rounded-full bg-gradient-to-br from-purple-200/20 to-blue-200/15 blur-lg"></div>
+          {/* Beautiful floating blobs - Smaller for mobile */}
+          <div className="absolute top-0 right-0 w-12 h-12 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-blue-200/40 to-purple-200/30 blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-indigo-200/30 to-pink-200/20 blur-xl"></div>
+          <div className="absolute top-1/2 left-1/3 w-8 h-8 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-purple-200/20 to-blue-200/15 blur-lg"></div>
 
-          <div className="relative z-10 p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <Plus className="h-5 w-5 mr-2 text-blue-600" />
-              Add New Job Post
+          <div className="relative z-10 p-3 sm:p-6">
+            <h2 className="text-sm sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-4 flex items-center">
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
+              Paste a link to any post or paste the content
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-4">
               <div className="relative">
                 <textarea
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
-                  placeholder="Enter job post content here... Include job title, description, requirements, contact information, etc."
-                  className="w-full h-32 p-4 border border-gray-200 rounded-lg resize-vertical focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:border outline-none text-sm bg-white/80 backdrop-blur-sm"
+                  placeholder="https://www.linkedin.com/posts/.... OR paste the content here..."
+                  className="w-full h-20 sm:h-32 p-2 sm:p-4 border border-gray-200 rounded-lg resize-vertical focus:ring-1 focus:ring-blue-500 focus:border-blue-500 focus:border outline-none text-xs sm:text-sm bg-white/80 backdrop-blur-sm"
                   disabled={isSaving}
                 />
-                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gradient-to-br from-green-200/30 to-blue-200/20 blur-sm opacity-50"></div>
+                <div className="absolute top-2 right-2 w-3 h-3 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-green-200/30 to-blue-200/20 blur-sm opacity-50"></div>
               </div>
               <div className="flex justify-end">
                 <button
                   onClick={handleSavePost}
                   disabled={isSaving || !newPostContent.trim()}
-                  className="group relative px-6 py-3 bg-transparent border border-blue-500 hover:border-blue-600 text-blue-600 hover:text-blue-700 rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 hover:bg-blue-50 overflow-hidden"
+                  className="group relative px-3 sm:px-6 py-2 sm:py-3 bg-transparent border border-blue-500 hover:border-blue-600 text-blue-600 hover:text-blue-700 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 hover:bg-blue-50 overflow-hidden"
                 >
                   {/* Animated background */}
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 via-blue-100/50 to-blue-50/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg"></div>
 
                   {/* Main content */}
-                  <div className="relative flex items-center space-x-2">
+                  <div className="relative flex items-center space-x-1 sm:space-x-2">
                     {isSaving ? (
                       <>
                         <div className="relative">
-                          <div className="animate-spin rounded-full h-4 w-4 border border-blue-500 border-t-transparent"></div>
+                          <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border border-blue-500 border-t-transparent"></div>
                         </div>
                         <span className="font-medium">Saving...</span>
-                        <Sparkles className="h-4 animate-pulse" />
+                        <Sparkles className="h-3 w-3 sm:h-4 animate-pulse" />
                       </>
                     ) : (
                       <>
-                        <Wand2 className="h-4 w-4 transition-transform duration-200 group-hover:rotate-12" />
+                        <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:rotate-12" />
                         <span className="font-medium">Save Post</span>
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                       </>
                     )}
                   </div>
@@ -680,29 +658,29 @@ const PostsPage = () => {
           </div>
         </motion.div>
 
-        {/* Tabs for separating sent/not sent posts */}
-        <motion.div className="mb-6" variants={itemVariants}>
+        {/* Tabs for separating sent/not sent posts - More compact */}
+        <motion.div className="mb-4 sm:mb-6" variants={itemVariants}>
           <div className="flex space-x-1 bg-white border border-gray-200 p-1 rounded-lg w-fit">
             <button
               onClick={() => setActiveTab("not-sent")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
                 activeTab === "not-sent"
                   ? "bg-blue-50 text-blue-700 border border-blue-200"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
-              <Clock size={14} />
+              <Clock size={12} />
               Pending ({notSentPosts.length})
             </button>
             <button
               onClick={() => setActiveTab("sent")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 ${
                 activeTab === "sent"
                   ? "bg-green-50 text-green-700 border border-green-200"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
-              <Send size={14} />
+              <Send size={12} />
               Sent ({sentPosts.length})
             </button>
           </div>
@@ -711,30 +689,30 @@ const PostsPage = () => {
         {/* Posts display based on active tab */}
         {activeTab === "not-sent" && (
           <motion.div variants={itemVariants}>
-            <div className="flex items-center mb-4">
-              <Clock className="h-5 w-5 mr-2 text-orange-600" />
-              <h2 className="text-lg font-semibold text-gray-800">
+            <div className="flex items-center mb-3 sm:mb-4">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-orange-600" />
+              <h2 className="text-sm sm:text-lg font-semibold text-gray-800">
                 Pending Posts ({notSentPosts.length})
               </h2>
             </div>
             {notSentPosts.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded-lg p-8 text-center relative overflow-hidden">
-                <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-gradient-to-br from-orange-200/20 to-yellow-200/15 blur-xl"></div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center relative overflow-hidden">
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-orange-200/20 to-yellow-200/15 blur-xl"></div>
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Clock className="h-8 w-8 text-orange-600" />
+                  <div className="w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4">
+                    <Clock className="h-4 w-4 sm:h-8 sm:w-8 text-orange-600" />
                   </div>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-xs sm:text-sm">
                     No posts pending to be sent.
                   </p>
-                  <p className="mt-2 text-xs text-gray-400">
+                  <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-400">
                     All your posts have been sent!
                   </p>
                 </div>
               </div>
             ) : (
               <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4"
                 variants={containerVariants}
               >
                 {notSentPosts.map(renderPostCard)}
@@ -745,30 +723,30 @@ const PostsPage = () => {
 
         {activeTab === "sent" && (
           <motion.div variants={itemVariants}>
-            <div className="flex items-center mb-4">
-              <Send className="h-5 w-5 mr-2 text-green-600" />
-              <h2 className="text-lg font-semibold text-gray-800">
+            <div className="flex items-center mb-3 sm:mb-4">
+              <Send className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-green-600" />
+              <h2 className="text-sm sm:text-lg font-semibold text-gray-800">
                 Sent Posts ({sentPosts.length})
               </h2>
             </div>
             {sentPosts.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded-lg p-8 text-center relative overflow-hidden">
-                <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/15 blur-xl"></div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 text-center relative overflow-hidden">
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/15 blur-xl"></div>
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Send className="h-8 w-8 text-green-600" />
+                  <div className="w-8 h-8 sm:w-16 sm:h-16 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-4">
+                    <Send className="h-4 w-4 sm:h-8 sm:w-8 text-green-600" />
                   </div>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-xs sm:text-sm">
                     No posts have been sent yet.
                   </p>
-                  <p className="mt-2 text-xs text-gray-400">
+                  <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-400">
                     Start sending your job posts to track them here.
                   </p>
                 </div>
               </div>
             ) : (
               <motion.div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4"
                 variants={containerVariants}
               >
                 {sentPosts.map(renderPostCard)}
@@ -777,11 +755,11 @@ const PostsPage = () => {
           </motion.div>
         )}
 
-        {/* Modal for post details - keeping existing modal code */}
+        {/* Modal for post details - Mobile optimized */}
         <AnimatePresence>
           {selectedPost && (
             <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -795,19 +773,19 @@ const PostsPage = () => {
                 transition={{ duration: 0.15 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Modal gradient blobs */}
-                <div className="absolute top-4 right-4 w-20 h-20 rounded-full bg-gradient-to-br from-blue-200/30 to-purple-200/20 blur-2xl"></div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-gradient-to-br from-indigo-200/20 to-pink-200/15 blur-xl"></div>
+                {/* Modal gradient blobs - Smaller for mobile */}
+                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-10 h-10 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-200/30 to-purple-200/20 blur-2xl"></div>
+                <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 w-8 h-8 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-indigo-200/20 to-pink-200/15 blur-xl"></div>
 
-                <div className="relative p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-3">
-                      <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-                        <FileText className="h-4 w-4 mr-2 text-blue-600" />
+                <div className="relative p-3 sm:p-6">
+                  <div className="flex justify-between items-center mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <h2 className="text-sm sm:text-lg font-semibold text-gray-800 flex items-center">
+                        <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-blue-600" />
                         {selectedPost.jobTitle || "Job Post Details"}
                       </h2>
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] sm:text-xs font-medium ${
                           selectedPost.isEmailSent
                             ? "bg-green-100 text-green-800 border border-green-200"
                             : "bg-orange-100 text-orange-800 border border-orange-200"
@@ -815,12 +793,12 @@ const PostsPage = () => {
                       >
                         {selectedPost.isEmailSent ? (
                           <>
-                            <Send size={10} className="mr-1" />
+                            <Send size={8} className="mr-1" />
                             Sent
                           </>
                         ) : (
                           <>
-                            <Clock size={10} className="mr-1" />
+                            <Clock size={8} className="mr-1" />
                             Pending
                           </>
                         )}
@@ -828,40 +806,40 @@ const PostsPage = () => {
                     </div>
                     <button
                       onClick={closeModal}
-                      className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
                       aria-label="Close dialog"
                     >
-                      <X size={16} className="text-gray-500" />
+                      <X size={14} className="text-gray-500" />
                     </button>
                   </div>
 
-                  {/* Full content */}
-                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-6">
-                    <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
+                  {/* Full content - More compact */}
+                  <div className="bg-gray-50 border border-gray-200 p-2 sm:p-4 rounded-lg mb-3 sm:mb-6">
+                    <p className="text-gray-700 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed">
                       {selectedPost.content}
                     </p>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-2 sm:space-y-4">
                     {/* URLs */}
                     {selectedPost.extractedUrls?.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                        <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2 flex items-center">
                           <ExternalLink
-                            size={14}
+                            size={12}
                             className="mr-2 text-blue-600"
                           />
                           URLs
                         </h3>
-                        <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                          <ul className="space-y-2">
+                        <div className="bg-blue-50 border border-blue-200 p-2 sm:p-3 rounded-lg">
+                          <ul className="space-y-1 sm:space-y-2">
                             {selectedPost.extractedUrls.map((url, index) => (
                               <li key={index} className="break-all">
                                 <a
                                   href={url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline text-xs"
+                                  className="text-blue-600 hover:underline text-[10px] sm:text-xs"
                                 >
                                   {url}
                                 </a>
@@ -875,18 +853,18 @@ const PostsPage = () => {
                     {/* Emails */}
                     {selectedPost.extractedEmails?.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                          <Mail size={14} className="mr-2 text-purple-600" />
+                        <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2 flex items-center">
+                          <Mail size={12} className="mr-2 text-purple-600" />
                           Email Addresses
                         </h3>
-                        <div className="bg-purple-50 border border-purple-200 p-3 rounded-lg">
-                          <ul className="space-y-2">
+                        <div className="bg-purple-50 border border-purple-200 p-2 sm:p-3 rounded-lg">
+                          <ul className="space-y-1 sm:space-y-2">
                             {selectedPost.extractedEmails.map(
                               (email, index) => (
                                 <li key={index}>
                                   <a
                                     href={`mailto:${email}`}
-                                    className="text-purple-600 hover:underline text-xs"
+                                    className="text-purple-600 hover:underline text-[10px] sm:text-xs"
                                   >
                                     {email}
                                   </a>
@@ -901,25 +879,25 @@ const PostsPage = () => {
                     {/* Hashtags */}
                     {selectedPost.extractedHashtags?.length > 0 && (
                       <div>
-                        <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                          <Hash size={14} className="mr-2 text-gray-600" />
+                        <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2 flex items-center">
+                          <Hash size={12} className="mr-2 text-gray-600" />
                           Hashtags
                         </h3>
-                        <div className="bg-gray-50 border border-gray-200 p-3 rounded-lg">
-                          <div className="flex flex-wrap gap-2">
+                        <div className="bg-gray-50 border border-gray-200 p-2 sm:p-3 rounded-lg">
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
                             {selectedPost.extractedHashtags.map(
                               (tag, index) => (
                                 <span
                                   key={index}
-                                  className="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs text-gray-700 border border-gray-200"
+                                  className="inline-flex items-center rounded-full bg-white px-1.5 py-0.5 text-[8px] sm:text-xs text-gray-700 border border-gray-200"
                                 >
-                                  <Hash size={10} className="mr-1" />
+                                  <Hash size={8} className="mr-1" />
                                   {tag}
                                 </span>
                               )
                             )}
                           </div>
-                        </div>
+                          </div>
                       </div>
                     )}
                   </div>
@@ -929,11 +907,11 @@ const PostsPage = () => {
           )}
         </AnimatePresence>
 
-        {/* Delete Confirmation Modal */}
+        {/* Delete Confirmation Modal - Mobile optimized */}
         <AnimatePresence>
           {deleteConfirmPost && (
             <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -947,68 +925,68 @@ const PostsPage = () => {
                 transition={{ duration: 0.15 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Modal gradient blobs */}
-                <div className="absolute top-2 right-2 w-16 h-16 rounded-full bg-gradient-to-br from-red-200/30 to-orange-200/20 blur-2xl"></div>
-                <div className="absolute bottom-2 left-2 w-12 h-12 rounded-full bg-gradient-to-br from-gray-200/20 to-red-200/15 blur-xl"></div>
+                {/* Modal gradient blobs - Smaller for mobile */}
+                <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-8 h-8 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-red-200/30 to-orange-200/20 blur-2xl"></div>
+                <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-gray-200/20 to-red-200/15 blur-xl"></div>
 
-                <div className="relative p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                <div className="relative p-3 sm:p-6">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-800">
+                        <h2 className="text-sm sm:text-lg font-semibold text-gray-800">
                           Delete Post
                         </h2>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           This action cannot be undone
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={closeDeleteModal}
-                      className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
                       aria-label="Close dialog"
                     >
-                      <X size={16} className="text-gray-500" />
+                      <X size={14} className="text-gray-500" />
                     </button>
                   </div>
 
-                  {/* Post preview */}
-                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-6">
+                  {/* Post preview - More compact */}
+                  <div className="bg-gray-50 border border-gray-200 p-2 sm:p-4 rounded-lg mb-3 sm:mb-6">
                     {deleteConfirmPost.jobTitle && (
-                      <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <Briefcase className="h-3 w-3 mr-1.5 text-blue-600" />
+                      <h3 className="text-xs sm:text-sm font-semibold text-gray-800 mb-1 sm:mb-2 flex items-center">
+                        <Briefcase className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1.5 text-blue-600" />
                         {deleteConfirmPost.jobTitle}
                       </h3>
                     )}
-                    <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
+                    <p className="text-gray-600 text-[10px] sm:text-sm line-clamp-3 leading-relaxed">
                       {deleteConfirmPost.content}
                     </p>
                   </div>
 
-                  <div className="flex justify-end space-x-3">
+                  <div className="flex justify-end space-x-2 sm:space-x-3">
                     <button
                       onClick={closeDeleteModal}
                       disabled={deletingPostId === deleteConfirmPost._id}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => handleDeletePost(deleteConfirmPost._id)}
                       disabled={deletingPostId === deleteConfirmPost._id}
-                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 hover:border-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-red-600 border border-red-600 rounded-lg hover:bg-red-700 hover:border-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2"
                     >
                       {deletingPostId === deleteConfirmPost._id ? (
                         <>
-                          <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
+                          <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 border border-white border-t-transparent"></div>
                           Deleting...
                         </>
                       ) : (
                         <>
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                           Delete Post
                         </>
                       )}

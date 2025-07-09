@@ -202,7 +202,7 @@ export const PostsProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.post(`${apiUrl}/extension/savePost`, {
-        content: postData
+        text: postData
       });
       //console.log("Save response:", response.data);
       

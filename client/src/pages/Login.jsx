@@ -46,32 +46,32 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white">
-      {/* Simplified Background - fewer blobs, hidden on mobile */}
-      <div className="hidden md:block blob blob1"></div>
-      <div className="hidden md:block blob blob2"></div>
-      <div className="blob blob3"></div>
+      {/* Ultra-minimal background - only on larger screens */}
+      <div className="hidden lg:block blob blob1"></div>
+      <div className="hidden lg:block blob blob2"></div>
+      <div className="hidden sm:block blob blob3"></div>
 
-      {/* Simplified overlay */}
-      <div className="fixed inset-0 z-5 bg-white/10 backdrop-blur-[0.1px]"></div>
+      {/* Minimal overlay */}
+      <div className="fixed inset-0 z-5 bg-white/5 backdrop-blur-[0.05px]"></div>
 
-      {/* Reduced floating particles - fewer and hidden on mobile */}
+      {/* Fewer floating particles - only on desktop */}
       {!prefersReducedMotion && (
-        <div className="hidden md:block fixed inset-0 z-5 pointer-events-none">
-          {[...Array(5)].map((_, i) => (
+        <div className="hidden lg:block fixed inset-0 z-5 pointer-events-none">
+          {[...Array(3)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-purple-400/20 rounded-full"
+              className="absolute w-1 h-1 bg-purple-400/10 rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
               }}
               animate={{
-                y: [0, -50, 0],
-                opacity: [0, 0.5, 0],
+                y: [0, -30, 0],
+                opacity: [0, 0.3, 0],
               }}
               transition={{
-                duration: 8,
-                delay: Math.random() * 3,
+                duration: 6,
+                delay: Math.random() * 2,
                 repeat: Infinity,
                 ease: "linear",
               }}
@@ -80,13 +80,13 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Simplified white overlay */}
-      <div className="fixed inset-0 z-8 bg-white/15 backdrop-blur-sm"></div>
+      {/* Minimal white overlay */}
+      <div className="fixed inset-0 z-8 bg-white/5 backdrop-blur-sm"></div>
 
       {/* Login Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-sm">
-          {/* Main Login Card */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-2 sm:px-4 py-4 sm:py-8">
+        <div className="w-full max-w-xs sm:max-w-sm">
+          {/* Main Login Card - Ultra compact */}
           <motion.div
             className="relative"
             variants={cardVariants}
@@ -95,48 +95,48 @@ export default function LoginPage() {
             transition={cardTransition}
           >
             {/* Card Background with Glass Effect */}
-            <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden relative">
+            <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden relative">
               {/* Simplified gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-blue-50/30 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-transparent to-blue-50/20 pointer-events-none"></div>
 
-              {/* Logo Section */}
-              <div className="pt-4 pb-3 flex flex-col items-center relative z-10">
-                <div className="w-20 h-20 rounded-lg bg-transparent flex items-center border border-gray-200 justify-center mb-2 shadow-sm">
+              {/* Ultra-compact Logo Section */}
+              <div className="pt-3 sm:pt-4 pb-2 sm:pb-3 flex flex-col items-center relative z-10">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-transparent flex items-center border border-gray-200 justify-center mb-1 sm:mb-2 shadow-sm">
                   <img 
                     src="/logo.png" 
                     alt="ResumeTex Logo" 
-                    className="w-16 h-16 object-contain"
+                    className="w-10 h-10 sm:w-14 sm:h-14 object-contain"
                   />
                 </div>
 
-                <h1 className="text-lg font-bold text-gray-800 mb-1">
+                <h1 className="text-base sm:text-lg font-bold text-gray-800 mb-0.5 sm:mb-1">
                   ResumeTex
                 </h1>
-                <p className="text-xs text-gray-500 text-center max-w-xs leading-relaxed px-2">
+                <p className="text-xs text-gray-500 text-center max-w-xs leading-tight px-2">
                   AI-Powered Resume Transformation
                 </p>
               </div>
 
-              {/* Welcome Section */}
-              <div className="px-4 sm:px-6 pb-3 text-center relative z-10">
-                <p className="text-xs text-gray-600 leading-relaxed px-2">
+              {/* Compact Welcome Section */}
+              <div className="px-3 sm:px-4 pb-2 sm:pb-3 text-center relative z-10">
+                <p className="text-xs text-gray-600 leading-tight px-1 sm:px-2">
                   Sign in to transform your resume with AI magic and create stunning LaTeX documents.
                 </p>
               </div>
 
-              {/* Login Button */}
-              <div className="px-4 sm:px-6 pb-4 relative z-10">
+              {/* Compact Login Button */}
+              <div className="px-3 sm:px-4 pb-3 sm:pb-4 relative z-10">
                 <motion.button
                   onClick={handleLoginClick}
-                  className="group w-full flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-purple-300 px-4 py-2.5 rounded-lg transition-colors duration-200 backdrop-blur-sm relative overflow-hidden"
+                  className="group w-full flex items-center justify-center gap-1.5 sm:gap-2 bg-white/90 hover:bg-white text-gray-800 border border-gray-200 hover:border-purple-300 px-3 sm:px-4 py-2 sm:py-2.5 rounded-md sm:rounded-lg transition-colors duration-200 backdrop-blur-sm relative overflow-hidden"
                   whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
                   transition={{ duration: 0.1 }}
                 >
-                  <div className="flex items-center space-x-2 relative z-10">
-                    {/* Google Icon */}
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 relative z-10">
+                    {/* Compact Google Icon */}
                     <svg
-                      className="w-4 h-4 flex-shrink-0"
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0"
                       viewBox="0 0 24 24"
                       xmlns="http://www.w3.org/2000/svg"
                     >
@@ -157,28 +157,28 @@ export default function LoginPage() {
                         fill="#EA4335"
                       />
                     </svg>
-                    <span className="font-medium text-sm">
+                    <span className="font-medium text-xs sm:text-sm">
                       Continue with Google
                     </span>
-                    <ArrowRight className="w-3 h-3 opacity-60" />
+                    <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-60" />
                   </div>
                 </motion.button>
 
-                {/* Trust Indicators */}
-                <div className="mt-3 flex items-center justify-center space-x-4 text-xs text-gray-500">
-                  <div className="flex items-center space-x-1">
-                    <Shield className="w-3 h-3 text-green-500" />
-                    <span>Secure</span>
+                {/* Compact Trust Indicators */}
+                <div className="mt-2 sm:mt-3 flex items-center justify-center space-x-3 sm:space-x-4 text-xs text-gray-500">
+                  <div className="flex items-center space-x-0.5 sm:space-x-1">
+                    <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-500" />
+                    <span className="text-xs">Secure</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Sparkles className="w-3 h-3 text-purple-500" />
-                    <span>AI-Powered</span>
+                  <div className="flex items-center space-x-0.5 sm:space-x-1">
+                    <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-purple-500" />
+                    <span className="text-xs">AI-Powered</span>
                   </div>
                 </div>
               </div>
 
-              {/* Terms Section */}
-              <div className="px-4 sm:px-6 pb-3 text-center text-xs text-gray-500 leading-relaxed relative z-10">
+              {/* Compact Terms Section */}
+              <div className="px-3 sm:px-4 pb-2 sm:pb-3 text-center text-xs text-gray-500 leading-tight relative z-10">
                 By continuing, you agree to our{" "}
                 <a href="#" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
                   Terms
@@ -189,8 +189,8 @@ export default function LoginPage() {
                 </a>
               </div>
 
-              {/* Footer */}
-              <div className="px-4 sm:px-6 py-2 bg-gradient-to-r from-gray-50/80 to-purple-50/80 border-t border-gray-100/50 text-center relative z-10">
+              {/* Compact Footer */}
+              <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-50/60 to-purple-50/60 border-t border-gray-100/50 text-center relative z-10">
                 <p className="text-xs text-gray-500">
                   © 2025 ResumeTex
                 </p>
@@ -200,11 +200,11 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Mobile-Responsive Privacy Info Modal */}
+      {/* Ultra-compact Mobile-First Privacy Info Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -212,108 +212,108 @@ export default function LoginPage() {
           >
             {/* Modal Backdrop */}
             <motion.div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={closeModal}
             />
 
-            {/* Mobile-Responsive Modal Content */}
+            {/* Ultra-compact Modal Content */}
             <motion.div
-              className="relative w-full max-w-sm sm:max-w-md mx-auto bg-white/95 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-xs sm:max-w-sm mx-auto bg-white/95 backdrop-blur-xl border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto"
               variants={modalVariants}
               initial="hidden"
               animate="visible"
               exit="hidden"
               transition={modalTransition}
             >
-              {/* Close button for mobile */}
+              {/* Always visible close button */}
               <button
                 onClick={closeModal}
-                className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors duration-200 sm:hidden"
+                className="absolute top-2 right-2 z-20 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors duration-200"
               >
-                <X className="w-4 h-4 text-gray-600" />
+                <X className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
               </button>
 
               {/* Simplified gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-transparent to-blue-50/20 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/10 via-transparent to-blue-50/10 pointer-events-none"></div>
 
-              {/* Modal Header */}
-              <div className="pt-4 sm:pt-6 pb-3 sm:pb-4 px-4 sm:px-6 text-center relative z-10">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-                  <Mail className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
+              {/* Compact Modal Header */}
+              <div className="pt-3 sm:pt-4 pb-2 sm:pb-3 px-3 sm:px-4 text-center relative z-10">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+                  <Mail className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                <h2 className="text-sm sm:text-lg font-bold text-gray-800 mb-1 sm:mb-2">
                   Email Permission Required
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   Understanding our email access
                 </p>
               </div>
 
-              {/* Modal Body */}
-              <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4 relative z-10">
-                {/* Info Points */}
-                <div className="space-y-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
-                      <Mail className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-purple-600" />
+              {/* Compact Modal Body */}
+              <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3 relative z-10">
+                {/* Compact Info Points */}
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
+                      <Mail className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                      <p className="text-xs text-gray-700 leading-tight">
                         <strong>Direct Email Sending:</strong> We require sensitive scope access to send emails directly from your account, so you won't be overwhelmed with sending them one by one.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
-                      <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-600" />
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                      <CheckCircle className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                      <p className="text-xs text-gray-700 leading-tight">
                         <strong>User Control:</strong> This action is solely taken by you, not us. You have complete control over when emails are sent.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
-                      <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600" />
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                      <Lock className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                      <p className="text-xs text-gray-700 leading-tight">
                         <strong>Encrypted Data:</strong> We save encrypted data that only you have access to. Your data is encoded - even we cannot decode it or read it.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Encouragement Message */}
-                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-100">
-                  <p className="text-xs sm:text-sm text-center text-gray-700 font-medium">
+                {/* Compact Encouragement Message */}
+                <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-md sm:rounded-lg border border-purple-100">
+                  <p className="text-xs text-center text-gray-700 font-medium">
                     🚀 Happy using ResumeTex and get hired quickly!
                   </p>
                 </div>
 
-                {/* Action Buttons - Stacked on mobile, side by side on desktop */}
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6">
-                  <motion.button
-                    onClick={closeModal}
-                    className="w-full px-4 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium"
-                    whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
-                    whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
-                  >
-                    Cancel
-                  </motion.button>
+                {/* Compact Action Buttons - Always stacked on mobile */}
+                <div className="flex flex-col space-y-2 mt-3 sm:mt-4">
                   <motion.button
                     onClick={handleProceedLogin}
-                    className="w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium shadow-lg"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-md sm:rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium shadow-lg"
                     whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
                   >
                     Continue with Google
+                  </motion.button>
+                  <motion.button
+                    onClick={closeModal}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 text-gray-600 rounded-md sm:rounded-lg hover:bg-gray-50 transition-colors duration-200 text-xs sm:text-sm font-medium"
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
+                  >
+                    Cancel
                   </motion.button>
                 </div>
               </div>
