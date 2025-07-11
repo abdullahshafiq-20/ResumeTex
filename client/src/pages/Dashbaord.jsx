@@ -210,7 +210,8 @@ const itemVariants = {
               <p className="text-sm sm:text-xl font-bold text-gray-800">{stats?.user?.activityScore}%</p>
             </div>
             <div className="self-end lg:self-auto flex items-center space-x-1">
-              <ArrowUpRight className="h-6 w-6 sm:h-6 sm:w-6 text-blue-600" /> <span className="text-sm sm:text-xl font-bold text-gray-800">{`${stats?.user?.activityScore}%` || 0}</span>
+              <ArrowUpRight className="h-6 w-6 sm:h-6 sm:w-6 text-blue-600" /> 
+              {/* <span className="text-sm sm:text-xl font-bold text-gray-800">{`${stats?.user?.activityScore}%` || 0}</span> */}
             </div>
           </div>
         </div>

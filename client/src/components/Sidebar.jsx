@@ -169,6 +169,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <div className="flex items-center space-x-1 sm:space-x-2">
                   <span className="font-semibold text-sm sm:text-base lg:text-lg text-gray-800">ResumeTex</span>
                   
+                  {/* Beta tag */}
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                    BETA
+                  </span>
+                  
                   {/* Compact blinking dot when AI is processing */}
                   <AnimatePresence>
                     {isProcessing && (
