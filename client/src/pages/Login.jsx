@@ -20,6 +20,14 @@ export default function LoginPage() {
     window.location.href = apiUrl + "/auth/google";
   };
 
+  const handleTermsClick = () => {
+    window.location.href = "/terms-of-servic";
+  };
+
+  const handlePrivacyClick = () => {
+    window.location.href = "/privacy-policy";
+  };
+
   const closeModal = () => {
     setShowModal(false);
   };
@@ -180,11 +188,11 @@ export default function LoginPage() {
               {/* Compact Terms Section */}
               <div className="px-3 sm:px-4 pb-2 sm:pb-3 text-center text-xs text-gray-500 leading-tight relative z-10">
                 By continuing, you agree to our{" "}
-                <a href="#" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
+                <a href="/terms-of-service" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
                   Terms
                 </a>{" "}
                 and{" "}
-                <a href="#" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
+                <a href="/privacy-policy" className="text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-200">
                   Privacy Policy
                 </a>
               </div>
