@@ -40,7 +40,7 @@ export default function App() {
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/" element={<LoginPage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             {/* <Route path="/response" element={<ResponsePage />} /> */}

@@ -150,9 +150,10 @@ Return only the JSON object:`;
         console.error('Error parsing resume with AI:', error);
 
         // Fallback to basic parsing if AI fails
+        console.log("fallback to basic parsing");
         return extractResumeDetails(resumeText, pref);
     }
-}
+}   
 
 
 export const manualResumeController = async (req, res) => {
@@ -164,11 +165,13 @@ export const manualResumeController = async (req, res) => {
         const text = extractedData.text;
         const result = await parseResumeWithAI(text, pref);
 
+        console.log("result.job_title: ", result.job_title);
+
         // res.json({ result });
 
         const userPreferences = await UserPreferences.create({
             userId: userId,
-            preferences: result.job_title,
+            preferences: pref || result.job_title,
             summary: result.summary || "",
             skills: result.skills,
             projects: result.projects,
@@ -181,7 +184,7 @@ export const manualResumeController = async (req, res) => {
         const userResume = await UserResume.create({
             userId: userId,
             resume_link: pdfUrl,
-            resume_title: result.job_title,
+            resume_title: pref || result.job_title,
             thumbnail: imageUrl,
             file_type: 'pdf',
             description: '',
