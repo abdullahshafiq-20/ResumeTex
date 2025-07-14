@@ -12,7 +12,8 @@ app.use(cors({
   origin: [
     'https://resume-tex.vercel.app',
     'http://localhost:5173',
-    'https://resumeconvertorlatex.onrender.com'
+    'https://resumeconvertorlatex.onrender.com',
+    'https://dev.resumetex.live'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
