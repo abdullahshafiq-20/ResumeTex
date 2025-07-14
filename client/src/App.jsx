@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
 import { HelmetProvider } from 'react-helmet-async';
 import "./App.css";
+import AdSenseScriptLoader from "./components/AdSenseScriptLoader";
 
 // Lazy load components
 const BeforeAfterPage = lazy(() => import("./pages/BeforeAfterPage"));
@@ -17,6 +18,7 @@ export default function App() {
   return (
     <>
       <HelmetProvider>
+      <AdSenseScriptLoader />
       <Toaster />
       <Analytics />
       <div className="app-container">
