@@ -211,7 +211,28 @@ const TermsOfServicePage = () => {
           details: "We integrate with third-party services (payment processors, authentication providers) and are not responsible for their performance or security."
         }
       ]
+    },
+    {
+      icon: Mail,
+      title: "Google API Use Disclosure",
+      gradient: "from-indigo-500 to-blue-500",
+      stats: "Limited Use",
+      content: [
+        {
+          subtitle: "Gmail API Usage",
+          details: "ResumeTex uses the Gmail API with the `gmail.send` scope solely to send resume documents or status notifications to recipients as instructed by the user. We do not read, access, or store the content of the user's Gmail account."
+        },
+        {
+          subtitle: "Limited Use Policy Compliance",
+          details: "We fully comply with Google’s Limited Use requirements. User Gmail data is not used for advertising, shared with third parties, or used to train AI models. Emails are only sent in response to direct user actions."
+        },
+        {
+          subtitle: "No Offline Access",
+          details: "We do not request offline access or store Gmail tokens. Each email action is tied to a specific, active user session and explicit user action."
+        }
+      ]
     }
+    
   ];
 
   const serviceFeatures = [
