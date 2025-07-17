@@ -4,6 +4,7 @@ import { onboardResume, getUserResume, convertPdfToImage, addResume, deleteResum
 import { verifyToken } from "../middleware/auth.js";
 import { extractData } from "../controllers/extractPdfData.js";
 import { manualResumeController } from "../controllers/resume/manualResumeController.js";
+import { convertLatexToJson } from "../controllers/resume/targetJobController.js";
 const resumeRoutes = express.Router();
 
 resumeRoutes.get("/onboard-resume", verifyToken, onboardResume);
@@ -13,5 +14,6 @@ resumeRoutes.post("/addresume", verifyToken, addResume);
 resumeRoutes.post("/extract-data", extractData);
 resumeRoutes.post("/delete-resume", verifyToken, deleteResume);
 resumeRoutes.post("/manual-resume", verifyToken, manualResumeController);
+resumeRoutes.post("/conversion", convertLatexToJson);
 
 export default resumeRoutes;
