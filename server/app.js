@@ -16,6 +16,8 @@ import prefRoutes from "./routes/prefRoutes.js";
 import { coinLogRouter } from "./routes/coinRoutes.js";
 import { initSocket } from './config/socketConfig.js';
 import cronJob from "./services/cronJob.js";
+
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -41,6 +43,7 @@ mongoose.connect(process.env.URI).then(() => {
   console.log("Connected to MongoDB");
 }
 );
+
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
