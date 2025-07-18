@@ -444,14 +444,16 @@ const PostsPage = () => {
 
         <div className="p-2 sm:p-3">
           {post.jobTitle && (
-            <h3 className={`text-xs sm:text-sm font-semibold line-clamp-1 mb-2 flex items-center ${
+            <a href={post.postUrl} target="_blank" rel="noopener noreferrer" className={`text-xs sm:text-sm font-semibold line-clamp-1 mb-2 flex items-center ${
+              post.postUrl ? "hover:text-blue-600 hover:underline" : ""
+            } ${
               isNoMatchFound ? "text-red-800" : "text-gray-800"
             }`}>
               <Briefcase className={`h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 ${
                 isNoMatchFound ? "text-red-600" : "text-blue-600"
               }`} />
               {post.jobTitle}
-            </h3>
+            </a>
           )}
 
           <div className="mb-2 sm:mb-3">

@@ -138,12 +138,14 @@ export const savePost = async (req, res) => {
     try {
         const { text } = req.body;
         let content;
+        let postUrl;
         const id = req.user.id; // Assuming email is available in req.user from authentication middleware
         const timestamp = new Date().toISOString();
         //console.log("User ID:", id);
         if (text.includes("https://www.linkedin.com/posts/")) {
             const post = await getLinkedInPost(text);
             content = post.content.commentary;
+            postUrl = text
         }
         else {
             content = text;
@@ -196,6 +198,7 @@ export const savePost = async (req, res) => {
 
                 data = await extensionSchema.create({
                     userId: userid,
+                    postUrl: postUrl,
                     content: cleanedContent, // Save cleaned content
                     extractedUrls: extracted_urls,
                     extractedEmails: extracted_emails,

@@ -15,6 +15,11 @@ const LinkedInPostSchema = new Schema({
     required: true,
     description: 'ID of the user who extracted this post'
   },
+  postUrl: {
+    type: String,
+    required: false,
+    description: 'URL of the LinkedIn post'
+  },
   content: {
     type: String,
     required: true,

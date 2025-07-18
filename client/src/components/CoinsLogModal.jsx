@@ -155,10 +155,12 @@ const CoinsLogModal = ({ isOpen, onClose }) => {
                 <div className="text-xs text-blue-800">
                   <p className="font-medium mb-1">About Coins:</p>
                   <ul className="space-y-0.5 list-disc list-inside text-xs">
-                    <li><strong>Resume Upload:</strong> -3 coins</li>
-                    <li><strong>AI Email:</strong> -2 coins</li>
-                    <li><strong>AI Resume:</strong> -5 coins</li>
-                    <li><strong>Weekly bonus:</strong> +20 coins</li>
+                    <li><strong>AI Resume Transformation:</strong> -10 coins</li>
+                    <li><strong>Adding Resume to Collection:</strong> -3 coins</li>
+                    <li><strong>Post Scraping</strong> -3 coins</li>
+                    <li><strong>ResumeTex AI Email:</strong> -2 coins</li>
+                    <li><strong>Gemini Email:</strong> -7 coins</li>
+                    <li><strong>Request Bonus:</strong> +20 coins</li>
                   </ul>
                 </div>
               </div>

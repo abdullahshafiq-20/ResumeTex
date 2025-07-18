@@ -83,6 +83,20 @@ export const ResumeProvider = ({ children }) => {
       console.error("Error updating preferences:", error);
       throw error;
     }
+  
+
+
+    
+  }, [apiUrl]);
+
+  const addLinks = useCallback(async (links) => {
+    try {
+      const response = await api.post(`${apiUrl}/add-links`, { links });
+      return response.data;
+    } catch (error) {
+      console.error("Error adding links:", error);
+      throw error;
+    }
   }, [apiUrl]);
 
   // Socket event handlers - fix to prevent recreation
@@ -149,8 +163,9 @@ export const ResumeProvider = ({ children }) => {
     deleteResume,
     fetchResumes,
     isSocketConnected: isConnected,
-    updatePreferences
-  }), [resumes, loading, createResume, updateResume, deleteResume, fetchResumes, isConnected, updatePreferences]);
+    updatePreferences,
+    addLinks
+  }), [resumes, loading, createResume, updateResume, deleteResume, fetchResumes, isConnected, updatePreferences, addLinks]);
 
   return (
     <ResumeContext.Provider value={value}>

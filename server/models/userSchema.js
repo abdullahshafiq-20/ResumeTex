@@ -60,7 +60,22 @@ const userPrefrencesSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
-    preferences: {
+    links: {
+        type: [{
+            platform: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            url: {
+                type: String,
+                required: true,
+                trim: true
+            }
+        }],
+        default: []
+    },
+    preferences: {  
         type: Object,
         required: true
     },

@@ -40,3 +40,30 @@ export const updateUserPreferences = async (req, res) => {
         });
     }
 };
+
+export const addLinks = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { links } = req.body;
+        console.log(links);
+        const userPreferences = await UserPreferences.findOneAndUpdate(
+            { userId },
+            { $push: { links } },
+            { new: true }
+        );
+        res.status(200).json({
+            success: true,
+            message: 'Links added successfully',
+            data: userPreferences
+        });
+        emitPreferencesDashboard(userId, userPreferences);
+        triggerStatsUpdate(userId);
+    } catch (error) {
+        console.error('Error adding links:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add links',
+            error: error.message
+        });
+    }
+}
