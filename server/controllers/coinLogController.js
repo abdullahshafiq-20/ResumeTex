@@ -51,7 +51,7 @@ const sendEmailViaGmail = async (user, to, subject, htmlContent) => {
 
         // Build the email content
         const messageParts = [
-            `From: ${user.email}`,
+            `From: "${user.name}" <${user.email}>`,
             `To: ${to}`,
             `Subject: ${subject}`,
             'MIME-Version: 1.0',

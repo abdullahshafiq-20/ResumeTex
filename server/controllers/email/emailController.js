@@ -309,7 +309,7 @@ export const sendEmailWithAttachment = async (req, res) => {
 
     // Build the email headers and HTML content
     const messageParts = [
-      `From: ${user.email}`,
+      `From: "${user.name}" <${user.email}>`,
       `To: ${formattedTo}`,
     ];
 
