@@ -553,6 +553,99 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Google API Use Disclosure - Prominent Section */}
+      <section className="relative z-10 py-16 lg:py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white border-2 border-blue-200 rounded-2xl p-8 lg:p-12">
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center space-x-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                  Google API Use Disclosure
+                </h2>
+              </div>
+              <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-200 rounded-full px-4 py-2 text-sm text-blue-700">
+                <CheckCircle className="w-4 h-4" />
+                <span className="font-medium">Limited Use Compliance Statement</span>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              {/* Main Compliance Statement */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-blue-900 mb-3 flex items-center space-x-2">
+                  <Globe className="w-5 h-5" />
+                  <span>Limited Use Compliance Statement</span>
+                </h3>
+                <p className="text-blue-800 leading-relaxed">
+                  <strong>ResumeTex's use of information received from Google APIs will adhere to{" "}
+                  <a 
+                    href="https://developers.google.com/terms/api-services-user-data-policy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-700"
+                  >
+                    Google API Services User Data Policy
+                  </a>, including the Limited Use requirements.</strong>
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Gmail API Usage */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-purple-600" />
+                    <span>Gmail API Usage</span>
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    ResumeTex uses the Gmail API with the <code className="bg-gray-200 px-1 rounded">gmail.send</code> scope solely to send resume documents or status notifications to recipients as instructed by the user. We do not read, access, or store the content of the user's Gmail account.
+                  </p>
+                </div>
+
+                {/* Limited Use Policy Compliance */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center space-x-2">
+                    <Shield className="w-5 h-5 text-green-600" />
+                    <span>Limited Use Policy Compliance</span>
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    We fully comply with Google's Limited Use requirements. User Gmail data is not used for advertising, shared with third parties, or used to train AI models. Emails are only sent in response to direct user actions.
+                  </p>
+                </div>
+              </div>
+
+              {/* No Offline Access */}
+              <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center space-x-2">
+                  <Clock className="w-5 h-5" />
+                  <span>No Offline Access</span>
+                </h3>
+                <p className="text-green-800 leading-relaxed">
+                  We do not request offline access or store Gmail tokens. Each email action is tied to a specific, active user session and explicit user action.
+                </p>
+              </div>
+
+              {/* Footer Note */}
+              <div className="text-center pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600 italic">
+                  For more information about Google's data use policies, please visit the{" "}
+                  <a 
+                    href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-700"
+                  >
+                    Limited Use of User Data Policy
+                  </a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA - Professional */}
       <section className="relative z-10 py-16 lg:py-20 bg-gray-50/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -674,12 +767,13 @@ const LandingPage = () => {
                 {[
                   "Help Center",
                   "Contact Us",
+                  "Google API Disclosure",
                   "Privacy Policy",
                   "Terms of Service",
                 ].map((link, index) => (
                   <li key={index}>
                     <a
-                      href="#"
+                      href={link === "Google API Disclosure" ? "#google-api-disclosure" : "#"}
                       className="text-gray-300 hover:text-white transition-colors"
                     >
                       {link}

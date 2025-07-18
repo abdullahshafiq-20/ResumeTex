@@ -45,6 +45,38 @@ const TermsOfServicePage = () => {
 
   const termsSection = [
     {
+      icon: Mail,
+      title: "Google API Use Disclosure",
+      gradient: "from-indigo-500 to-blue-500",
+      stats: "Limited Use",
+      content: [
+        {
+          subtitle: "Limited Use Compliance Statement",
+          details: "ResumeTex's use of information received from Google APIs will adhere to Google API Services User Data Policy (https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements. This compliance statement ensures your data protection and privacy when using our email features."
+        },
+        {
+          subtitle: "Gmail API Usage",
+          details: "ResumeTex uses the Gmail API with the gmail.send scope solely to send resume documents or status notifications to recipients as instructed by the user. We do not read, access, or store the content of the user's Gmail account. All email actions are initiated by explicit user requests and are limited to document delivery functions only."
+        },
+        {
+          subtitle: "Limited Use Policy Compliance",
+          details: "We fully comply with Google's Limited Use requirements. User Gmail data is not used for advertising purposes, shared with third parties, or used to train AI models. All Gmail interactions are restricted to the specific function of sending resume documents and notifications. No Gmail data is stored, analyzed, or used for any purpose beyond the immediate email sending action."
+        },
+        {
+          subtitle: "No Offline Access",
+          details: "We do not request offline access or store Gmail tokens. Each email action is tied to a specific, active user session and explicit user action. When you close your session, all Gmail access tokens are immediately invalidated. This ensures that your Gmail access cannot be used without your direct, real-time authorization."
+        },
+        {
+          subtitle: "Data Privacy and Security",
+          details: "No Gmail content, contacts, or metadata is accessed, stored, or processed by our systems. The Gmail API integration is used exclusively as a delivery mechanism for your resume documents. We maintain strict data isolation between your Gmail account and our resume processing systems to ensure complete privacy protection."
+        },
+        {
+          subtitle: "User Control and Transparency",
+          details: "All Gmail-related actions require explicit user consent and are performed only when you actively choose to send a document via email. You have complete control over when and how the Gmail API is used. For more information about Google's data use policies, please visit the Limited Use of User Data Policy (https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes)."
+        }
+      ]
+    },
+    {
       icon: FileText,
       title: "Service Description",
       gradient: "from-purple-500 to-pink-500",
@@ -211,27 +243,8 @@ const TermsOfServicePage = () => {
           details: "We integrate with third-party services (payment processors, authentication providers) and are not responsible for their performance or security."
         }
       ]
-    },
-    {
-      icon: Mail,
-      title: "Google API Use Disclosure",
-      gradient: "from-indigo-500 to-blue-500",
-      stats: "Limited Use",
-      content: [
-        {
-          subtitle: "Gmail API Usage",
-          details: "ResumeTex uses the Gmail API with the `gmail.send` scope solely to send resume documents or status notifications to recipients as instructed by the user. We do not read, access, or store the content of the user's Gmail account."
-        },
-        {
-          subtitle: "Limited Use Policy Compliance",
-          details: "We fully comply with Google’s Limited Use requirements. User Gmail data is not used for advertising, shared with third parties, or used to train AI models. Emails are only sent in response to direct user actions."
-        },
-        {
-          subtitle: "No Offline Access",
-          details: "We do not request offline access or store Gmail tokens. Each email action is tied to a specific, active user session and explicit user action."
-        }
-      ]
     }
+    
     
   ];
 
