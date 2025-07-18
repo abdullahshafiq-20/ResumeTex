@@ -1,12 +1,13 @@
 import { User, UserPreferences } from "../../models/userSchema.js";
 import { extensionSchema } from "../../models/extensionSchema.js";
-import { emitPostCreated, emitPostDeleted } from "../../config/socketConfig.js";
+import { emitPostCreated, emitPostDeleted, emitMatchFound  } from "../../config/socketConfig.js";
 import { triggerStatsUpdate } from "../../utils/trigger.js";
 import bcrypt from "bcrypt";
 import axios from "axios";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from "dotenv";
 import { getLinkedInPost } from "./postController.js";
+import { coinGateAsync } from "../../middleware/coinMiddleware.js";
 dotenv.config();
 
 
@@ -50,7 +51,7 @@ function extractContentInfo(content) {
     };
 }
 
-const getJobTitle = async (content, userSkills) => {
+const getJobTitle = async (content, userSkills, restrict=true) => {
     //create gemini client
     const apiKey = process.env.GEMINI_API_KEY_4;
     //console.log(apiKey);
@@ -58,7 +59,7 @@ const getJobTitle = async (content, userSkills) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     //create gemini prompt
-    const prompt = `You are a job matching specialist. Your task is to analyze job listings and match them with user skills.
+    const Restrictprompt = `You are a job matching specialist. Your task is to analyze job listings and match them with user skills.
 
     USER SKILLS: ${userSkills}
     
@@ -79,6 +80,27 @@ const getJobTitle = async (content, userSkills) => {
     
     Example output: "Senior Software Engineer" or "Marketing Manager" or "no match found"`;
 
+    const UnRestrictprompt = `You are a job matching specialist. Your task is to analyze job listings and match them with user skills.
+    
+    USER SKILLS: ${userSkills}
+    
+    JOB LISTINGS TEXT: ${content}
+    
+    INSTRUCTIONS:
+    1. Analyze all job titles in the provided text
+    2. Compare each job title against the user's stated skills
+    3. Select the ONE job title that best aligns with the user's skills
+    4. Consider factors like: skills, experience level, industry, role type, and career goals
+    
+    RESPONSE FORMAT:
+    - Return ONLY the job title
+    - No explanations, descriptions, or additional text
+    - Return the job title if at least one skill matches
+    
+    Example output: "Senior Software Engineer" or "Marketing Manager"`;
+
+    const prompt = restrict ? Restrictprompt : UnRestrictprompt;
+
     //create gemini response
     //console.log("prompt", prompt)
     const result = await model.generateContent(prompt);
@@ -88,11 +110,23 @@ const getJobTitle = async (content, userSkills) => {
 
 }
 
+const checkPostExists = async (content, userId) => {
+    const post = await extensionSchema.findOne({ content: content, userId: userId });
+    if (post) {
+        return post;
+    }
+    return null;
+}
+
 export const savePostFromLink = async (req, res) => {
     try {
         const { url } = req.body;
         const post = await getLinkedInPost(url);
         const content = post.content.commentary;
+        const postExists = await checkPostExists(content, req.user.id);
+        if (postExists) {
+            return res.status(400).json({ message: "Post already exists" });
+        }
         return post;
     } catch (error) {
         console.error("Error saving post from link:", error);
@@ -142,6 +176,14 @@ export const savePost = async (req, res) => {
                 }
             });
 
+            const postExists = await checkPostExists(cleanedContent, userid);
+            if (postExists) {
+                console.log("Post already exists");
+                return res.status(400).json({ message: "Post already exists" });
+            }
+
+
+
 
 
             if (response.status === 200) {
@@ -177,7 +219,6 @@ export const savePost = async (req, res) => {
                 timestamp: timestamp
             });
         }
-
         emitPostCreated(userid, data);
         triggerStatsUpdate(userid);
 
@@ -329,3 +370,28 @@ export const updatePostStatus = async (req, res) => {
         });
     }
 };
+
+export const makeMatchFound = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const post = await extensionSchema.findById(postId);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+        const userSkills = await UserPreferences.find({ userId: post.userId });
+        const skills = userSkills.map(skill => skill.skills);
+        const jobTitle = await getJobTitle(post.content, skills, false);
+
+        const updateTitle = await extensionSchema.findByIdAndUpdate(postId, { jobTitle: jobTitle }, { new: true });
+
+        emitMatchFound(post.userId, jobTitle);
+        return res.status(200).json({ message: "Match found", jobTitle: jobTitle });
+    } catch (error) {
+        console.error("Error making match found:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to make match found",
+            error: error.message
+        });
+    }
+}

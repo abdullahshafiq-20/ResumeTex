@@ -34,14 +34,14 @@ export const SocketProvider = ({ children }) => {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    
+
     setSocket(prevSocket => {
       if (prevSocket) {
         prevSocket.disconnect();
       }
       return null;
     });
-    
+
     setIsConnected(false);
     setConnectionError(null);
     reconnectAttemptsRef.current = 0;
@@ -50,7 +50,7 @@ export const SocketProvider = ({ children }) => {
   // Initialize socket connection with retry logic
   const connectSocket = useCallback(() => {
     const token = getAuthToken();
-    
+
     if (!token) {
       console.error('No authentication token found');
       setConnectionError('Authentication required');
@@ -92,7 +92,7 @@ export const SocketProvider = ({ children }) => {
       newSocket.on('disconnect', (reason) => {
         //console.log('Socket disconnected:', reason);
         setIsConnected(false);
-        
+
         // Only attempt reconnection for certain disconnect reasons
         if (reason === 'io server disconnect') {
           return;
@@ -103,12 +103,12 @@ export const SocketProvider = ({ children }) => {
         console.error('Socket connection error:', error.message);
         setConnectionError(error.message);
         setIsConnected(false);
-        
+
         // Implement exponential backoff for reconnection
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
           //console.log(`Retrying connection in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
-          
+
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectAttemptsRef.current++;
             connectSocket();
@@ -120,7 +120,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       setSocket(newSocket);
-      
+
     } catch (error) {
       console.error('Error creating socket:', error);
       setConnectionError(error.message);
@@ -131,7 +131,7 @@ export const SocketProvider = ({ children }) => {
   const emitEvent = useCallback((event, data) => {
     if (socket && isConnected) {
       socket.emit(event, data);
-      //console.log(`Emitted ${event}:`, data);
+      console.log(`Emitted ${event}:`, data);
     } else {
       console.warn('Socket not connected, cannot emit event:', event);
     }
@@ -141,8 +141,8 @@ export const SocketProvider = ({ children }) => {
   const onEvent = useCallback((event, callback) => {
     if (socket) {
       socket.on(event, callback);
-      //console.log(`Listening for ${event} events`);
-      
+      console.log(`Listening for ${event} events`);
+
       // Return cleanup function
       return () => {
         socket.off(event, callback);
@@ -183,7 +183,7 @@ export const SocketProvider = ({ children }) => {
   // Monitor token changes - simplified to avoid loops
   useEffect(() => {
     const token = getAuthToken();
-    
+
     if (!token && socket) {
       // User logged out, disconnect
       disconnectSocket();
@@ -203,7 +203,7 @@ export const SocketProvider = ({ children }) => {
     const handleNotification = (data) => {
       //console.log('Received notification:', data);
       setNotifications(prev => [data, ...prev.slice(0, 9)]); // Keep last 10 notifications
-      
+
       // You can add toast notification here
       // toast.success(data.data.message || 'Notification received');
     };

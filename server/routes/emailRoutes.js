@@ -1,6 +1,7 @@
 import express from "express";
 import { sendEmail, sendEmailWithAttachment, createEmail, saveEmail, updateEmail, getEmails } from "../controllers/email/emailController.js";
 import { verifyToken } from "../middleware/auth.js";
+import { coinGate } from "../middleware/coinMiddleware.js";
 
 const emailRoutes = express.Router();
 

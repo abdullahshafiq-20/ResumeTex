@@ -1,4 +1,4 @@
-import { User, UserPreferences, Email, UserResume } from '../models/userSchema.js';
+import { User, UserPreferences, Email, UserResume, CoinLog } from '../models/userSchema.js';
 import { extensionSchema } from '../models/extensionSchema.js';
 import { Count } from '../models/countSchema.js';
 import mongoose from 'mongoose';
@@ -6,6 +6,11 @@ import { emitStatsDashboard } from '../config/socketConfig.js';
 /**
  * Helper function to fetch user preferences data
  */
+
+const fetchCoinsLog = async (userId) => {
+    const coinsLog = await CoinLog.find({ userId }).sort({ createdAt: -1 });
+    return coinsLog;
+};
 const fetchUserPreferences = async (userId) => {
     const userPreferences = await UserPreferences.find({ userId }).sort({ createdAt: -1 });
 
@@ -193,9 +198,10 @@ export const getAllUserStats = async (req, res) => {
             resumeStats,
             emailStats,
             linkedInStats,
-            globalCount
+            globalCount,
+            coinLog
         ] = await Promise.all([
-            User.findById(userId).select('name email subscribed isExtensionConnected onboarded createdAt'),
+            User.findById(userId).select('name coins email subscribed isExtensionConnected onboarded createdAt'),
             UserPreferences.findOne({ userId }),
             UserResume.aggregate([
                 { $match: { userId: new mongoose.Types.ObjectId(userId) } },
@@ -238,7 +244,8 @@ export const getAllUserStats = async (req, res) => {
                     }
                 }
             ]),
-            Count.findOne()
+            Count.findOne(),
+            fetchCoinsLog(userId)
         ]);
 
         // Get additional data using helper functions
@@ -277,6 +284,7 @@ export const getAllUserStats = async (req, res) => {
             user: {
                 name: userInfo?.name || '',
                 email: userInfo?.email || '',
+                coins: userInfo?.coins || 0,    
                 subscribed: userInfo?.subscribed || false,
                 extensionConnected: userInfo?.isExtensionConnected || false,
                 onboarded: userInfo?.onboarded || false,
@@ -316,6 +324,7 @@ export const getAllUserStats = async (req, res) => {
             global: {
                 totalUsers: globalCount?.count || 0
             },
+            coinLog,
             activityTimeline,
             comparison: comparisonStats
         };

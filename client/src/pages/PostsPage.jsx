@@ -34,6 +34,7 @@ const PostsPage = () => {
     savePost,
     updatePostStatus,
     isSocketConnected,
+    makeMatchFound
   } = usePosts();
   const { socket } = useSocket();
   const [selectedPost, setSelectedPost] = useState(null);
@@ -43,6 +44,9 @@ const PostsPage = () => {
   const [updatingPostId, setUpdatingPostId] = useState(null);
   const [activeTab, setActiveTab] = useState("not-sent");
   const [deleteConfirmPost, setDeleteConfirmPost] = useState(null);
+  // Add new state for the relevance modal
+  const [irrelevantPost, setIrrelevantPost] = useState(null);
+  const [markingAsRelevant, setMarkingAsRelevant] = useState(false);
   const { lastUpdated, isLive } = useDashboard();
 
   // Function to emit notification
@@ -142,6 +146,34 @@ const PostsPage = () => {
     document.body.style.overflow = "auto";
   };
 
+  // Add new function to handle marking as relevant
+  const handleMarkAsRelevant = async (postId) => {
+    setMarkingAsRelevant(true);
+    try {
+      await makeMatchFound(postId);
+      showNotification("Post marked as relevant successfully!", "success");
+      toast.success("Post marked as relevant!");
+      setIrrelevantPost(null);
+      document.body.style.overflow = "auto";
+    } catch (error) {
+      console.error("Error marking post as relevant:", error);
+      showNotification("Failed to mark post as relevant. Please try again.", "error");
+    } finally {
+      setMarkingAsRelevant(false);
+    }
+  };
+
+  // Add functions to handle the irrelevant post modal
+  const openIrrelevantModal = (post) => {
+    setIrrelevantPost(post);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeIrrelevantModal = () => {
+    setIrrelevantPost(null);
+    document.body.style.overflow = "auto";
+  };
+
   // Only show page loading on initial load when not saving
   if (
     initialLoading &&
@@ -208,6 +240,19 @@ const PostsPage = () => {
         }`}
         variants={itemVariants}
       >
+        {/* Add button for "no match found" posts at the top */}
+        {isNoMatchFound && (
+          <div className="p-2 sm:p-3 bg-red-100 border-b border-red-200">
+            <button
+              onClick={() => openIrrelevantModal(post)}
+              className="w-full flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm text-red-700 py-1.5 sm:py-2 border border-red-300 rounded-lg hover:bg-red-200 hover:border-red-400 transition-all duration-200 font-medium"
+            >
+              <AlertTriangle size={12} />
+              Why is this marked as irrelevant?
+            </button>
+          </div>
+        )}
+
         {/* Smaller background blob for mobile */}
         <div className={`absolute top-1 right-1 w-2 h-2 sm:w-4 sm:h-4 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
           isNoMatchFound 
@@ -649,7 +694,7 @@ const PostsPage = () => {
                     ) : (
                       <>
                         <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:rotate-12" />
-                        <span className="font-medium">Save Post</span>
+                        <span className="font-medium">Save Post - 3🪙</span>
                         <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                       </>
                     )}
@@ -990,6 +1035,115 @@ const PostsPage = () => {
                         <>
                           <Trash2 size={12} />
                           Delete Post
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Irrelevant Post Modal - Mobile optimized */}
+        <AnimatePresence>
+          {irrelevantPost && (
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeIrrelevantModal}
+            >
+              <motion.div
+                className="bg-white border border-gray-200 rounded-lg w-full max-w-md relative overflow-hidden"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.15 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal gradient blobs */}
+                <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-8 h-8 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-orange-200/30 to-red-200/20 blur-2xl"></div>
+                <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-200/20 to-orange-200/15 blur-xl"></div>
+
+                <div className="relative p-3 sm:p-6">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm sm:text-lg font-semibold text-gray-800">
+                          Post Marked as Irrelevant
+                        </h2>
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          Why you can't create an email for this post
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={closeIrrelevantModal}
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                      aria-label="Close dialog"
+                    >
+                      <X size={14} className="text-gray-500" />
+                    </button>
+                  </div>
+
+                  {/* Explanation */}
+                  <div className="bg-orange-50 border border-orange-200 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h3 className="text-xs sm:text-sm font-semibold text-orange-800 mb-1 sm:mb-2">
+                          AI Analysis Result
+                        </h3>
+                        <p className="text-xs sm:text-sm text-orange-700 leading-relaxed">
+                          We found this post irrelevant to your profile as we marked it as "no match found". 
+                          This means our AI couldn't identify suitable job opportunities or relevant content that matches your background and preferences.
+                        </p>
+                        <p className="text-xs sm:text-sm text-orange-700 leading-relaxed mt-2">
+                          You cannot create an email for this post because it doesn't contain relevant job information for your profile.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Post preview */}
+                  <div className="bg-gray-50 border border-gray-200 p-2 sm:p-3 rounded-lg mb-4 sm:mb-6">
+                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 mb-1 sm:mb-2 flex items-center">
+                      <MessageSquare className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1.5 text-gray-600" />
+                      Post Content Preview
+                    </h3>
+                    <p className="text-gray-600 text-[10px] sm:text-xs line-clamp-3 leading-relaxed">
+                      {irrelevantPost.content}
+                    </p>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                    <button
+                      onClick={closeIrrelevantModal}
+                      disabled={markingAsRelevant}
+                      className="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Okay, I understand
+                    </button>
+                    <button
+                      onClick={() => handleMarkAsRelevant(irrelevantPost._id)}
+                      disabled={markingAsRelevant}
+                      className="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 hover:border-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2"
+                    >
+                      {markingAsRelevant ? (
+                        <>
+                          <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 border border-white border-t-transparent"></div>
+                          Marking as relevant...
+                        </>
+                      ) : (
+                        <>
+                          <Target size={12} />
+                          Mark as relevant
                         </>
                       )}
                     </button>

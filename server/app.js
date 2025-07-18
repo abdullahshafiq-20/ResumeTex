@@ -13,6 +13,7 @@ import resumeRoutes from "./routes/resumeRoutes.js";
 import extensionRoutes from "./routes/extensionRoutes.js";
 import statsRouter from "./routes/statsRoutes.js";
 import prefRoutes from "./routes/prefRoutes.js";
+import { coinLogRouter } from "./routes/coinRoutes.js";
 import { initSocket } from './config/socketConfig.js';
 import cronJob from "./services/cronJob.js";
 app.use(express.json());
@@ -40,7 +41,7 @@ mongoose.connect(process.env.URI).then(() => {
   console.log("Connected to MongoDB");
 }
 );
- 
+
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
@@ -58,6 +59,7 @@ app.use("/api", resumeRoutes);
 app.use("/api", extensionRoutes);
 app.use("/api", statsRouter);
 app.use("/api", prefRoutes);
+app.use("/api/coin", coinLogRouter);
 app.get("/", (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
@@ -65,9 +67,9 @@ app.get("/", (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Something went wrong!',
-    message: err.message 
+    message: err.message
   });
 });
 

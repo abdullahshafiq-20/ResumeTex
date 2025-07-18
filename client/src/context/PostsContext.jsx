@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import api from "../utils/api";
 import { useSocket } from "./SocketContext";
+import { toast } from "react-hot-toast";
 
 const PostsContext = createContext();
 
@@ -21,27 +22,27 @@ export const PostsProvider = ({ children }) => {
       try {
         const userId = getUserId();
         //console.log("Fetching posts for user ID:", userId);
-        
+
         // Get posts and emails
         const postsResponse = await api.get(`${apiUrl}/getPosts/?userId=${userId}`);
         const emailsResponse = await api.get(`${apiUrl}/get-emails`);
-        
+
         //console.log("Posts response:", postsResponse.data);
         //console.log("Emails response:", emailsResponse.data);
-        
+
         // Extract the actual posts array from the response
         // The API returns { success: true, message: "...", data: [...] }
         const postsData = postsResponse.data?.data || [];
         const emailsData = Array.isArray(emailsResponse.data) ? emailsResponse.data : [];
-        
+
         //console.log("Posts data array:", postsData);
         //console.log("Emails data array:", emailsData);
-        
+
         // Map emails to posts using linkedInId which corresponds to post._id
         const postsWithEmailStatus = postsData.map(post => {
           // Find corresponding email for this post
           const email = emailsData.find(email => email.linkedInId === post._id);
-          
+
           // Return post with added email status properties
           return {
             ...post,
@@ -50,23 +51,23 @@ export const PostsProvider = ({ children }) => {
             emailDetails: email || null // Store the full email details if needed
           };
         });
-        
+
         //console.log("Posts with email status:", postsWithEmailStatus);
-        
+
         // Update main posts state
         setPosts(postsWithEmailStatus);
-        
+
         // Filter posts based on email status
         const generated = postsWithEmailStatus.filter(post => post.isEmailGenerated === true);
         const sent = postsWithEmailStatus.filter(post => post.isEmailSent === true);
-        
+
         //console.log("Generated email posts:", generated);
         //console.log("Sent email posts:", sent);
-        
+
         // Update filtered states
         setEmailsGenerated(generated);
         setEmailsSent(sent);
-        
+
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
@@ -115,7 +116,7 @@ export const PostsProvider = ({ children }) => {
           }
           return post;
         }));
-        
+
         // Also refresh to get latest data
         refreshPosts();
       }
@@ -139,18 +140,18 @@ export const PostsProvider = ({ children }) => {
   const refreshPosts = async () => {
     if (!getUserId()) return;
     setLoading(true);
-    
+
     try {
       const userId = getUserId();
-      
+
       // Get posts and emails
       const postsResponse = await api.get(`${apiUrl}/getPosts/?userId=${userId}`);
       const emailsResponse = await api.get(`${apiUrl}/get-emails`);
-      
+
       // Extract the actual posts array from the response
       const postsData = postsResponse.data?.data || [];
       const emailsData = Array.isArray(emailsResponse.data) ? emailsResponse.data : [];
-      
+
       // Map emails to posts
       const postsWithEmailStatus = postsData.map(post => {
         const email = emailsData.find(email => email.linkedInId === post._id);
@@ -161,12 +162,12 @@ export const PostsProvider = ({ children }) => {
           emailDetails: email || null
         };
       });
-      
+
       // Update states
       setPosts(postsWithEmailStatus);
       setEmailsGenerated(postsWithEmailStatus.filter(post => post.isEmailGenerated === true));
       setEmailsSent(postsWithEmailStatus.filter(post => post.isEmailSent === true));
-      
+
     } catch (error) {
       console.error("Error refreshing posts:", error);
     } finally {
@@ -179,9 +180,9 @@ export const PostsProvider = ({ children }) => {
       console.error("Email ID is required");
       return null;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const response = await api.get(`${apiUrl}/get-emails?postId=${postId}`);
       //console.log("Fetched email:", response.data);
@@ -204,13 +205,35 @@ export const PostsProvider = ({ children }) => {
       const response = await api.post(`${apiUrl}/extension/savePost`, {
         text: postData
       });
-      //console.log("Save response:", response.data);
-      
+      console.log("Save response:", response.data);
       // Refresh posts after saving
       await refreshPosts();
-      
+
     } catch (error) {
       console.error("Error saving post:", error);
+      // Extract the server error message
+      const errorMessage = error.response?.data?.message || error.message || "Unknown error occurred";
+      console.log("Server error message:", errorMessage);
+      toast.error(errorMessage);
+      // Re-throw with the extracted message so the UI can handle it
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const makeMatchFound = async (postId) => {
+    if (!postId) {
+      console.error("Post ID is required");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await api.post(`${apiUrl}/makeMatchFound/${postId}`);
+      //console.log("Make match found response:", response.data);
+      await refreshPosts();
+    } catch (error) {
+      console.error("Error making match found:", error);
     } finally {
       setLoading(false);
     }
@@ -221,16 +244,16 @@ export const PostsProvider = ({ children }) => {
       console.error("Post ID is required");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const response = await api.delete(`${apiUrl}/deletePost/${postId}`);
       //console.log("Delete response:", response.data);
-      
+
       // Refresh posts after deletion
       await refreshPosts();
-      
+
     } catch (error) {
       console.error("Error deleting post:", error);
     } finally {
@@ -243,15 +266,15 @@ export const PostsProvider = ({ children }) => {
       console.error("Post ID is required");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const response = await api.patch(`${apiUrl}/updatePostStatus/${postId}`, {
         isEmailSent: isEmailSent
       });
       //console.log("Update status response:", response.data);
-      
+
       // Update local state immediately for better UX
       setPosts(prev => prev.map(post => {
         if (post._id === postId) {
@@ -262,10 +285,10 @@ export const PostsProvider = ({ children }) => {
         }
         return post;
       }));
-      
+
       // Refresh posts to sync with server
       await refreshPosts();
-      
+
     } catch (error) {
       console.error("Error updating post status:", error);
       throw error; // Re-throw to handle in UI
@@ -275,16 +298,17 @@ export const PostsProvider = ({ children }) => {
   };
 
   return (
-    <PostsContext.Provider value={{ 
-      posts, 
-      emailsGenerated, 
+    <PostsContext.Provider value={{
+      posts,
+      emailsGenerated,
       emailsSent,
       loading,
       refreshPosts,
       fetchEmailbyId,
       deletePost,
       savePost,
-      updatePostStatus
+      updatePostStatus,
+      makeMatchFound
     }}>
       {children}
     </PostsContext.Provider>

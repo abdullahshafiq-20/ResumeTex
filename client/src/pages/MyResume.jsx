@@ -24,7 +24,7 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
   // Compact title suggestions for mobile
   const titleSuggestions = [
     "Full Stack Dev",
-    "Frontend Dev", 
+    "Frontend Dev",
     "Backend Dev",
     "AI Engineer",
     "Data Scientist",
@@ -35,8 +35,8 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
     // Validation: at least 3 characters, not just spaces, and contains letters
     const trimmed = titleInput.trim();
     setIsValid(
-      trimmed.length >= 3 && 
-      /[a-zA-Z]/.test(trimmed) && 
+      trimmed.length >= 3 &&
+      /[a-zA-Z]/.test(trimmed) &&
       trimmed.length <= 100
     );
   }, [titleInput]);
@@ -78,7 +78,7 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
       setIsUploading(false);
       setPdfUrl(response.data.data.url);
       toast.success("Resume uploaded successfully!");
-      
+
     } catch (error) {
       console.error("Upload failed:", error);
       setIsUploading(false);
@@ -177,9 +177,9 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
               Upload Resume (PDF)
             </label>
-            
+
             {!selectedFile ? (
-              <div 
+              <div
                 className="border-2 border-dashed border-blue-300 rounded-md sm:rounded-lg p-3 sm:p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
                 onClick={() => document.getElementById("simpleUploadFileInput").click()}
               >
@@ -216,7 +216,7 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
                     <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-blue-600 flex-shrink-0"></div>
                   )}
                 </div>
-                
+
                 {/* Upload Progress */}
                 {isUploading && (
                   <div className="mt-2 sm:mt-3">
@@ -251,7 +251,7 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
               }`}
               disabled={isAnalyzing}
             />
-            
+
             {/* Compact Validation feedback */}
             {titleInput && (
               <div className="mt-1 sm:mt-2 flex items-center space-x-1 sm:space-x-2">
@@ -268,7 +268,7 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
                 )}
               </div>
             )}
-            
+
             {/* Compact Title Suggestions */}
             <div className="mt-2 sm:mt-3">
               <p className="text-xs font-medium text-gray-600 mb-1 sm:mb-2">Quick suggestions:</p>
@@ -302,11 +302,11 @@ const SimpleResumeUploadModal = ({ isOpen, onClose, onUpload }) => {
               ) : (
                 <>
                   <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>Add to Collection</span>
+                  <span>Add to Collection - 3🪙</span>
                 </>
               )}
             </button>
-            
+
             {!isAnalyzing && (
               <button
                 onClick={handleClose}
@@ -335,7 +335,7 @@ const MyResume = () => {
   const handleFileUpload = async (data) => {
     setIsUploading(false);
     setUploadSuccess(true);
-    
+
     // Hide success message after 3 seconds
     setTimeout(() => {
       setUploadSuccess(false);
@@ -364,13 +364,13 @@ const MyResume = () => {
       });
 
       toast.success(`Resume "${title}" added to your collection!`);
-      
+
       // Trigger resume list refresh
       // The new resume should appear in the list automatically via socket events
-      
+
     } catch (error) {
       console.error('Simple upload failed:', error);
-      
+
       // More detailed error handling
       if (error.response?.data?.error) {
         toast.error(`Upload failed: ${error.response.data.error}`);
@@ -446,7 +446,7 @@ const itemVariants = {
               </span>
             )}
           </div>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="text-blue-600 hover:text-blue-800 text-[10px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded border border-blue-200 hover:border-blue-300 transition-colors"
           >
@@ -470,7 +470,7 @@ const itemVariants = {
 
       {/* Upload Options Section - Mobile Optimized */}
       <div className="mb-4 sm:mb-6 grid grid-cols-1 gap-3 sm:gap-6">
-        
+
         {/* AI Resume Transformation - Compact */}
         <motion.div
           className="relative overflow-hidden"
@@ -485,12 +485,12 @@ const itemVariants = {
               <div className="absolute bottom-1 right-1/3 w-1.5 h-1.5 sm:w-3 sm:h-3 bg-blue-200/30 rounded-full animate-pulse delay-700"></div>
               <div className="absolute top-1/2 right-3 w-1 h-1 sm:w-2 sm:h-2 bg-indigo-200/50 rounded-full animate-pulse delay-1000"></div>
             </div>
-            
+
             <div className="relative flex items-start space-x-2 sm:space-x-3">
               <div className="flex-shrink-0 mt-0.5">
                 <Wand2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 animate-pulse" />
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
                   <h3 className="text-xs sm:text-sm font-semibold text-gray-800">AI Resume Transformation</h3>
@@ -500,18 +500,18 @@ const itemVariants = {
                     <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-500 rounded-full animate-pulse delay-400"></div>
                   </div>
                 </div>
-                
+
                 <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed mb-2 sm:mb-3">
-                  <strong>Smart AI tweaking:</strong> Upload your resume and target job title. 
+                  <strong>Smart AI tweaking:</strong> Upload your resume and target job title.
                   AI will transform and optimize your entire resume content to match the position perfectly.
                 </p>
-                
+
                 <div className="flex items-center space-x-1.5 sm:space-x-2 text-[10px] sm:text-xs mb-2 sm:mb-3">
                   <Target className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-500" />
                   <span className="text-gray-500">Example: "AI Engineer" → Complete resume refactoring</span>
                 </div>
               </div>
-              
+
               <div className="flex-shrink-0">
                 <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 animate-pulse delay-500" />
               </div>
@@ -540,14 +540,14 @@ const itemVariants = {
           <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-2.5 sm:p-4 relative">
             {/* Smaller background decoration */}
             <div className="absolute top-1 right-1 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-200 to-green-200 opacity-20 blur-xl"></div>
-            
+
             <div className="relative flex items-start space-x-2 sm:space-x-4">
               <div className="flex-shrink-0">
                 <div className="w-6 h-6 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center">
                   <FileText className="h-3 w-3 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
               </div>
-              
+
               <div className="flex-1 min-w-0 flex flex-col">
                 <div className="flex-1">
                   <div className="flex items-center space-x-1.5 sm:space-x-2 mb-1.5 sm:mb-2">
@@ -559,18 +559,18 @@ const itemVariants = {
                       <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-green-500 rounded-full animate-pulse delay-200"></div>
                     </div>
                   </div>
-                  
+
                   <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed mb-2 sm:mb-3">
-                    <strong>No modifications:</strong> Upload your existing resume as-is to your collection. 
+                    <strong>No modifications:</strong> Upload your existing resume as-is to your collection.
                     Perfect for storing resumes without any AI tweaking or changes.
                   </p>
-                  
+
                   <div className="flex items-center space-x-1.5 sm:space-x-2 text-[10px] sm:text-xs mb-3 sm:mb-4">
                     <Info className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-500" />
                     <span className="text-gray-500">Basic analysis + secure storage</span>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={() => setShowSimpleUploadModal(true)}
                   disabled={isAnalyzing}
@@ -584,7 +584,7 @@ const itemVariants = {
                   ) : (
                     <>
                       <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span>Simple Upload</span>
+                      <span>Simple Upload - 3🪙</span>
                     </>
                   )}
                 </button>

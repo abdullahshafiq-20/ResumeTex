@@ -67,7 +67,7 @@ export const emailTemplate = (link) => {
                         <table width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e5e7eb; padding-top: 24px;">
                             <tr>
                                 <td style="text-align: center;">
-                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">&copy; 2024 ResumeTex. All rights reserved.</p>
+                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">&copy; 2025 ResumeTex. All rights reserved.</p>
                                 </td>
                             </tr>
                         </table>

@@ -452,7 +452,8 @@ const GmailPermissionModal = ({ isOpen, onClose, onLogout }) => {
                     Email Sending Permission Required
                   </p>
                   <p className="text-[10px] sm:text-xs text-yellow-700 leading-relaxed">
-                    To send emails directly to recruiters, you need to grant Gmail permission during signup.
+                    To send emails directly to recruiters, you need to grant
+                    Gmail permission during signup.
                   </p>
                 </div>
               </div>
@@ -463,32 +464,39 @@ const GmailPermissionModal = ({ isOpen, onClose, onLogout }) => {
               <h4 className="text-xs sm:text-sm font-semibold text-gray-900">
                 How to enable email sending:
               </h4>
-              
+
               <div className="space-y-2">
                 <div className="flex items-start space-x-2">
                   <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[10px] font-medium text-blue-600">1</span>
+                    <span className="text-[10px] font-medium text-blue-600">
+                      1
+                    </span>
                   </div>
                   <p className="text-[10px] sm:text-xs text-gray-700">
                     Log out from your current session using the button below
                   </p>
                 </div>
-                
+
                 <div className="flex items-start space-x-2">
                   <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[10px] font-medium text-blue-600">2</span>
+                    <span className="text-[10px] font-medium text-blue-600">
+                      2
+                    </span>
                   </div>
                   <p className="text-[10px] sm:text-xs text-gray-700">
                     Sign in again with your Google account
                   </p>
                 </div>
-                
+
                 <div className="flex items-start space-x-2">
                   <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[10px] font-medium text-blue-600">3</span>
+                    <span className="text-[10px] font-medium text-blue-600">
+                      3
+                    </span>
                   </div>
                   <p className="text-[10px] sm:text-xs text-gray-700">
-                    <strong>Grant Gmail permission</strong> when prompted during login
+                    <strong>Grant Gmail permission</strong> when prompted during
+                    login
                   </p>
                 </div>
               </div>
@@ -503,7 +511,8 @@ const GmailPermissionModal = ({ isOpen, onClose, onLogout }) => {
                     Alternative: Copy Email Content
                   </p>
                   <p className="text-[9px] sm:text-[10px] text-gray-600">
-                    You can copy the generated email and send it manually through your email client.
+                    You can copy the generated email and send it manually
+                    through your email client.
                   </p>
                 </div>
               </div>
@@ -518,7 +527,7 @@ const GmailPermissionModal = ({ isOpen, onClose, onLogout }) => {
                 <LogOut className="h-3 w-3" />
                 <span>Logout & Re-authenticate</span>
               </button>
-              
+
               <button
                 onClick={onClose}
                 className="w-full px-3 py-1.5 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-xs font-medium"
@@ -534,7 +543,8 @@ const GmailPermissionModal = ({ isOpen, onClose, onLogout }) => {
 };
 
 const EmailPage = () => {
-  const { getUserId, getUserProfile, getGmailPermission, logoutUser } = useAuth();
+  const { getUserId, getUserProfile, getGmailPermission, logoutUser } =
+    useAuth();
   const { posts, emailsGenerated, emailsSent, refreshPosts, fetchEmailbyId } =
     usePosts();
   const { resumes } = useResumes();
@@ -558,7 +568,8 @@ const EmailPage = () => {
   const [isAddingRecipients, setIsAddingRecipients] = useState(false);
 
   // Add state for Gmail permission modal
-  const [showGmailPermissionModal, setShowGmailPermissionModal] = useState(false);
+  const [showGmailPermissionModal, setShowGmailPermissionModal] =
+    useState(false);
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -697,7 +708,7 @@ const EmailPage = () => {
     }
   };
 
-  const generateEmail = async (post = selectedPost) => {
+  const generateEmail = async (post = selectedPost, useGemini = false) => {
     if (!post || !selectedResumeId) return;
 
     try {
@@ -706,17 +717,24 @@ const EmailPage = () => {
       setError(null);
 
       const emailData = {
-        email: post.extractedEmails[0], // Using the first email
+        email: post.extractedEmails[0],
         jobTitle: post.jobTitle || "Job Position",
         jobDescription: post.content || "",
         companyName: "",
         resume_id: selectedResumeId,
         postId: post._id,
+        type: "descriptive",
       };
 
-      const response = await api.post(`${apiUrl}/create-email`, emailData);
+      // Add gemini parameter to the API call
+      const queryParams = useGemini ? "?gemini=true" : "";
+      console.log("queryParams", queryParams);
+      const response = await api.post(
+        `${apiUrl}/create-email${queryParams}`,
+        emailData
+      );
 
-      // Format the email data properly
+      // Rest of your code remains the same...
       const newEmail = {
         to: post.extractedEmails[0],
         subject: response.data.subject || response.data.data?.subject,
@@ -725,7 +743,6 @@ const EmailPage = () => {
         attachment: response.data.attachment || response.data.data?.attachment,
       };
 
-      // Only update the states after we have the new email and ensure it has content
       if (newEmail.subject && newEmail.body) {
         setGeneratedEmail(newEmail);
         setEmailDetails(null);
@@ -735,6 +752,12 @@ const EmailPage = () => {
       }
     } catch (err) {
       console.error("Error generating email:", err);
+      if (err.response.data.error === "Insufficient coins") {
+        toast.error(err.response.data.error);
+        setIsLoading(false);
+        setRegenerating(false);
+        return;
+      }
       setError("Failed to generate email. Please try again.");
     } finally {
       setIsLoading(false);
@@ -978,7 +1001,7 @@ const EmailPage = () => {
             {/* Action Buttons - Compact */}
             <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3 pt-3 sm:pt-4 border-t border-gray-200">
               <button
-                onClick={() => generateEmail(selectedPost)}
+                onClick={() => generateEmail(selectedPost, false)}
                 disabled={!selectedResumeId || isLoading}
                 className="flex-1 px-3 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium flex items-center justify-center space-x-1 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-base"
               >
@@ -1320,9 +1343,9 @@ const EmailPage = () => {
 
                 {/* AI-themed Generate Again Button - More compact */}
                 <button
-                  onClick={() => generateEmail()}
+                  onClick={() => generateEmail(selectedPost, false)}
                   disabled={regenerating}
-                  className={`group relative px-2 py-1.5 sm:px-4 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-[10px] sm:text-sm font-medium transition-all duration-300 overflow-hidden shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[100px] sm:min-w-[160px] ${
+                  className={`group relative px-2 py-1.5 sm:px-4 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-[10px] sm:text-[12px] font-medium transition-all duration-300 overflow-hidden shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[100px] sm:min-w-[160px] ${
                     regenerating
                       ? "opacity-75 cursor-not-allowed scale-100"
                       : "hover:from-purple-700 hover:to-blue-700"
@@ -1338,20 +1361,58 @@ const EmailPage = () => {
                     {regenerating ? (
                       <>
                         <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-4 sm:w-4 border-2 border-white border-t-transparent"></div>
-                        <span className="hidden sm:inline">
-                          AI Regenerating...
-                        </span>
-                        <span className="sm:hidden">Regenerating...</span>
                         <Sparkles className="h-2.5 w-2.5 sm:h-4 sm:w-4 animate-pulse" />
                       </>
                     ) : (
                       <>
-                        <Bot className="h-2.5 w-2.5 sm:h-4 sm:w-4 animate-pulse" />
+                        {/* <Bot className="h-2.5 w-2.5 sm:h-4 sm:w-4 animate-pulse" /> */}
                         <span className="hidden sm:inline">
-                          AI Generate Again
+                          AI Generate - 2🪙
                         </span>
                         <span className="sm:hidden">Generate Again</span>
-                        <Wand2 className="h-2.5 w-2.5 sm:h-4 sm:w-4 group-hover:rotate-12 transition-transform duration-200" />
+                        {/* <Wand2 className="h-2.5 w-2.5 sm:h-4 sm:w-4 group-hover:rotate-12 transition-transform duration-200" /> */}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Floating particles effect */}
+                  {!regenerating && (
+                    <>
+                      <div className="absolute top-0.5 left-1 sm:top-1 sm:left-2 w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white/40 rounded-full animate-ping delay-100"></div>
+                      <div className="absolute bottom-0.5 right-1.5 sm:bottom-1 sm:right-3 w-0.5 h-0.5 sm:w-1 sm:h-1 bg-white/40 rounded-full animate-ping delay-300"></div>
+                      <div className="absolute top-1 right-0.5 sm:top-2 sm:right-1 w-0.5 h-0.5 bg-white/60 rounded-full animate-ping delay-500"></div>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => generateEmail(selectedPost, true)}
+                  disabled={regenerating}
+                  className={`group relative px-2 py-1.5 sm:px-4 sm:py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg text-[10px] sm:text-[12px] font-medium transition-all duration-300 overflow-hidden shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[100px] sm:min-w-[160px] ${
+                    regenerating
+                      ? "opacity-75 cursor-not-allowed scale-100"
+                      : "hover:from-yellow-700 hover:to-yellow-600"
+                  }`}
+                >
+                  {/* Animated background gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-blue-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  {/* Subtle shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+
+                  <div className="relative flex items-center justify-center space-x-1 sm:space-x-2">
+                    {regenerating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-4 sm:w-4 border-2 border-white border-t-transparent"></div>
+                        <Sparkles className="h-2.5 w-2.5 sm:h-4 sm:w-4 animate-pulse" />
+                      </>
+                    ) : (
+                      <>
+                        {/* <Bot className="h-2.5 w-2.5 sm:h-4 sm:w-4 animate-pulse" /> */}
+                        <span className="hidden sm:inline">
+                          Use Gemini - 7🪙
+                        </span>
+                        <span className="sm:hidden">Gemini</span>
+                        {/* <Wand2 className="h-2.5 w-2.5 sm:h-4 sm:w-4 group-hover:rotate-12 transition-transform duration-200" /> */}
                       </>
                     )}
                   </div>
@@ -1390,15 +1451,15 @@ const EmailPage = () => {
                   !getGmailPermission()
                     ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
                     : "bg-transparent border-blue-500 text-blue-600 hover:bg-blue-50"
-                } ${
-                  sendingEmail ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                } ${sendingEmail ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
-                  !getGmailPermission()
-                    ? "bg-gradient-to-r from-red-50/0 via-red-100/30 to-red-50/0"
-                    : "bg-gradient-to-r from-blue-50/0 via-blue-100/30 to-blue-50/0"
-                }`}></div>
+                <div
+                  className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+                    !getGmailPermission()
+                      ? "bg-gradient-to-r from-red-50/0 via-red-100/30 to-red-50/0"
+                      : "bg-gradient-to-r from-blue-50/0 via-blue-100/30 to-blue-50/0"
+                  }`}
+                ></div>
                 <div className="relative flex items-center space-x-1">
                   {sendingEmail ? (
                     <>
@@ -1492,7 +1553,6 @@ const EmailPage = () => {
         toast.success("Email sent successfully!");
         await refreshPosts();
         closeMobileModal();
-        
       }
     } catch (error) {
       console.error("Error sending email:", error);
@@ -1507,7 +1567,7 @@ const EmailPage = () => {
     setShowGmailPermissionModal(false);
     logoutUser();
     // Redirect to login page or handle as needed
-    window.location.href = '/login'; // Adjust this path as needed
+    window.location.href = "/login"; // Adjust this path as needed
   };
 
   // Get email suggestions from the selected post

@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useDashboard } from '../context/DashbaordContext';
+import CoinsLogModal from '../components/CoinsLogModal';
+import { useState } from 'react';
+
 import { 
   BarChart3, 
   FileText, 
@@ -14,7 +17,8 @@ import {
   Activity,
   PieChart,
   Target,
-  ArrowUpRight
+  ArrowUpRight,
+  Coins // Import Coins icon
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -27,8 +31,11 @@ const Dashboard = () => {
     error, 
     fetchDashboardData, 
     isLive, 
-    lastUpdated 
+    lastUpdated,
+    coins // Get coins from context
   } = useDashboard();
+  const [isCoinsModalOpen, setIsCoinsModalOpen] = useState(false);
+
 
   if (loading) {
     return (
@@ -146,6 +153,7 @@ const itemVariants = {
 };
 
   return (
+    <>
     <div className="relative">
       {/* Gradient background blobs */}
       <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-20 blur-3xl -z-10"></div>
@@ -201,6 +209,23 @@ const itemVariants = {
         initial="hidden"
         animate="visible"
       >
+        {/* New Coins Card */}
+        <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 relative overflow-hidden cursor-pointer"
+        
+        onClick={() => setIsCoinsModalOpen(true)} // Open coins modal on click
+        >
+          <div className="absolute top-1 right-1 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-200 to-amber-300 opacity-30 blur-lg"></div>
+          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-2 lg:mb-0">
+              <p className="text-gray-600 text-[10px] sm:text-xs font-medium">Coins Balance</p>
+              <p className="text-sm sm:text-xl font-bold text-gray-800">{coins || 0}</p>
+            </div>
+            <div className="self-end lg:self-auto">
+              <Coins className="h-6 w-6 sm:h-6 sm:w-6 text-amber-600" />
+            </div>
+          </div>
+        </div>
+
         {/* Activity Score */}
         <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 relative overflow-hidden">
           <div className="absolute top-1 right-1 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-200 to-blue-300 opacity-30 blur-lg"></div>
@@ -211,7 +236,6 @@ const itemVariants = {
             </div>
             <div className="self-end lg:self-auto flex items-center space-x-1">
               <ArrowUpRight className="h-6 w-6 sm:h-6 sm:w-6 text-blue-600" /> 
-              {/* <span className="text-sm sm:text-xl font-bold text-gray-800">{`${stats?.user?.activityScore}%` || 0}</span> */}
             </div>
           </div>
         </div>
@@ -226,20 +250,6 @@ const itemVariants = {
             </div>
             <div className="self-end lg:self-auto">
               <FileText className="h-6 w-6 sm:h-6 sm:w-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Emails Generated */}
-        <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 relative overflow-hidden">
-          <div className="absolute top-1 right-1 w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-30 blur-lg"></div>
-          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div className="mb-2 lg:mb-0">
-              <p className="text-gray-600 text-[10px] sm:text-xs font-medium">Emails Generated</p>
-              <p className="text-sm sm:text-xl font-bold text-gray-800">{stats?.emails?.generated || 0}</p>
-            </div>
-            <div className="self-end lg:self-auto">
-              <Mail className="h-6 w-6 sm:h-6 sm:w-6 text-purple-600" />
             </div>
           </div>
         </div>
@@ -449,7 +459,14 @@ const itemVariants = {
           </div>
         </motion.div>
       </div>
-    </div>
+      </div>
+
+      {/* Coins Log Modal */}
+
+    <CoinsLogModal isOpen={isCoinsModalOpen} onClose={() => setIsCoinsModalOpen(false)} />
+      
+      
+      </>
   );
 };
 

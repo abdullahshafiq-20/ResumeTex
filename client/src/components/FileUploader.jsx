@@ -635,8 +635,8 @@ export default function FileUploader({
                   ) : (
                     <>
                       <Wand2 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:rotate-12" />
-                      <span className="font-semibold">Transform Resume with {selectedModel}</span>
-                      <Bot className="h-4 w-4 sm:h-5 sm:w-5 transition-all duration-300 group-hover:scale-110" />
+                      <span className="font-semibold">Transform Resume with AI</span>
+                      <Bot className="h-4 w-4 sm:h-5 sm:w-5 transition-all duration-300 group-hover:scale-110" /> - 10🪙
                     </>
                   )}
                 </div>

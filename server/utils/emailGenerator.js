@@ -9,6 +9,7 @@
  * @param {string} [params.candidateName="Candidate"] - Name of the candidate
  * @param {string} [params.companyName="Company"] - Name of the company
  * @param {string} [params.recruiterName="Hiring Manager"] - Name of the recruiter
+ * @param {string} [params.type="descriptive"] - Email type: "concise" or "descriptive"
  * @param {boolean} [params.extractSummary=true] - Whether to extract key points from summary
  * @returns {Object} Email template in JSON format with subject and body
  */
@@ -252,17 +253,17 @@ function replacePlaceholders(template, params) {
 /**
  * Creates a random email template using one of the predefined styles
  */
-export const createRandomEmailTemplate = (params) => {
+export const createRandomEmailTemplate = (params, type = 'descriptive') => {
     // Get random template style
     const templateKeys = Object.keys(EMAIL_TEMPLATES);
     const randomTemplateKey = getRandomItem(templateKeys);
     const selectedTemplate = EMAIL_TEMPLATES[randomTemplateKey];
     
-    return createEmailTemplateWithStyle(params, randomTemplateKey);
+    return createEmailTemplateWithStyle(params, randomTemplateKey, type);
 };
 
 /**
- * Creates an email template using a specific style
+ * Creates an email template using a specific style and type
  */
 export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSIONAL') => {
     const {
@@ -275,6 +276,7 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
         candidateName = 'Candidate',
         companyName = '',
         recruiterName = 'Hiring Manager',
+        type = 'descriptive', // New parameter
         extractSummary = true
     } = params;
 
@@ -283,12 +285,11 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
         throw new Error("Missing required parameters: jobTitle, jobDescription, and summary are required");
     }
 
+    // Standardized subject format: "Application for {title} - {name}"
+    const subjectLine = `Application for ${jobTitle} - ${candidateName}`;
+    
     const template = EMAIL_TEMPLATES[templateStyle] || EMAIL_TEMPLATES.PROFESSIONAL;
     const hasCompany = companyName && companyName.trim() !== '';
-    
-    // Get random subject line
-    const subjectTemplates = hasCompany ? template.subjectTemplates.withCompany : template.subjectTemplates.withoutCompany;
-    const subjectLine = replacePlaceholders(getRandomItem(subjectTemplates), params);
     
     // Get random opening
     const openings = hasCompany ? template.openings.withCompany : template.openings.withoutCompany;
@@ -298,51 +299,32 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
     const closings = hasCompany ? template.closings.withCompany : template.closings.withoutCompany;
     const closing = replacePlaceholders(getRandomItem(closings), params);
 
-    // Process summary and generate email content
-    const jobKeywords = extractKeywords(jobDescription);
-    const matchedSkills = skills.filter(skill =>
-        jobKeywords.some(keyword => skill.toLowerCase().includes(keyword))
-    );
+    // Process based on type parameter
+    const emailContent = generateEmailContentByType(params, type, opening, closing);
 
-    let matchSummary = '';
-    if (matchedSkills.length > 0) {
-        const matchPhrases = [
-            `My experience with ${matchedSkills.join(', ')} directly aligns with your requirements.`,
-            `I bring hands-on experience in ${matchedSkills.join(', ')}, which matches perfectly with what you're looking for.`,
-            `My proficiency in ${matchedSkills.join(', ')} makes me an ideal candidate for this role.`,
-            `I have extensive experience working with ${matchedSkills.join(', ')}, which directly relates to your job requirements.`
-        ];
-        matchSummary = getRandomItem(matchPhrases) + ' ';
-    }
+    return {
+        to: to || '',
+        subject: subjectLine,
+        body: emailContent,
+        templateStyle: template.name,
+        type: type
+    };
+};
 
-    // Format skills text
-    let skillsText = "";
-    if (skills.length > 0) {
-        if (skills.length === 1) {
-            skillsText = skills[0];
-        } else if (skills.length === 2) {
-            skillsText = `${skills[0]} and ${skills[1]}`;
-        } else {
-            const lastSkill = skills[skills.length - 1];
-            const otherSkills = skills.slice(0, skills.length - 1).join(", ");
-            skillsText = `${otherSkills}, and ${lastSkill}`;
-        }
-    }
-
-    // Format projects section with variations
-    let projectsSection = "";
-    if (projects.length > 0) {
-        const projectIntros = [
-            "Key projects in my portfolio include:",
-            "Notable projects I've delivered include:",
-            "Some highlights from my project experience:",
-            "Recent projects that demonstrate my capabilities:"
-        ];
-        projectsSection = getRandomItem(projectIntros);
-        projects.forEach(project => {
-            projectsSection += `\n• ${project}`;
-        });
-    }
+/**
+ * Generates email content based on the specified type
+ */
+function generateEmailContentByType(params, type, opening, closing) {
+    const {
+        jobTitle,
+        jobDescription,
+        summary,
+        skills = [],
+        projects = [],
+        candidateName = 'Candidate',
+        recruiterName = 'Hiring Manager',
+        extractSummary = true
+    } = params;
 
     // Process summary
     let processedSummary = summary;
@@ -350,38 +332,150 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
         processedSummary = extractKeyPointsFromSummary(summary);
     }
 
-    // Generate skills section with variation
-    let skillsSection = "";
-    if (skills.length > 0) {
-        const skillIntros = [
-            `My technical expertise includes ${skillsText}, making me well-suited for this position.`,
-            `I bring strong skills in ${skillsText} that directly apply to this role.`,
-            `My proficiency in ${skillsText} positions me as a strong candidate for this opportunity.`,
-            `With expertise in ${skillsText}, I'm confident I can make an immediate impact.`
-        ];
-        skillsSection = getRandomItem(skillIntros);
+    // Extract relevant skills (not all skills)
+    const jobKeywords = extractKeywords(jobDescription);
+    const relevantSkills = getRelevantSkills(skills, jobKeywords, type);
+
+    if (type === 'concise') {
+        return generateConciseEmail(params, processedSummary, relevantSkills, opening, closing);
+    } else {
+        return generateDescriptiveEmail(params, processedSummary, relevantSkills, opening, closing);
+    }
+}
+
+/**
+ * Generates a concise email version
+ */
+function generateConciseEmail(params, processedSummary, relevantSkills, opening, closing) {
+    const { candidateName, recruiterName, projects } = params;
+
+    let skillsText = "";
+    if (relevantSkills.length > 0) {
+        skillsText = `I have experience with ${relevantSkills.join(", ")}.`;
     }
 
-    // Create the email body
+    let projectText = "";
+    if (projects.length > 0) {
+        // Only mention 1-2 key projects for concise version
+        const keyProjects = projects.slice(0, 2);
+        projectText = `Key projects include: ${keyProjects.join(" and ")}.`;
+    }
+
     const emailBody = `Dear ${recruiterName || "Hiring Manager"},
 
-${opening} ${processedSummary} ${matchSummary}
+${opening} ${processedSummary}
 
-${skillsSection}
+${skillsText} ${projectText}
 
-${projectsSection}
 ${closing}
 
 Best regards,
 ${candidateName}`;
 
-    return {
-        to: to || '',
-        subject: subjectLine,
-        body: emailBody,
-        templateStyle: template.name
-    };
-};
+    return emailBody;
+}
+
+/**
+ * Generates a descriptive email version
+ */
+function generateDescriptiveEmail(params, processedSummary, relevantSkills, opening, closing) {
+    const { candidateName, recruiterName, projects, jobDescription } = params;
+
+    // Generate skills section with more detail
+    let skillsSection = "";
+    if (relevantSkills.length > 0) {
+        const skillIntros = [
+            `My technical expertise includes ${formatSkillsList(relevantSkills)}, making me well-suited for this position.`,
+            `I bring strong skills in ${formatSkillsList(relevantSkills)} that directly apply to this role.`,
+            `My proficiency in ${formatSkillsList(relevantSkills)} positions me as a strong candidate for this opportunity.`
+        ];
+        skillsSection = getRandomItem(skillIntros);
+    }
+
+    // Generate projects section
+    let projectsSection = "";
+    if (projects.length > 0) {
+        const projectIntros = [
+            "Key projects in my portfolio include:",
+            "Notable projects I've delivered include:",
+            "Some highlights from my project experience:"
+        ];
+        projectsSection = getRandomItem(projectIntros);
+        // Show more projects in descriptive version
+        projects.slice(0, 4).forEach(project => {
+            projectsSection += `\n• ${project}`;
+        });
+    }
+
+    // Add relevance statement
+    const jobKeywords = extractKeywords(jobDescription);
+    const matchedSkills = relevantSkills.filter(skill =>
+        jobKeywords.some(keyword => skill.toLowerCase().includes(keyword))
+    );
+
+    let relevanceStatement = "";
+    if (matchedSkills.length > 0) {
+        relevanceStatement = `My experience with ${matchedSkills.join(', ')} directly aligns with your requirements. `;
+    }
+
+    const emailBody = `Dear ${recruiterName || "Hiring Manager"},
+
+${opening} ${processedSummary} ${relevanceStatement}
+
+${skillsSection}
+
+${projectsSection}
+
+${closing}
+
+Best regards,
+${candidateName}`;
+
+    return emailBody;
+}
+
+/**
+ * Gets relevant skills based on job requirements and type
+ */
+function getRelevantSkills(skills, jobKeywords, type) {
+    if (!skills || skills.length === 0) return [];
+
+    // Find skills that match job keywords
+    const matchedSkills = skills.filter(skill =>
+        jobKeywords.some(keyword => 
+            skill.toLowerCase().includes(keyword.toLowerCase()) ||
+            keyword.toLowerCase().includes(skill.toLowerCase())
+        )
+    );
+
+    // Get additional skills to fill out the list
+    const otherSkills = skills.filter(skill => !matchedSkills.includes(skill));
+
+    let relevantSkills = [...matchedSkills];
+
+    if (type === 'concise') {
+        // For concise emails, limit to 3-4 most relevant skills
+        relevantSkills = relevantSkills.concat(otherSkills).slice(0, 4);
+    } else {
+        // For descriptive emails, include more skills but still not all
+        relevantSkills = relevantSkills.concat(otherSkills).slice(0, 6);
+    }
+
+    return relevantSkills;
+}
+
+/**
+ * Formats skills list with proper grammar
+ */
+function formatSkillsList(skills) {
+    if (skills.length === 0) return "";
+    if (skills.length === 1) return skills[0];
+    if (skills.length === 2) return `${skills[0]} and ${skills[1]}`;
+    
+    const lastSkill = skills[skills.length - 1];
+    const otherSkills = skills.slice(0, skills.length - 1).join(", ");
+    return `${otherSkills}, and ${lastSkill}`;
+}
 
 /**
  * Get list of available template styles
@@ -393,11 +487,10 @@ export const getAvailableTemplateStyles = () => {
     }));
 };
 
-// Keep the original function for backward compatibility
+// Update the main export function to include type parameter
 export const generateEmailTemplate = (params) => {
-    
-    return createRandomEmailTemplate(params);
-
+    // return createEmailTemplateWithStyle(params, 'PROFESSIONAL');
+    return createRandomEmailTemplate(params, 'descriptive');
 };
 
 /**
@@ -573,3 +666,5 @@ function extractKeyPhrases(summary) {
 
 // const emailTemplate = generateEmailTemplate(emailParams);
 // //console.log(JSON.stringify(emailTemplate, null, 2));
+
+

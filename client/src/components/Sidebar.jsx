@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from '../context/AuthContext';
 import { useProcessing } from '../context/ProcessingContext';
+import { useDashboard } from '../context/DashbaordContext'; // Add this import
 import logo from '../../public/logo.png';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -11,6 +12,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { logoutUser, user } = useAuth();
   const { getUserProfile } = useAuth();
   const { isProcessing, processingMessage } = useProcessing();
+  const { coins } = useDashboard(); // Get coins from context
 
   // Detect if user prefers reduced motion
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -238,6 +240,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <p className="text-xs text-gray-600 truncate">
                       {getSafeUserProfile().email || 'No email'}
                     </p>
+                    
+                    {/* Coins display */}
+                    <div className="flex items-center mt-1">
+                      <CoinsIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 mr-1" />
+                      <span className="text-xs font-medium text-amber-600">
+                        {coins || 0} coins
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -326,6 +336,13 @@ const BriefcaseIcon = (props) => (
 const LogoutIcon = (props) => (
   <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+  </svg>
+);
+
+// Add Coins icon
+const CoinsIcon = (props) => (
+  <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 

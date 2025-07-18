@@ -193,6 +193,7 @@ export const manualResumeController = async (req, res) => {
             format: format
         });
 
+        
         emitResumeCreated(userId, userResume);
         emitPreferencesDashboard(userId, userPreferences);
         triggerStatsUpdate(userId);

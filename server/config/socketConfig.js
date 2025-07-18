@@ -18,14 +18,14 @@ const initSocket = (server) => {
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
-      
+
       if (!token) {
         return next(new Error('Authentication error: No token provided'));
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.userId = decoded.id;
-      socket.userEmail = decoded.email; // Assuming email is part of the token payload      
+      socket.userEmail = decoded.email; // Assuming email is part of the token payload
       //console.log(`User ${socket.userEmail} connected with socket ID: ${socket.id}`);
       next();
     } catch (error) {
@@ -37,10 +37,10 @@ const initSocket = (server) => {
   // Handle socket connections
   io.on('connection', (socket) => {
     //console.log(`Socket connected: ${socket.id} for user: ${socket.userEmail}`);
-    
+
     // Join user to their personal room
     socket.join(`user_${socket.userId}`);
-    
+
     // Join user to general room (for broadcast messages)
     socket.join('general');
 
@@ -184,8 +184,29 @@ const emitPreferencesUpdated = (userId, preferencesData) => {
   });
 };
 
+const emitMatchFound = (userId, jobTitle) => {
+  emitToUser(userId, 'match_found', {
+    type: 'match_found',
+    data: { jobTitle },
+    timestamp: new Date().toISOString()
+  });
+};
 
+const emitCoinDeduction = (userId, coinData) => {
+  emitToUser(userId, 'coins_update', {
+    type: 'coins_update',
+    data: coinData,
+    timestamp: new Date().toISOString()
+  });
+};
 
+const emitCoinsLog = (userId, coinsLog) => {
+  emitToUser(userId, 'coins_log', {
+    type: 'coins_log',
+    data: coinsLog,
+    timestamp: new Date().toISOString()
+  });
+};
 
 export {
   initSocket,
@@ -204,4 +225,7 @@ export {
   emitEmailSent,
   emitPostDeleted,
   emitPreferencesUpdated,
+  emitMatchFound,
+  emitCoinDeduction,
+  emitCoinsLog
 };

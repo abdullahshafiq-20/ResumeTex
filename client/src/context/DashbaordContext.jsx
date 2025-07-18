@@ -14,6 +14,8 @@ export const DashbaordProvider = ({ children }) => {
     const [comparison, setComparison] = useState(null);
     const [preferences, setPreferences] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [coins, setCoins] = useState(0); // Add coins state
+    const [coinsLog, setCoinsLog] = useState([]); // Optional: if you need to store coins log
     const { socket, isConnected } = useSocket();
 
     // Single comprehensive fetch function using the unified endpoint
@@ -23,20 +25,22 @@ export const DashbaordProvider = ({ children }) => {
             console.log('Skipping fetch - auth loading:', authLoading, 'authenticated:', isAuthenticated, 'user:', !!user);
             return;
         }
-        
+
         console.log('Starting dashboard data fetch for user:', user.email || user.id);
         setLoading(true);
         setError(null);
-        
+
         try {
             // Single API call to get all dashboard data
             const response = await api.get(`/user/all-stats?limit=${limit}`);
+            const coinsLog = await api.get('/coin/coin-log');
+             // Fetch coins log if needed
 
             console.log('API Response:', response.data);
 
             if (response.data.success) {
                 const data = response.data.data;
-                
+
                 // Extract different sections from the unified response
                 setStats({
                     user: data.user,
@@ -45,12 +49,19 @@ export const DashbaordProvider = ({ children }) => {
                     linkedIn: data.linkedIn,
                     global: data.global
                 });
-                
+
                 setActivity(data.activityTimeline || []);
                 setComparison(data.comparison || null);
                 setPreferences(data.preferences || null);
                 setLastUpdated(new Date().toISOString());
-                
+                setCoinsLog(coinsLog.data || []); // Set coins log if needed
+
+                // Set coins from user data
+                if (data.user && data.user.coins !== undefined) {
+                    console.log('Setting coins from user data:', data.user.coins);
+                    setCoins(data.user.coins);
+                }
+
                 console.log('Dashboard data fetch completed successfully');
             } else {
                 console.warn('Stats fetch failed:', response.data.message || response.data.error);
@@ -75,7 +86,7 @@ export const DashbaordProvider = ({ children }) => {
             console.log('Received live stats update:', data);
             if (data.type === 'stats_dashboard' && data.data) {
                 const statsData = data.data;
-                
+
                 // Update all sections from the unified stats data
                 if (statsData.user || statsData.resumes || statsData.emails || statsData.linkedIn || statsData.global) {
                     setStats({
@@ -83,22 +94,31 @@ export const DashbaordProvider = ({ children }) => {
                         resumes: statsData.resumes,
                         emails: statsData.emails,
                         linkedIn: statsData.linkedIn,
-                        global: statsData.global
+                        global: statsData.global,
+                        coinLog: statsData.coinLog || [] // Optional: if you need to store coins log
+
                     });
+
+                    // Update coins if included in user data
+                    if (statsData.user && statsData.user.coins !== undefined) {
+                        setCoins(statsData.user.coins);
+                        console.log('Updated coins from stats data:', statsData.user.coins);
+                    }
                 }
-                
+                setCoinsLog(statsData.coinLog || []); // Update coins log if available
+
                 if (statsData.activityTimeline) {
                     setActivity(statsData.activityTimeline);
                 }
-                
+
                 if (statsData.comparison) {
                     setComparison(statsData.comparison);
                 }
-                
+
                 if (statsData.preferences) {
                     setPreferences(statsData.preferences);
                 }
-                
+
                 setLastUpdated(data.timestamp || new Date().toISOString());
             }
         };
@@ -125,16 +145,29 @@ export const DashbaordProvider = ({ children }) => {
             }
         };
 
+        const handleCoinsUpdate = (data) => {
+            console.log('Received coins update:', data);
+            if (data.type === 'coins_update' && data.coins !== undefined) {
+                setCoins(data.coins);
+                setLastUpdated(data.timestamp || new Date().toISOString());
+            }
+        };
+
         socket.on('stats_dashboard', handleStatsUpdate);
         socket.on('activity_dashboard', handleActivityUpdate);
         socket.on('comparison_dashboard', handleComparisonUpdate);
         socket.on('preferences_dashboard', handlePreferencesUpdate);
+        socket.on('coins_update', handleCoinsUpdate);
 
         socket.on('dashboard_update', (data) => {
             console.log('Received dashboard update:', data);
             switch (data.type) {
                 case 'stats':
                     setStats(data.data);
+                    // Update coins if included in stats data
+                    if (data.data?.user?.coins !== undefined) {
+                        setCoins(data.data.user.coins);
+                    }
                     break;
                 case 'activity':
                     setActivity(data.data);
@@ -144,6 +177,9 @@ export const DashbaordProvider = ({ children }) => {
                     break;
                 case 'preferences':
                     setPreferences(data.data);
+                    break;
+                case 'coins':
+                    setCoins(data.data);
                     break;
                 default:
                     console.log('Unknown dashboard update type:', data.type);
@@ -157,19 +193,13 @@ export const DashbaordProvider = ({ children }) => {
             socket.off('activity_dashboard', handleActivityUpdate);
             socket.off('comparison_dashboard', handleComparisonUpdate);
             socket.off('preferences_dashboard', handlePreferencesUpdate);
+            socket.off('coins_update', handleCoinsUpdate);
             socket.off('dashboard_update');
         };
     }, [socket, isConnected]);
 
     // Main effect to fetch data when authentication is ready
     useEffect(() => {
-        // console.log('Auth state changed:', {
-        //     authLoading,
-        //     isAuthenticated,
-        //     hasUser: !!user,
-        //     userEmail: user?.email
-        // });
-
         if (!authLoading && isAuthenticated && user) {
             console.log('Auth ready, fetching dashboard data...');
             fetchDashboardData();
@@ -197,6 +227,7 @@ export const DashbaordProvider = ({ children }) => {
     const refreshDashboardData = useCallback(async (limit = 10) => {
         await fetchDashboardData(limit);
     }, [fetchDashboardData]);
+    
 
     const value = {
         // Data
@@ -205,14 +236,16 @@ export const DashbaordProvider = ({ children }) => {
         comparison,
         preferences,
         lastUpdated,
-        
+        coins,
+        coinsLog, // Add coins log to the context value
+
         // Loading states
         loading: loading || authLoading, // Include auth loading
         error,
-        
+
         // Socket status
         isLive: isConnected,
-        
+
         // Actions - all now use the unified endpoint
         fetchDashboardData,
         refreshStats,
@@ -220,7 +253,7 @@ export const DashbaordProvider = ({ children }) => {
         refreshComparison,
         refreshPreferences,
         refreshDashboardData, // New function with custom limit
-        
+
         // Clear error
         clearError: () => setError(null)
     };

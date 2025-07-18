@@ -8,6 +8,8 @@ import { setupOAuthWithRefreshToken } from "../../utils/oauthUtils.js";
 import { generateEmailTemplate } from "../../utils/emailGenerator.js";
 import { emitEmailCreated, emitEmailSent, emitStatsDashboard, emitToUser } from "../../config/socketConfig.js";
 import { triggerStatsUpdate } from "../../utils/trigger.js";
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { coinGateAsync } from "../../middleware/coinMiddleware.js";
 dotenv.config();
 
 const PROMPT = `
@@ -218,10 +220,10 @@ export const sendEmail = async (req, res) => {
     triggerStatsUpdate(userId);
     // Trigger dashboard update
 
-    return res.status(200).json({ 
-      success: true, 
+    return res.status(200).json({
+      success: true,
       messageId: result.data.id,
-      emailRecord 
+      emailRecord
     });
   } catch (error) {
     console.error('Send email error:', error.message);
@@ -238,62 +240,62 @@ export const sendEmailWithAttachment = async (req, res) => {
     const { to, cc, bcc, subject, message, pdfUrl } = req.body;
     const attachment = req.file; // For file uploads with multer
     const userId = req.user.id;
-    
+
     const user = await User.findById(userId);
     const name = user.name;
     const userResume = await UserResume.findOne({ userId, resume_link: pdfUrl });
     //console.log("userResume", userResume)
     const resume_title = userResume.resume_title;
 
-    
+
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
     }
-    
+
     // Check if attachment or pdfUrl exists
     if (!attachment && !pdfUrl) {
       return res.status(400).json({ error: 'No attachment provided. Please include either a file upload or provide a PDF URL.' });
     }
-    
+
     // Helper function to validate and format recipients
     const formatRecipients = (recipients) => {
       if (!recipients) return '';
-      
+
       // Handle both string and array inputs
       const recipientArray = Array.isArray(recipients) ? recipients : [recipients];
-      
+
       // Basic email validation regex
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      
+
       // Validate all email addresses
       const invalidEmails = recipientArray.filter(email => !emailRegex.test(email.trim()));
       if (invalidEmails.length > 0) {
         throw new Error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
       }
-      
+
       // Return comma-separated string of trimmed emails
       return recipientArray.map(email => email.trim()).join(', ');
     };
-    
+
     // Format recipients
     const formattedTo = formatRecipients(to);
     const formattedCc = formatRecipients(cc);
     const formattedBcc = formatRecipients(bcc);
-    
+
     // Validate that at least one recipient is provided
     if (!formattedTo) {
       return res.status(400).json({ error: 'At least one recipient in "to" field is required' });
     }
-    
+
     // Set up OAuth2 client with user's refresh token
     const auth = setupOAuthWithRefreshToken(user.googleRefreshToken);
-    
+
     // Create Gmail API client
     const gmail = google.gmail({ version: 'v1', auth });
-    
+
     // Define boundary for multipart message - use a more unique boundary
     const boundary = `boundary-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Properly format the HTML message content
     const formattedMessage = `<!DOCTYPE html>
 <html>
@@ -304,13 +306,13 @@ export const sendEmailWithAttachment = async (req, res) => {
   ${message.replace(/\n/g, '<br>')}
 </body>
 </html>`;
-    
+
     // Build the email headers and HTML content
     const messageParts = [
       `From: ${user.email}`,
       `To: ${formattedTo}`,
     ];
-    
+
     // Add CC and BCC headers if provided
     if (formattedCc) {
       messageParts.push(`Cc: ${formattedCc}`);
@@ -318,7 +320,7 @@ export const sendEmailWithAttachment = async (req, res) => {
     if (formattedBcc) {
       messageParts.push(`Bcc: ${formattedBcc}`);
     }
-    
+
     // Continue with the rest of the headers
     messageParts.push(
       `Subject: ${subject}`,
@@ -332,12 +334,12 @@ export const sendEmailWithAttachment = async (req, res) => {
       formattedMessage,
       ''
     );
-    
+
     // Handle attachment scenarios
     if (attachment) {
       // Case 1: File upload via multer
       const attachmentBase64 = attachment.buffer.toString('base64');
-      
+
       messageParts.push(
         `--${boundary}`,
         `Content-Type: ${attachment.mimetype}`,
@@ -354,10 +356,10 @@ export const sendEmailWithAttachment = async (req, res) => {
         const response = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
         const pdfBuffer = Buffer.from(response.data);
         const pdfBase64 = pdfBuffer.toString('base64');
-        
+
         // Extract filename from URL or use default
         const filename = `${name} - ${resume_title}.pdf`;
-        
+
         messageParts.push(
           `--${boundary}`,
           'Content-Type: application/pdf',
@@ -372,19 +374,19 @@ export const sendEmailWithAttachment = async (req, res) => {
         return res.status(400).json({ error: 'Failed to fetch PDF from provided URL', details: fetchError.message });
       }
     }
-    
+
     // Close the multipart message
     messageParts.push(`--${boundary}--`);
-    
+
     const emailContent = messageParts.join('\r\n');
-    
+
     // Encode the email to base64url format
     const encodedMessage = Buffer.from(emailContent)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
-    
+
     // Send the email
     const result = await gmail.users.messages.send({
       userId: 'me',
@@ -392,16 +394,16 @@ export const sendEmailWithAttachment = async (req, res) => {
         raw: encodedMessage
       }
     });
-    
+
     // Count total recipients for response
     const totalRecipients = [
       ...(Array.isArray(to) ? to : [to]),
       ...(Array.isArray(cc) ? cc : cc ? [cc] : []),
       ...(Array.isArray(bcc) ? bcc : bcc ? [bcc] : [])
     ].length;
-    
-    return res.status(200).json({ 
-      success: true, 
+
+    return res.status(200).json({
+      success: true,
       messageId: result.data.id,
       attachmentType: attachment ? 'file' : 'url',
       recipients: {
@@ -486,11 +488,54 @@ function generateEmailTemplate22(params) {
 // Example usage:
 
 
+const generateWithgemini = async (params) => {
+  const { jobTitle, jobDescription, summary, skills = [], projects = [], candidateName = "Candidate", companyName = "Company", recruiterName = "Hiring Manager", to, name } = params;
+  const prompt = `Generate a professional, human-like job application email that feels natural and conversational while maintaining professionalism.
+
+## Input:
+- Job Title: ${jobTitle}
+- Job Description: ${jobDescription}
+- Candidate Summary: ${summary}
+- Skills: ${skills}
+- Projects: ${projects}
+
+## Instructions:
+1. Start with "Dear Hiring Manager,"
+2. Write 2-3 concise paragraphs that:
+   - Express genuine interest in the specific role
+   - Highlight only the most relevant skills and experience from the provided information
+   - Mention 1-2 specific projects that align with job requirements
+3. End with "Regards," and with ${name}
+4. Dont include Subject line in the email
+
+## Requirements:
+- **Human tone:** Natural, conversational, and authentic (avoid robotic corporate speak)
+- **Concise:** 150-200 words maximum
+- **Relevant:** Only include information that directly matches the job description
+- **Specific:** Use concrete examples, not generic statements
+- **Professional:** Maintain appropriate business communication standards
+
+Focus on creating a genuine connection rather than a formal template.
+  `
+  const apiKey = process.env.GEMINI_API_KEY_5;
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const result = await model.generateContent(prompt);
+  const data = {
+    to: to,
+    subject: `Application for ${jobTitle} - ${name}`,
+    body: result.response.text().trim()
+  }
+  return data;
+}
+
 
 export const createEmail = async (req, res) => {
   try {
-    const { email, jobTitle, jobDescription,companyName, resume_id, postId } = req.body;
+    const { email, jobTitle, jobDescription, companyName, resume_id, postId, type } = req.body;
     const userId = req.user.id; // Assuming you have user ID from auth middleware
+    const model = req.query.gemini
+    // console.log("model", model)
 
     // //console.log("req.body", req.body)
 
@@ -507,7 +552,8 @@ export const createEmail = async (req, res) => {
     const { resume_title, resume_link } = userResume;
     //console.log("resume_title", resume_title)
     //console.log("resume_link", resume_link)
-    const userPreferences = await UserPreferences.findOne({ preferences: resume_title });
+    const userPreferences = await UserPreferences.findOne({ preferences: resume_title, userId: userId });
+    // console.log("userPreferences", userPreferences)
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
     }
@@ -525,34 +571,52 @@ export const createEmail = async (req, res) => {
       projects: userPreferences.projects || ["Project A", "Project B"],
       candidateName: user.name || "John Doe",
       companyName: companyName,
-      recruiterName: "Hiring Manager"
+      recruiterName: "Hiring Manager",
+      type: type,
+      name: user.name
     };
 
-    //console.log("emailParams")
+    // console.log("emailParams", emailParams)
 
-    
-    const data = generateEmailTemplate(emailParams);
+    let data;
+    let coins;
+    if (model) {
+      coins = await coinGateAsync("geminiEmail", userId);
+      if (!coins) {
+        return res.status(400).json({ error: 'Insufficient coins' });
+      }
+      data = await generateWithgemini(emailParams);
+      // console.log("data", data)
+
+
+    } else {
+      coins = await coinGateAsync("aiEmail", userId);
+      if (!coins) {
+        return res.status(400).json({ error: 'Insufficient coins' });
+      }
+      data = generateEmailTemplate(emailParams);
+    }
     //console.log("Gmail Created:", data)
 
     const { to, subject, body } = data;
     const saveEmail = await Email.findOneAndUpdate(
       { userId, linkedInId: postId },
-      { $set: { userId, linkedInId:postId, resumeId: resume_id,  isEmailGenerated: true, isEmailSent: false, to: email, subject, body, attachment: resume_link } },
-      { upsert: true , new: true }
+      { $set: { userId, linkedInId: postId, resumeId: resume_id, isEmailGenerated: true, isEmailSent: false, to: email, subject, body, attachment: resume_link } },
+      { upsert: true, new: true }
     )
     //console.log("saveEmail", saveEmail)
 
     //console.log("=== EMITTING EMAIL CREATED EVENT ===");
     //console.log("userId:", userId);
     //console.log("saveEmail:", saveEmail);
-    
+
     // Emit socket event with proper data structure
     emitEmailCreated(userId, {
       type: 'email_created',
       data: saveEmail,
       postId: postId // Include postId for easier frontend handling
     });
-    
+
     // Also emit a more specific event for real-time updates
     emitToUser(userId, 'post_email_status_updated', {
       postId: postId,
@@ -562,7 +626,7 @@ export const createEmail = async (req, res) => {
     });
 
     triggerStatsUpdate(userId);
-    
+
     res.status(201).json({
       success: true,
       message: "Email created and saved successfully",
