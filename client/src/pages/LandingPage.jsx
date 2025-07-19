@@ -580,7 +580,7 @@ const LandingPage = () => {
                   <span>Limited Use Compliance Statement</span>
                 </h3>
                 <p className="text-blue-800 leading-relaxed">
-                  <strong>ResumeTex's use of information received from Google APIs will adhere to{" "}
+                  <strong>ResumeTex's use of information received from Google APIs adheres to{" "}
                   <a 
                     href="https://developers.google.com/terms/api-services-user-data-policy" 
                     target="_blank" 
@@ -588,7 +588,15 @@ const LandingPage = () => {
                     className="text-blue-600 underline hover:text-blue-700"
                   >
                     Google API Services User Data Policy
-                  </a>, including the Limited Use requirements.</strong>
+                  </a>, including the{" "}
+                  <a 
+                    href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy#limited-use" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-700"
+                  >
+                    Limited Use requirements
+                  </a>.</strong>
                 </p>
               </div>
 
@@ -632,12 +640,21 @@ const LandingPage = () => {
                 <p className="text-sm text-gray-600 italic">
                   For more information about Google's data use policies, please visit the{" "}
                   <a 
-                    href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" 
+                    href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-blue-600 underline hover:text-blue-700"
                   >
-                    Limited Use of User Data Policy
+                    Google API Services User Data developer Policy
+                  </a>{" "}
+                  and specifically the{" "}
+                  <a 
+                    href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy#limited-use" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-700"
+                  >
+                    Limited Use requirements
                   </a>.
                 </p>
               </div>

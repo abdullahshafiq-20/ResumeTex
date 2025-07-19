@@ -52,11 +52,35 @@ const TermsOfServicePage = () => {
       content: [
         {
           subtitle: "Limited Use Compliance Statement",
-          details: "ResumeTex's use of information received from Google APIs will adhere to Google API Services User Data Policy (https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements. This compliance statement ensures your data protection and privacy when using our email features."
+          details: (
+            <span>
+              ResumeTex's use of information received from Google APIs adheres to{" "}
+              <a 
+                href="https://developers.google.com/terms/api-services-user-data-policy" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-700"
+              >
+                Google API Services User Data Policy
+              </a>, including the{" "}
+              <a 
+                href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy#limited-use" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-700"
+              >
+                Limited Use requirements
+              </a>. This compliance statement ensures your data protection and privacy when using our email features.
+            </span>
+          )
         },
         {
           subtitle: "Gmail API Usage",
-          details: "ResumeTex uses the Gmail API with the gmail.send scope solely to send resume documents or status notifications to recipients as instructed by the user. We do not read, access, or store the content of the user's Gmail account. All email actions are initiated by explicit user requests and are limited to document delivery functions only."
+          details: (
+            <span>
+              ResumeTex uses the Gmail API with the <code className="bg-gray-200 px-1 rounded">gmail.send</code> scope solely to send resume documents or status notifications to recipients as instructed by the user. We do not read, access, or store the content of the user's Gmail account. All email actions are initiated by explicit user requests and are limited to document delivery functions only.
+            </span>
+          )
         },
         {
           subtitle: "Limited Use Policy Compliance",
@@ -72,7 +96,28 @@ const TermsOfServicePage = () => {
         },
         {
           subtitle: "User Control and Transparency",
-          details: "All Gmail-related actions require explicit user consent and are performed only when you actively choose to send a document via email. You have complete control over when and how the Gmail API is used. For more information about Google's data use policies, please visit the Limited Use of User Data Policy (https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes)."
+          details: (
+            <span>
+              All Gmail-related actions require explicit user consent and are performed only when you actively choose to send a document via email. You have complete control over when and how the Gmail API is used. For more information about Google's data use policies, please visit the{" "}
+              <a 
+                href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-700"
+              >
+                Google API Services User Data developer Policy
+              </a>{" "}
+              and specifically the{" "}
+              <a 
+                href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy#limited-use" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-700"
+              >
+                Limited Use requirements
+              </a>.
+            </span>
+          )
         }
       ]
     },
