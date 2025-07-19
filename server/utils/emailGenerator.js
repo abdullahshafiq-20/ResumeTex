@@ -277,7 +277,8 @@ export const createEmailTemplateWithStyle = (params, templateStyle = 'PROFESSION
         companyName = '',
         recruiterName = 'Hiring Manager',
         type = 'descriptive', // New parameter
-        extractSummary = true
+        extractSummary = true,
+        userLinks = []
     } = params;
 
     // Validate required parameters
@@ -323,7 +324,8 @@ function generateEmailContentByType(params, type, opening, closing) {
         projects = [],
         candidateName = 'Candidate',
         recruiterName = 'Hiring Manager',
-        extractSummary = true
+        extractSummary = true,
+        userLinks = []
     } = params;
 
     // Process summary
@@ -343,11 +345,12 @@ function generateEmailContentByType(params, type, opening, closing) {
     }
 }
 
+
 /**
  * Generates a concise email version
  */
 function generateConciseEmail(params, processedSummary, relevantSkills, opening, closing) {
-    const { candidateName, recruiterName, projects } = params;
+    const { candidateName, recruiterName, projects, userLinks } = params;
 
     let skillsText = "";
     if (relevantSkills.length > 0) {
@@ -361,6 +364,12 @@ function generateConciseEmail(params, processedSummary, relevantSkills, opening,
         projectText = `Key projects include: ${keyProjects.join(" and ")}.`;
     }
 
+    let linksText = "";
+    if (userLinks && userLinks.length > 0) {
+        // Fix: userLinks is an array, so format it properly
+        linksText = userLinks.map(link => `[${link.platform}](${link.url})`).join(' | ') + '\n';
+    }
+
     const emailBody = `Dear ${recruiterName || "Hiring Manager"},
 
 ${opening} ${processedSummary}
@@ -370,7 +379,8 @@ ${skillsText} ${projectText}
 ${closing}
 
 Best regards,
-${candidateName}`;
+${candidateName}
+${linksText}`;
 
     return emailBody;
 }
@@ -379,7 +389,7 @@ ${candidateName}`;
  * Generates a descriptive email version
  */
 function generateDescriptiveEmail(params, processedSummary, relevantSkills, opening, closing) {
-    const { candidateName, recruiterName, projects, jobDescription } = params;
+    const { candidateName, recruiterName, projects, jobDescription, userLinks } = params;
 
     // Generate skills section with more detail
     let skillsSection = "";
@@ -407,6 +417,12 @@ function generateDescriptiveEmail(params, processedSummary, relevantSkills, open
         });
     }
 
+    let linksText = "";
+    if (userLinks && userLinks.length > 0) {
+        // Fix: userLinks is an array, so format it properly
+        linksText = userLinks.map(link => `[${link.platform}](${link.url})`).join(' | ') + '\n';
+    }
+
     // Add relevance statement
     const jobKeywords = extractKeywords(jobDescription);
     const matchedSkills = relevantSkills.filter(skill =>
@@ -429,7 +445,8 @@ ${projectsSection}
 ${closing}
 
 Best regards,
-${candidateName}`;
+${candidateName}
+${linksText}`;
 
     return emailBody;
 }

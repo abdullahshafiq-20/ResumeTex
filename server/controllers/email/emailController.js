@@ -22,6 +22,28 @@ const PROMPT = `
   5-End with a professional closing
 
 `
+const processMessageLinks = (message) => {
+  // First escape any existing HTML to prevent issues
+  let processedMessage = message
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  
+  // Convert markdown-style links [text](url) to HTML
+  processedMessage = processedMessage.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g, 
+    '<a href="$2" style="color: #0066cc; text-decoration: underline;">$1</a>'
+  );
+  
+  // Convert plain URLs to clickable links (avoid double-converting already processed links)
+  processedMessage = processedMessage.replace(
+    /(?<!href=")(?<!">)(https?:\/\/[^\s<>"]+)(?!<\/a>)/g,
+    '<a href="$1" style="color: #0066cc; text-decoration: underline;">$1</a>'
+  );
+  
+  return processedMessage;
+};
+
 
 // Controller to send email
 // export const sendEmail = async (req, res) => {
@@ -234,76 +256,78 @@ export const sendEmail = async (req, res) => {
   }
 };
 
-// Send an email with attachments
+
 export const sendEmailWithAttachment = async (req, res) => {
   try {
     const { to, cc, bcc, subject, message, pdfUrl } = req.body;
-    const attachment = req.file; // For file uploads with multer
+    const attachment = req.file;
     const userId = req.user.id;
 
     const user = await User.findById(userId);
     const name = user.name;
     const userResume = await UserResume.findOne({ userId, resume_link: pdfUrl });
-    //console.log("userResume", userResume)
     const resume_title = userResume.resume_title;
-
 
     if (!user || !user.googleRefreshToken) {
       return res.status(401).json({ error: 'User not authenticated with Google' });
     }
 
-    // Check if attachment or pdfUrl exists
     if (!attachment && !pdfUrl) {
       return res.status(400).json({ error: 'No attachment provided. Please include either a file upload or provide a PDF URL.' });
     }
 
-    // Helper function to validate and format recipients
     const formatRecipients = (recipients) => {
       if (!recipients) return '';
-
-      // Handle both string and array inputs
       const recipientArray = Array.isArray(recipients) ? recipients : [recipients];
-
-      // Basic email validation regex
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      // Validate all email addresses
       const invalidEmails = recipientArray.filter(email => !emailRegex.test(email.trim()));
       if (invalidEmails.length > 0) {
         throw new Error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
       }
-
-      // Return comma-separated string of trimmed emails
       return recipientArray.map(email => email.trim()).join(', ');
     };
 
-    // Format recipients
     const formattedTo = formatRecipients(to);
     const formattedCc = formatRecipients(cc);
     const formattedBcc = formatRecipients(bcc);
 
-    // Validate that at least one recipient is provided
     if (!formattedTo) {
       return res.status(400).json({ error: 'At least one recipient in "to" field is required' });
     }
 
-    // Set up OAuth2 client with user's refresh token
     const auth = setupOAuthWithRefreshToken(user.googleRefreshToken);
-
-    // Create Gmail API client
     const gmail = google.gmail({ version: 'v1', auth });
-
-    // Define boundary for multipart message - use a more unique boundary
     const boundary = `boundary-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Properly format the HTML message content
+    // Process the message to convert links
+    const processedMessage = processMessageLinks(message);
+
+    // Enhanced HTML formatting with better styling
     const formattedMessage = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    a {
+      color: #0066cc;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+    a:hover {
+      color: #004499;
+    }
+  </style>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-  ${message.replace(/\n/g, '<br>')}
+<body>
+  ${processedMessage.replace(/\n/g, '<br>')}
 </body>
 </html>`;
 
@@ -313,7 +337,6 @@ export const sendEmailWithAttachment = async (req, res) => {
       `To: ${formattedTo}`,
     ];
 
-    // Add CC and BCC headers if provided
     if (formattedCc) {
       messageParts.push(`Cc: ${formattedCc}`);
     }
@@ -321,25 +344,22 @@ export const sendEmailWithAttachment = async (req, res) => {
       messageParts.push(`Bcc: ${formattedBcc}`);
     }
 
-    // Continue with the rest of the headers
     messageParts.push(
       `Subject: ${subject}`,
       'MIME-Version: 1.0',
       `Content-Type: multipart/mixed; boundary="${boundary}"`,
       '',
       `--${boundary}`,
-      'Content-Type: text/html; charset=utf-8',
-      'Content-Transfer-Encoding: 7bit',
+      'Content-Type: text/html; charset=UTF-8',
+      'Content-Transfer-Encoding: 8bit',  // ✅ Changed from quoted-printable
       '',
       formattedMessage,
       ''
     );
 
-    // Handle attachment scenarios
+    // Handle attachments (existing code)
     if (attachment) {
-      // Case 1: File upload via multer
       const attachmentBase64 = attachment.buffer.toString('base64');
-
       messageParts.push(
         `--${boundary}`,
         `Content-Type: ${attachment.mimetype}`,
@@ -350,14 +370,10 @@ export const sendEmailWithAttachment = async (req, res) => {
         ''
       );
     } else if (pdfUrl) {
-      // Case 2: PDF URL provided
       try {
-        // Fetch the PDF from the URL
         const response = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
         const pdfBuffer = Buffer.from(response.data);
         const pdfBase64 = pdfBuffer.toString('base64');
-
-        // Extract filename from URL or use default
         const filename = `${name} - ${resume_title}.pdf`;
 
         messageParts.push(
@@ -375,19 +391,15 @@ export const sendEmailWithAttachment = async (req, res) => {
       }
     }
 
-    // Close the multipart message
     messageParts.push(`--${boundary}--`);
-
     const emailContent = messageParts.join('\r\n');
 
-    // Encode the email to base64url format
     const encodedMessage = Buffer.from(emailContent)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
 
-    // Send the email
     const result = await gmail.users.messages.send({
       userId: 'me',
       requestBody: {
@@ -395,7 +407,6 @@ export const sendEmailWithAttachment = async (req, res) => {
       }
     });
 
-    // Count total recipients for response
     const totalRecipients = [
       ...(Array.isArray(to) ? to : [to]),
       ...(Array.isArray(cc) ? cc : cc ? [cc] : []),
@@ -418,6 +429,11 @@ export const sendEmailWithAttachment = async (req, res) => {
     return res.status(500).json({ error: 'Failed to send email with attachment', details: error.message });
   }
 };
+
+
+
+
+
 function generateEmailTemplate22(params) {
   // Destructure parameters with defaults
   const {
@@ -489,7 +505,7 @@ function generateEmailTemplate22(params) {
 
 
 const generateWithgemini = async (params) => {
-  const { jobTitle, jobDescription, summary, skills = [], projects = [], candidateName = "Candidate", companyName = "Company", recruiterName = "Hiring Manager", to, name } = params;
+  const { jobTitle, jobDescription, summary, skills = [], projects = [], candidateName = "Candidate", companyName = "Company", recruiterName = "Hiring Manager", to, name, userLinks } = params;
   const prompt = `Generate a professional, human-like job application email that feels natural and conversational while maintaining professionalism.
 
 ## Input:
@@ -498,6 +514,7 @@ const generateWithgemini = async (params) => {
 - Candidate Summary: ${summary}
 - Skills: ${skills}
 - Projects: ${projects}
+- Links: ${userLinks}
 
 ## Instructions:
 1. Start with "Dear Hiring Manager,"
@@ -506,7 +523,8 @@ const generateWithgemini = async (params) => {
    - Highlight only the most relevant skills and experience from the provided information
    - Mention 1-2 specific projects that align with job requirements
 3. End with "Regards," and with ${name}
-4. Dont include Subject line in the email
+4. If the user has links, include them in the email in the format of [platform](url)
+5. Dont include Subject line in the email
 
 ## Requirements:
 - **Human tone:** Natural, conversational, and authentic (avoid robotic corporate speak)
@@ -561,6 +579,8 @@ export const createEmail = async (req, res) => {
       return res.status(400).json({ error: 'User preferences not found' });
     }
 
+    const userLinks = user.links;
+
     //console.log("userPreferences", userPreferences)
     const emailParams = {
       to: email || "email@gmail.com",
@@ -573,7 +593,8 @@ export const createEmail = async (req, res) => {
       companyName: companyName,
       recruiterName: "Hiring Manager",
       type: type,
-      name: user.name
+      name: user.name,
+      userLinks: userLinks
     };
 
     // console.log("emailParams", emailParams)

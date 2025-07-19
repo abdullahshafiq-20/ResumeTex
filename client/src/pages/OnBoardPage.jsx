@@ -160,7 +160,7 @@ const OnBoardPage = () => {
       setIsUploading(false);
       setIsUploaded(true);
       
-      console.log('Upload response:', response.data);
+      // console.log('Upload response:', response.data);
       
       if (response.data && response.data.data && response.data.data.url) {
         setPdfUrl(response.data.data.url);
@@ -274,7 +274,7 @@ const OnBoardPage = () => {
           pdfUrl2: data.pdfUrl2 || prev.pdfUrl2,
           pdfUrl3: data.pdfUrl3 || prev.pdfUrl3,
         }));
-        console.log(data);
+        // console.log(data);
         setProcessStatus('All resumes have been created successfully!');
         setProcessComplete(true);
         setIsProcessing(false);

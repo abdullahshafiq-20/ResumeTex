@@ -50,7 +50,7 @@ const ResumeSelector = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { getGmailPermission, logoutUser } = useAuth();
-  console.log(getGmailPermission());
+  // console.log(getGmailPermission());
 
   const getResumeOptions = () => {
     if (Array.isArray(resumes)) {
@@ -728,7 +728,7 @@ const EmailPage = () => {
 
       // Add gemini parameter to the API call
       const queryParams = useGemini ? "?gemini=true" : "";
-      console.log("queryParams", queryParams);
+      // console.log("queryParams", queryParams);
       const response = await api.post(
         `${apiUrl}/create-email${queryParams}`,
         emailData

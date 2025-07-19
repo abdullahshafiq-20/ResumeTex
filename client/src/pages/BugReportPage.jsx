@@ -19,7 +19,7 @@ const BugReportPage = () => {
       e.preventDefault();
       setIsSubmitting(true);
       try {
-        console.log("Form submitted:", formData);
+        // console.log("Form submitted:", formData);
         const response = await axios.post(`${api}/bugForm`, formData);
         if (response.status === 200) {
           toast.success("Bug report submitted successfully!", {

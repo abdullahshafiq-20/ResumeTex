@@ -201,7 +201,7 @@ export const getAllUserStats = async (req, res) => {
             globalCount,
             coinLog
         ] = await Promise.all([
-            User.findById(userId).select('name coins email subscribed isExtensionConnected onboarded createdAt'),
+            User.findById(userId).select('name links coins email subscribed isExtensionConnected onboarded createdAt'),
             UserPreferences.findOne({ userId }),
             UserResume.aggregate([
                 { $match: { userId: new mongoose.Types.ObjectId(userId) } },
@@ -284,6 +284,7 @@ export const getAllUserStats = async (req, res) => {
             user: {
                 name: userInfo?.name || '',
                 email: userInfo?.email || '',
+                links: userInfo?.links || [],
                 coins: userInfo?.coins || 0,    
                 subscribed: userInfo?.subscribed || false,
                 extensionConnected: userInfo?.isExtensionConnected || false,

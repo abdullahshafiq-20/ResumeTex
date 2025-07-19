@@ -205,7 +205,7 @@ export const PostsProvider = ({ children }) => {
       const response = await api.post(`${apiUrl}/extension/savePost`, {
         text: postData
       });
-      console.log("Save response:", response.data);
+      // console.log("Save response:", response.data);
       // Refresh posts after saving
       await refreshPosts();
 
@@ -213,7 +213,7 @@ export const PostsProvider = ({ children }) => {
       console.error("Error saving post:", error);
       // Extract the server error message
       const errorMessage = error.response?.data?.message || error.message || "Unknown error occurred";
-      console.log("Server error message:", errorMessage);
+      // console.log("Server error message:", errorMessage);
       toast.error(errorMessage);
       // Re-throw with the extracted message so the UI can handle it
       throw new Error(errorMessage);

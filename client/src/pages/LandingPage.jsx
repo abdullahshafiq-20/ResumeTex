@@ -177,7 +177,7 @@ const LandingPage = () => {
   };
 
   const handleWatchDemo = () => {
-    console.log("Watch demo clicked");
+    // console.log("Watch demo clicked");
   };
 
   return (

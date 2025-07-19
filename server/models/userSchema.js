@@ -9,6 +9,23 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 50
     },
+    links: {
+        type: [{
+            platform: {
+                type: String,
+                required: true,
+                trim: true,
+                unique: true
+            },
+            url: {
+                type: String,
+                required: true,
+                trim: true,
+                unique: true
+            }
+        }],
+        default: []
+    },
     email: {
         type: String,
         required: true,
@@ -59,21 +76,6 @@ const userPrefrencesSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
-    },
-    links: {
-        type: [{
-            platform: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            url: {
-                type: String,
-                required: true,
-                trim: true
-            }
-        }],
-        default: []
     },
     preferences: {  
         type: Object,

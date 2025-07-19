@@ -131,7 +131,7 @@ export const SocketProvider = ({ children }) => {
   const emitEvent = useCallback((event, data) => {
     if (socket && isConnected) {
       socket.emit(event, data);
-      console.log(`Emitted ${event}:`, data);
+      // console.log(`Emitted ${event}:`, data);
     } else {
       console.warn('Socket not connected, cannot emit event:', event);
     }
@@ -141,7 +141,7 @@ export const SocketProvider = ({ children }) => {
   const onEvent = useCallback((event, callback) => {
     if (socket) {
       socket.on(event, callback);
-      console.log(`Listening for ${event} events`);
+      // console.log(`Listening for ${event} events`);
 
       // Return cleanup function
       return () => {

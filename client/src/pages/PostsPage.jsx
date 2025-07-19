@@ -445,7 +445,7 @@ const PostsPage = () => {
         <div className="p-2 sm:p-3">
           {post.jobTitle && (
             <a href={post.postUrl} target="_blank" rel="noopener noreferrer" className={`text-xs sm:text-sm font-semibold line-clamp-1 mb-2 flex items-center ${
-              post.postUrl ? "hover:text-blue-600 hover:underline" : ""
+              post.postUrl ? "sm:text-blue-600 underline cursor-pointer" : ""
             } ${
               isNoMatchFound ? "text-red-800" : "text-gray-800"
             }`}>

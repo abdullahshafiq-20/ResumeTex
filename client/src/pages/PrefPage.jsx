@@ -21,8 +21,302 @@ import {
   Loader2,
   Info,
   Lock,
+  Link,
+  ExternalLink,
+  // Social Media Icons
+  Linkedin,
+  Github,
+  Twitter,
+  Instagram,
+  Youtube,
+  Facebook,
+
+  // Communication Icons
+  Mail,
+  MessageCircle, // Used for Discord and WhatsApp
+  Send, // Used for Telegram
+  Phone,
+
+  // Design & Creative Icons
+  Palette, // Used for Behance and Dribbble
+  Figma,
+
+  // Development Icons // Used for Stack Overflow and CodePen
+  Code2, // Used for Dev.to
+  Hash, // Used for Hashnode
+
+  // Content & Documentation Icons
+  BookOpen, // Used for Notion
+
+  // Web & Portfolio Icons
+  Globe, // Used for Portfolio
+  Globe2, // Used for Personal Website
+
+  // Business & Productivity Icons
+  Building, // Used for Crunchbase
+  Zap, // Used for Product Hunt
+
+  // Media & Entertainment Icons
+  Video,
+  XIcon, // Used for Twitch and TikTok
 } from "lucide-react";
 import { useResumes } from "../context/ResumeContext";
+
+// Platform configuration with icons and validation patterns
+const PLATFORMS = {
+  LinkedIn: {
+    name: "LinkedIn",
+    icon: Linkedin,
+    color: "text-blue-600",
+    bgColor: "bg-blue-100",
+    placeholder: "https://linkedin.com/in/username",
+    pattern: /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-]+\/?$/,
+  },
+  GitHub: {
+    name: "GitHub",
+    icon: Github,
+    color: "text-gray-800",
+    bgColor: "bg-gray-100",
+    placeholder: "https://github.com/username",
+    pattern: /^https?:\/\/(www\.)?github\.com\/[a-zA-Z0-9-]+\/?$/,
+  },
+  Portfolio: {
+    name: "Portfolio",
+    icon: Globe,
+    color: "text-green-600",
+    bgColor: "bg-green-100",
+    placeholder: "https://yourportfolio.com",
+    pattern: /^https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/,
+  },
+  Twitter: {
+    name: "Twitter",
+    icon: XIcon,
+    color: "text-blue-400",
+    bgColor: "bg-blue-50",
+    placeholder: "https://twitter.com/username",
+    pattern: /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/[a-zA-Z0-9_]+\/?$/,
+  },
+  Instagram: {
+    name: "Instagram",
+    icon: Instagram,
+    color: "text-pink-600",
+    bgColor: "bg-pink-100",
+    placeholder: "https://instagram.com/username",
+    pattern: /^https?:\/\/(www\.)?instagram\.com\/[a-zA-Z0-9_.]+\/?$/,
+  },
+  YouTube: {
+    name: "YouTube",
+    icon: Youtube,
+    color: "text-red-600",
+    bgColor: "bg-red-100",
+    placeholder: "https://youtube.com/@channel",
+    pattern:
+      /^https?:\/\/(www\.)?youtube\.com\/(channel\/|@|c\/)[a-zA-Z0-9_-]+\/?$/,
+  },
+  Facebook: {
+    name: "Facebook",
+    icon: Facebook,
+    color: "text-blue-700",
+    bgColor: "bg-blue-100",
+    placeholder: "https://facebook.com/profile",
+    pattern: /^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9.]+\/?$/,
+  },
+  Email: {
+    name: "Email",
+    icon: Mail,
+    color: "text-gray-600",
+    bgColor: "bg-gray-100",
+    placeholder: "mailto:your@email.com",
+    pattern: /^mailto:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  },
+  // New Professional Platforms
+  Behance: {
+    name: "Behance",
+    icon: Palette, // or use a custom Behance icon
+    color: "text-blue-500",
+    bgColor: "bg-blue-50",
+    placeholder: "https://behance.net/username",
+    pattern: /^https?:\/\/(www\.)?behance\.net\/[a-zA-Z0-9_-]+\/?$/,
+  },
+  Dribbble: {
+    name: "Dribbble",
+    icon: Palette,
+    color: "text-pink-500",
+    bgColor: "bg-pink-50",
+    placeholder: "https://dribbble.com/username",
+    pattern: /^https?:\/\/(www\.)?dribbble\.com\/[a-zA-Z0-9_-]+\/?$/,
+  },
+  Medium: {
+    name: "Medium",
+    icon: FileText,
+    color: "text-gray-700",
+    bgColor: "bg-gray-50",
+    placeholder: "https://medium.com/@username",
+    pattern: /^https?:\/\/(www\.)?medium\.com\/@[a-zA-Z0-9_.-]+\/?$/,
+  },
+  StackOverflow: {
+    name: "Stack Overflow",
+    icon: Code,
+    color: "text-orange-500",
+    bgColor: "bg-orange-50",
+    placeholder: "https://stackoverflow.com/users/id/username",
+    pattern:
+      /^https?:\/\/(www\.)?stackoverflow\.com\/users\/\d+\/[a-zA-Z0-9-]+\/?$/,
+  },
+  Devto: {
+    name: "Dev.to",
+    icon: Code2,
+    color: "text-gray-800",
+    bgColor: "bg-gray-50",
+    placeholder: "https://dev.to/username",
+    pattern: /^https?:\/\/(www\.)?dev\.to\/[a-zA-Z0-9_-]+\/?$/,
+  },
+  CodePen: {
+    name: "CodePen",
+    icon: Code,
+    color: "text-gray-700",
+    bgColor: "bg-gray-100",
+    placeholder: "https://codepen.io/username",
+    pattern: /^https?:\/\/(www\.)?codepen\.io\/[a-zA-Z0-9_-]+\/?$/,
+  },
+  Figma: {
+    name: "Figma",
+    icon: Figma,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    placeholder: "https://figma.com/@username",
+    pattern: /^https?:\/\/(www\.)?figma\.com\/@[a-zA-Z0-9_-]+\/?$/,
+  },
+  Hashnode: {
+    name: "Hashnode",
+    icon: Hash,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    placeholder: "https://hashnode.com/@username",
+    pattern:
+      /^https?:\/\/[a-zA-Z0-9_-]+\.hashnode\.dev\/?$|^https?:\/\/(www\.)?hashnode\.com\/@[a-zA-Z0-9_-]+\/?$/,
+  },
+  Notion: {
+    name: "Notion",
+    icon: BookOpen,
+    color: "text-gray-700",
+    bgColor: "bg-gray-50",
+    placeholder: "https://notion.so/username",
+    pattern:
+      /^https?:\/\/[a-zA-Z0-9_-]+\.notion\.site\/.*$|^https?:\/\/(www\.)?notion\.so\/[a-zA-Z0-9_-]+.*$/,
+  },
+  Website: {
+    name: "Personal Website",
+    icon: Globe2,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+    placeholder: "https://yourname.com",
+    pattern: /^https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/,
+  },
+  Calendly: {
+    name: "Calendly",
+    icon: Calendar,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    placeholder: "https://calendly.com/username",
+    pattern: /^https?:\/\/(www\.)?calendly\.com\/[a-zA-Z0-9_-]+\/?.*$/,
+  },
+  Discord: {
+    name: "Discord",
+    icon: MessageCircle,
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-50",
+    placeholder: "https://discord.gg/servername or discord.com/users/userid",
+    pattern:
+      /^https?:\/\/(www\.)?(discord\.gg\/[a-zA-Z0-9]+|discord\.com\/users\/\d+)\/?$/,
+  },
+  Telegram: {
+    name: "Telegram",
+    icon: Send,
+    color: "text-blue-500",
+    bgColor: "bg-blue-50",
+    placeholder: "https://t.me/username",
+    pattern: /^https?:\/\/(www\.)?t\.me\/[a-zA-Z0-9_]+\/?$/,
+  },
+  WhatsApp: {
+    name: "WhatsApp",
+    icon: MessageCircle,
+    color: "text-green-500",
+    bgColor: "bg-green-50",
+    placeholder: "https://wa.me/1234567890",
+    pattern: /^https?:\/\/(www\.)?wa\.me\/\d+\/?$/,
+  },
+  Phone: {
+    name: "Phone",
+    icon: Phone,
+    color: "text-gray-600",
+    bgColor: "bg-gray-100",
+    placeholder: "tel:+1234567890",
+    pattern: /^tel:\+?[1-9]\d{1,14}$/,
+  },
+  Substack: {
+    name: "Substack",
+    icon: Mail,
+    color: "text-orange-600",
+    bgColor: "bg-orange-50",
+    placeholder: "https://username.substack.com",
+    pattern: /^https?:\/\/[a-zA-Z0-9_-]+\.substack\.com\/?.*$/,
+  },
+  Twitch: {
+    name: "Twitch",
+    icon: Video,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    placeholder: "https://twitch.tv/username",
+    pattern: /^https?:\/\/(www\.)?twitch\.tv\/[a-zA-Z0-9_]+\/?$/,
+  },
+  TikTok: {
+    name: "TikTok",
+    icon: Video,
+    color: "text-black",
+    bgColor: "bg-gray-100",
+    placeholder: "https://tiktok.com/@username",
+    pattern: /^https?:\/\/(www\.)?tiktok\.com\/@[a-zA-Z0-9_.]+\/?$/,
+  },
+  ProductHunt: {
+    name: "Product Hunt",
+    icon: Zap,
+    color: "text-orange-500",
+    bgColor: "bg-orange-50",
+    placeholder: "https://producthunt.com/@username",
+    pattern: /^https?:\/\/(www\.)?producthunt\.com\/@[a-zA-Z0-9_-]+\/?$/,
+  },
+  AngelList: {
+    name: "AngelList",
+    icon: TrendingUp,
+    color: "text-gray-700",
+    bgColor: "bg-gray-50",
+    placeholder: "https://angel.co/u/username",
+    pattern:
+      /^https?:\/\/(www\.)?(angel\.co\/u\/[a-zA-Z0-9_-]+|wellfound\.com\/u\/[a-zA-Z0-9_-]+)\/?$/,
+  },
+  Crunchbase: {
+    name: "Crunchbase",
+    icon: Building,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    placeholder: "https://crunchbase.com/person/name",
+    pattern: /^https?:\/\/(www\.)?crunchbase\.com\/person\/[a-zA-Z0-9-]+\/?$/,
+  },
+};
+// Validation function
+const validateUrl = (platform, url) => {
+  if (!url.trim()) return "URL is required";
+
+  const platformConfig = PLATFORMS[platform];
+  if (!platformConfig) return "Invalid platform";
+
+  if (!platformConfig.pattern.test(url.trim())) {
+    return `Please enter a valid ${platformConfig.name} URL`;
+  }
+
+  return null;
+};
 
 // Mobile-Optimized Title Restriction Modal
 const TitleRestrictionModal = ({ isOpen, onClose }) => {
@@ -82,6 +376,208 @@ const TitleRestrictionModal = ({ isOpen, onClose }) => {
           >
             Got it
           </button>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
+
+// Mobile-Optimized Links Modal
+const LinksModal = ({
+  isOpen,
+  onClose,
+  currentLinks,
+  onSave,
+  isLoading,
+  editingLink = null,
+}) => {
+  // console.log(currentLinks);
+  const [selectedPlatform, setSelectedPlatform] = useState(
+    editingLink?.platform || "LinkedIn"
+  );
+  const [url, setUrl] = useState(editingLink?.url || "");
+  const [linkId, setLinkId] = useState(editingLink?._id || "");
+  const [error, setError] = useState("");
+
+  const handleSave = () => {
+    const validationError = validateUrl(selectedPlatform, url);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    // Check for duplicates (excluding current editing link)
+    const existingLink = currentLinks.find(
+      (link) =>
+        link.platform === selectedPlatform && link.url !== editingLink?.url
+    );
+
+    if (existingLink) {
+      setError(`${PLATFORMS[selectedPlatform].name} link already exists`);
+      return;
+    }
+
+    onSave({ platform: selectedPlatform, url: url.trim(), _id: linkId });
+    handleClose();
+  };
+
+  const handleClose = () => {
+    setSelectedPlatform(editingLink?.platform || "LinkedIn");
+    setUrl(editingLink?.url || "");
+    setError("");
+    onClose();
+  };
+
+  React.useEffect(() => {
+    if (editingLink) {
+      setSelectedPlatform(editingLink.platform);
+      setUrl(editingLink.url);
+      setLinkId(editingLink._id);
+    } else {
+      setSelectedPlatform("LinkedIn");
+      setUrl("");
+    }
+    setError("");
+  }, [editingLink, isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-white rounded-lg p-3 sm:p-4 w-full max-w-xs sm:max-w-md mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto"
+        >
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center">
+              <Link className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-purple-600" />
+              {editingLink ? "Edit Link" : "Add Link"}
+            </h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
+            </button>
+          </div>
+
+          {/* Platform Selection */}
+          <div className="mb-3 sm:mb-4">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+              Platform
+            </label>
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+              {Object.entries(PLATFORMS).map(([key, platform]) => {
+                const IconComponent = platform.icon;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedPlatform(key)}
+                    className={`p-2 sm:p-3 rounded-lg border transition-all text-left ${
+                      selectedPlatform === key
+                        ? `${platform.bgColor} border-current ${platform.color}`
+                        : "bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-1.5 sm:space-x-2">
+                      <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="text-[10px] sm:text-xs font-medium">
+                        {platform.name}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* URL Input */}
+          <div className="mb-3 sm:mb-4">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+              URL
+            </label>
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setError("");
+              }}
+              placeholder={PLATFORMS[selectedPlatform].placeholder}
+              className={`w-full border rounded-lg p-2 sm:p-3 text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                error ? "border-red-300" : "border-gray-300"
+              }`}
+            />
+            {error && (
+              <p className="text-[10px] sm:text-xs text-red-600 mt-1">
+                {error}
+              </p>
+            )}
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+              Please enter the full URL including https://
+            </p>
+          </div>
+
+          {/* Current Links Preview */}
+          {currentLinks.length > 0 && (
+            <div className="mb-3 sm:mb-4">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                Current Links
+              </label>
+              <div className="max-h-16 sm:max-h-20 overflow-y-auto space-y-1">
+                {currentLinks.map((link, index) => {
+                  const platform = PLATFORMS[link.platform];
+                  const IconComponent = platform?.icon || Link;
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-2 p-1.5 sm:p-2 bg-gray-50 rounded text-[10px] sm:text-xs"
+                    >
+                      <IconComponent
+                        className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                          platform?.color || "text-gray-600"
+                        }`}
+                      />
+                      <span className="font-medium">
+                        {platform?.name || link.platform}:
+                      </span>
+                      <span className="text-gray-600 truncate">{link.url}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <button
+              onClick={handleSave}
+              disabled={isLoading || !url.trim()}
+              className="flex-1 px-3 py-2 sm:px-4 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs sm:text-sm flex items-center justify-center space-x-1.5 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span>{editingLink ? "Updating..." : "Adding..."}</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>{editingLink ? "Update Link" : "Add Link"}</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleClose}
+              className="px-3 py-2 sm:px-4 sm:py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-xs sm:text-sm"
+            >
+              Cancel
+            </button>
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>
@@ -317,9 +813,15 @@ const ProjectsModal = ({
 };
 
 const PrefPage = () => {
-  const { preferences, loading, error, refreshPreferences, isSocketConnected } =
-    useDashboard();
-  const { updatePreferences } = useResumes();
+  const {
+    preferences,
+    loading,
+    error,
+    refreshPreferences,
+    isSocketConnected,
+    stats,
+  } = useDashboard();
+  const { updatePreferences, addLinks, updateLinks, deleteLink } = useResumes();
   const [selectedRecord, setSelectedRecord] = useState(0);
   const { lastUpdated, isLive } = useDashboard();
 
@@ -331,10 +833,16 @@ const PrefPage = () => {
   // Modal states
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [showLinksModal, setShowLinksModal] = useState(false);
   const [showTitleRestrictionModal, setShowTitleRestrictionModal] =
     useState(false);
   const [isAddingSkills, setIsAddingSkills] = useState(false);
   const [isAddingProjects, setIsAddingProjects] = useState(false);
+  const [isManagingLinks, setIsManagingLinks] = useState(false);
+  const [editingLink, setEditingLink] = useState(null);
+
+  // Get user links from stats
+  const userLinks = stats?.user?.links || [];
 
   // Initialize edit data when editing starts
   const startEditing = () => {
@@ -360,7 +868,7 @@ const PrefPage = () => {
   // Save preferences - preserve selected record
   const savePreferences = async () => {
     const currentSelectedIndex = selectedRecord; // Store current selection index
-    console.log(preferences.records[selectedRecord]._id);
+    // console.log(preferences.records[selectedRecord]._id);
     setIsSaving(true);
     try {
       await updatePreferences(
@@ -412,6 +920,57 @@ const PrefPage = () => {
     } finally {
       setIsAddingProjects(false);
     }
+  };
+
+  // Handle links management
+  const handleAddLink = async (linkData) => {
+    setIsManagingLinks(true);
+    try {
+      await addLinks(linkData);
+      setShowLinksModal(false);
+      // Refresh will happen via socket
+    } catch (error) {
+      console.error("Error adding link:", error);
+    } finally {
+      setIsManagingLinks(false);
+    }
+  };
+
+  const handleUpdateLink = async (linkData) => {
+    setIsManagingLinks(true);
+    // console.log("linkData", linkData);
+    try {
+      await updateLinks(linkData);
+      setShowLinksModal(false);
+      setEditingLink(null);
+      // Refresh will happen via socket
+    } catch (error) {
+      console.error("Error updating link:", error);
+    } finally {
+      setIsManagingLinks(false);
+    }
+  };
+
+  const handleDeleteLink = async (platform) => {
+    setIsManagingLinks(true);
+    try {
+      await deleteLink(platform);
+      // Refresh will happen via socket
+    } catch (error) {
+      console.error("Error deleting link:", error);
+    } finally {
+      setIsManagingLinks(false);
+    }
+  };
+
+  const openEditLinkModal = (link) => {
+    setEditingLink(link);
+    setShowLinksModal(true);
+  };
+
+  const openAddLinkModal = () => {
+    setEditingLink(null);
+    setShowLinksModal(true);
   };
 
   // Remove skill
@@ -540,6 +1099,15 @@ const PrefPage = () => {
         isLoading={isAddingProjects}
       />
 
+      <LinksModal
+        isOpen={showLinksModal}
+        onClose={() => setShowLinksModal(false)}
+        currentLinks={userLinks}
+        onSave={editingLink ? handleUpdateLink : handleAddLink}
+        isLoading={isManagingLinks}
+        editingLink={editingLink}
+      />
+
       <motion.div
         className=""
         variants={containerVariants}
@@ -579,6 +1147,219 @@ const PrefPage = () => {
             >
               Refresh
             </button>
+          </div>
+        </motion.div>
+
+        {/* User Links Panel - Simple Link Cards */}
+        <motion.div
+          className="mb-3 sm:mb-6 border border-slate-200 bg-white rounded-lg p-2.5 sm:p-4 relative overflow-hidden"
+          variants={itemVariants}
+        >
+          {/* Subtle background pattern */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1 left-1/3 w-2 h-2 sm:w-3 sm:h-3 bg-blue-200/20 rounded-full animate-pulse delay-300"></div>
+            <div className="absolute bottom-1 right-1/4 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-indigo-200/15 rounded-full animate-pulse delay-700"></div>
+          </div>
+
+          <div className="relative">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4 space-y-2 sm:space-y-0">
+              <div className="flex items-center">
+                <Link className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 mr-1.5 sm:mr-2" />
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-800">
+                  Professional Links ({userLinks.length})
+                </h3>
+                <div className="flex space-x-0.5 sm:space-x-1 ml-2">
+                  <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-indigo-500 rounded-full animate-pulse delay-200"></div>
+                  <div className="w-0.5 h-0.5 sm:w-1 sm:h-1 bg-purple-500 rounded-full animate-pulse delay-400"></div>
+                </div>
+              </div>
+
+              <button
+                onClick={openAddLinkModal}
+                className="text-[10px] sm:text-xs border border-blue-200 text-blue-600 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center space-x-1 self-start sm:self-auto"
+              >
+                <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                <span>Add Link</span>
+              </button>
+            </div>
+
+            {userLinks.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+                {userLinks.map((link, index) => {
+                  const platform = PLATFORMS[link.platform];
+                  const IconComponent = platform?.icon || Link;
+
+                  // Extract domain from URL
+                  const domain = link.url
+                    .replace(/^https?:\/\//, "")
+                    .split("/")[0];
+                  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=16`;
+
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="group relative"
+                    >
+                      {/* Simple Link Card */}
+                      <div
+                        onClick={() => window.open(link.url, "_blank")}
+                        className="border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200 overflow-hidden bg-white cursor-pointer hover:bg-gray-50"
+                      >
+                        <div className="p-2 sm:p-3">
+                          {/* Header with favicon and actions */}
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-1.5 sm:space-x-2">
+                              <img
+                                src={faviconUrl}
+                                alt=""
+                                className="w-3 h-3 sm:w-4 sm:h-4 rounded"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                  e.target.nextElementSibling.style.display =
+                                    "flex";
+                                }}
+                              />
+                              <div
+                                className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                                  platform?.bgColor || "bg-gray-100"
+                                } rounded flex items-center justify-center hidden`}
+                              >
+                                <IconComponent
+                                  className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${
+                                    platform?.color || "text-gray-600"
+                                  }`}
+                                />
+                              </div>
+                              <span className="text-[9px] sm:text-[10px] text-gray-500 font-medium">
+                                {domain}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center space-x-0.5 sm:space-x-1 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditLinkModal(link);
+                                }}
+                                className="p-0.5 text-gray-400 hover:text-blue-600 border border-transparent hover:border-blue-200 hover:bg-blue-50 rounded transition-all duration-200"
+                                title="Edit link"
+                              >
+                                <Edit3 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteLink(link.platform);
+                                }}
+                                disabled={isManagingLinks}
+                                className="p-0.5 text-gray-400 hover:text-red-600 border border-transparent hover:border-red-200 hover:bg-red-50 rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Delete link"
+                              >
+                                <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Main URL Display */}
+                          <div className="space-y-1 sm:space-y-1.5">
+                            <h4 className="font-medium text-[10px] sm:text-xs text-gray-900 group-hover:text-blue-600 transition-colors duration-200 break-all">
+                              {link.url}
+                            </h4>
+                          </div>
+
+                          {/* Footer */}
+                          <div className="flex items-center justify-between mt-2 pt-1.5 sm:pt-2 border-t border-gray-100">
+                            <div className="flex items-center space-x-1">
+                              <div
+                                className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                                  platform?.bgColor || "bg-gray-100"
+                                } rounded flex items-center justify-center`}
+                              >
+                                <IconComponent
+                                  className={`h-2 w-2 sm:h-2.5 sm:w-2.5 ${
+                                    platform?.color || "text-gray-600"
+                                  }`}
+                                />
+                              </div>
+                              <span className="text-[9px] sm:text-[10px] font-medium text-gray-700">
+                                {platform?.name || link.platform}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center space-x-1 text-gray-400 group-hover:text-blue-500 transition-colors duration-200">
+                              <ExternalLink className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+                              <span className="text-[8px] sm:text-[9px] font-medium">
+                                Visit
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Loading overlay */}
+                      {isManagingLinks && (
+                        <div className="absolute inset-0 bg-white/70 rounded-lg flex items-center justify-center">
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-blue-600" />
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Empty State */
+              <div className="text-center py-3 sm:py-4">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Link className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                </div>
+                <h4 className="text-xs sm:text-sm font-semibold text-gray-900 mb-1">
+                  No links added yet
+                </h4>
+                <p className="text-[10px] sm:text-xs text-gray-600 mb-2 max-w-xs mx-auto">
+                  Add your professional and social links to showcase your online
+                  presence.
+                </p>
+                <button
+                  onClick={openAddLinkModal}
+                  className="text-[10px] sm:text-xs border border-blue-200 text-blue-600 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors font-medium"
+                >
+                  Add your first link
+                </button>
+              </div>
+            )}
+
+            {/* Quick Stats */}
+            {userLinks.length > 0 && (
+              <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-200">
+                <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-600">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <span className="flex items-center">
+                      <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-green-500 rounded-full mr-1"></div>
+                      All active
+                    </span>
+                    <span className="flex items-center">
+                      <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-500 rounded-full mr-1"></div>
+                      {userLinks.length} total
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      userLinks.forEach((link) => {
+                        window.open(link.url, "_blank");
+                      });
+                    }}
+                    className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200 border border-transparent hover:border-blue-200 px-1.5 py-0.5 rounded"
+                  >
+                    Open all
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
 

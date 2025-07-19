@@ -22,11 +22,11 @@ export const DashbaordProvider = ({ children }) => {
     const fetchDashboardData = useCallback(async (limit = 10) => {
         // Don't fetch if auth is still loading or user is not authenticated
         if (authLoading || !isAuthenticated || !user) {
-            console.log('Skipping fetch - auth loading:', authLoading, 'authenticated:', isAuthenticated, 'user:', !!user);
+            // console.log('Skipping fetch - auth loading:', authLoading, 'authenticated:', isAuthenticated, 'user:', !!user);
             return;
         }
 
-        console.log('Starting dashboard data fetch for user:', user.email || user.id);
+        // console.log('Starting dashboard data fetch for user:', user.email || user.id);
         setLoading(true);
         setError(null);
 
@@ -36,7 +36,7 @@ export const DashbaordProvider = ({ children }) => {
             const coinsLog = await api.get('/coin/coin-log');
              // Fetch coins log if needed
 
-            console.log('API Response:', response.data);
+            // console.log('API Response:', response.data);
 
             if (response.data.success) {
                 const data = response.data.data;
@@ -58,11 +58,11 @@ export const DashbaordProvider = ({ children }) => {
 
                 // Set coins from user data
                 if (data.user && data.user.coins !== undefined) {
-                    console.log('Setting coins from user data:', data.user.coins);
+                    // console.log('Setting coins from user data:', data.user.coins);
                     setCoins(data.user.coins);
                 }
 
-                console.log('Dashboard data fetch completed successfully');
+                // console.log('Dashboard data fetch completed successfully');
             } else {
                 console.warn('Stats fetch failed:', response.data.message || response.data.error);
                 setError(response.data.message || 'Failed to fetch dashboard data');
@@ -80,10 +80,10 @@ export const DashbaordProvider = ({ children }) => {
     useEffect(() => {
         if (!socket || !isConnected) return;
 
-        console.log('Setting up dashboard socket listeners...');
+        // console.log('Setting up dashboard socket listeners...');
 
         const handleStatsUpdate = (data) => {
-            console.log('Received live stats update:', data);
+            // console.log('Received live stats update:', data);
             if (data.type === 'stats_dashboard' && data.data) {
                 const statsData = data.data;
 
@@ -102,7 +102,7 @@ export const DashbaordProvider = ({ children }) => {
                     // Update coins if included in user data
                     if (statsData.user && statsData.user.coins !== undefined) {
                         setCoins(statsData.user.coins);
-                        console.log('Updated coins from stats data:', statsData.user.coins);
+                        // console.log('Updated coins from stats data:', statsData.user.coins);
                     }
                 }
                 setCoinsLog(statsData.coinLog || []); // Update coins log if available
@@ -125,28 +125,28 @@ export const DashbaordProvider = ({ children }) => {
 
         // Keep individual listeners for compatibility with existing socket events
         const handleActivityUpdate = (data) => {
-            console.log('Received live activity update:', data);
+            // console.log('Received live activity update:', data);
             if (data.type === 'activity_dashboard' && data.data) {
                 setActivity(data.data);
             }
         };
 
         const handleComparisonUpdate = (data) => {
-            console.log('Received live comparison update:', data);
+            // console.log('Received live comparison update:', data);
             if (data.type === 'comparison_dashboard' && data.data) {
                 setComparison(data.data);
             }
         };
 
         const handlePreferencesUpdate = (data) => {
-            console.log('Received live preferences update:', data);
+            // console.log('Received live preferences update:', data);
             if (data.type === 'preferences_dashboard' && data.data) {
                 setPreferences(data.data);
             }
         };
 
         const handleCoinsUpdate = (data) => {
-            console.log('Received coins update:', data);
+            // console.log('Received coins update:', data);
             if (data.type === 'coins_update' && data.coins !== undefined) {
                 setCoins(data.coins);
                 setLastUpdated(data.timestamp || new Date().toISOString());
@@ -160,7 +160,7 @@ export const DashbaordProvider = ({ children }) => {
         socket.on('coins_update', handleCoinsUpdate);
 
         socket.on('dashboard_update', (data) => {
-            console.log('Received dashboard update:', data);
+            // console.log('Received dashboard update:', data);
             switch (data.type) {
                 case 'stats':
                     setStats(data.data);
@@ -188,7 +188,7 @@ export const DashbaordProvider = ({ children }) => {
         });
 
         return () => {
-            console.log('Cleaning up dashboard socket listeners...');
+            // console.log('Cleaning up dashboard socket listeners...');
             socket.off('stats_dashboard', handleStatsUpdate);
             socket.off('activity_dashboard', handleActivityUpdate);
             socket.off('comparison_dashboard', handleComparisonUpdate);
@@ -201,7 +201,7 @@ export const DashbaordProvider = ({ children }) => {
     // Main effect to fetch data when authentication is ready
     useEffect(() => {
         if (!authLoading && isAuthenticated && user) {
-            console.log('Auth ready, fetching dashboard data...');
+            // console.log('Auth ready, fetching dashboard data...');
             fetchDashboardData();
         }
     }, [authLoading, isAuthenticated, user, fetchDashboardData]);

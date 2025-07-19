@@ -89,12 +89,54 @@ export const ResumeProvider = ({ children }) => {
     
   }, [apiUrl]);
 
+  const fetchLinks = useCallback(async () => {
+    try {
+      const response = await api.get(`${apiUrl}/links/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching links:", error);
+      throw error;
+    }
+  }, [apiUrl]);
+
   const addLinks = useCallback(async (links) => {
     try {
-      const response = await api.post(`${apiUrl}/add-links`, { links });
+      const response = await api.post(`${apiUrl}/add-links`, { 
+        links: {
+          platform: links.platform,
+          url: links.url
+        }
+      });
       return response.data;
     } catch (error) {
       console.error("Error adding links:", error);
+      throw error;
+    }
+  }, [apiUrl]);
+
+  const updateLinks = useCallback(async (links) => {
+    // console.log("links", links);
+    try {
+      const response = await api.post(`${apiUrl}/update-links`, { 
+        links: {
+          platform: links.platform,
+          url: links.url,
+          _id: links._id
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating links:", error);
+      throw error;
+    }
+  }, [apiUrl]);
+  
+  const deleteLink = useCallback(async (platform) => {
+    try {
+      const response = await api.post(`${apiUrl}/delete-link`, { platform });
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting link:", error);
       throw error;
     }
   }, [apiUrl]);
@@ -105,13 +147,13 @@ export const ResumeProvider = ({ children }) => {
 
     // Handle resume created event
     const handleResumeCreated = (data) => {
-      console.log('Resume created via socket:', data);
+      // console.log('Resume created via socket:', data);
       setResumes(prev => [...prev, data.data]);
     };
 
     // Handle resume updated event
     const handleResumeUpdated = (data) => {
-      console.log('Resume updated via socket:', data);
+      // console.log('Resume updated via socket:', data);
       setResumes(prev => 
         prev.map(resume => 
           resume._id === data.data._id ? data.data : resume
@@ -121,14 +163,14 @@ export const ResumeProvider = ({ children }) => {
 
     // Handle resume deleted event
     const handleResumeDeleted = (data) => {
-      console.log('Resume deleted via socket:', data);
+      // console.log('Resume deleted via socket:', data);
       setResumes(prev => 
         prev.filter(resume => resume._id !== data.data.resumeId)
       );
     };
 
     const handlePreferencesUpdated = (data) => {
-      console.log('Preferences updated via socket:', data);
+      // console.log('Preferences updated via socket:', data);
       setPreferences(data.data);
     };
 
@@ -164,8 +206,11 @@ export const ResumeProvider = ({ children }) => {
     fetchResumes,
     isSocketConnected: isConnected,
     updatePreferences,
-    addLinks
-  }), [resumes, loading, createResume, updateResume, deleteResume, fetchResumes, isConnected, updatePreferences, addLinks]);
+    addLinks,
+    updateLinks,
+    deleteLink,
+    fetchLinks
+  }), [resumes, loading, createResume, updateResume, deleteResume, fetchResumes, isConnected, updatePreferences, addLinks, updateLinks, deleteLink, fetchLinks]);
 
   return (
     <ResumeContext.Provider value={value}>

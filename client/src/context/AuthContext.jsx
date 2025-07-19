@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get(`${apiUrl}/connectionStatus`);
       if (response.status === 200) {
-        console.log("Connection is good");
+        // console.log("Connection is good");
       } else {
         console.error("Connection error:", response.status);
       }
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
     setUser(decoded);
     setIsAuthenticated(true);
     setGmailPermission(decoded.gmail_permission);
-    console.log(decoded.gmail_permission);
+    // console.log(decoded.gmail_permission);
     // Fetch fresh user profile data after login
     const profileData = await fetchUserProfile();
     if (!profileData) {

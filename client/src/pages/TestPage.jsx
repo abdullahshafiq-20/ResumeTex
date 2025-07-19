@@ -42,7 +42,7 @@ const TestPage = () => {
       // Handle the Extracting data event (matches server event name)
       eventSourceRef.current.addEventListener('Extracting data', (event) => {
         const data = JSON.parse(event.data);
-        console.log('Extracting data:', data);
+        // console.log('Extracting data:', data);
         if (data.status === 'started') {
           setStatus('Extracting data from PDF...');
         } else if (data.status === 'completed') {
