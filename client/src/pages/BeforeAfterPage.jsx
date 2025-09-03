@@ -18,7 +18,7 @@ const BeforeAfterPage = () => {
   const [deploymentLog, setDeploymentLog] = useState({ type: "", message: "" });
   const navigate = useNavigate();
   const [count, setCount] = useState(0);
-  const [disable, setDisable] = useState(true);
+  const [disable, setDisable] = useState(false);
   const [showNewVersionModal, setShowNewVersionModal] = useState(false);
 
   // Status styles configuration
