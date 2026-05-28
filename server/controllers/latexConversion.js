@@ -206,13 +206,16 @@ const CV_STRUCTURE = `{
 
 
 export const ConvertLatex = async (req, res) => {
-    const { extractedData, template, model: modelName, apiProvider, isTailoredResume, jobTitle, jobDescription } = req.body;
+    const { extractedData, template, apiProvider, isTailoredResume, jobTitle, jobDescription } = req.body;
+    
+    // Get model from environment variable (default to gemini-2.5-flash)
+    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    
     console.log("apiProvider", apiProvider);
     console.log("model", modelName);
 
     let apiKey;
     let latexContent;
-    let mn;
     
     try {
 
@@ -225,51 +228,38 @@ export const ConvertLatex = async (req, res) => {
         LATEX_CONVERSION_PROMPT = await getLatexPrompt(extractedData, CV_STRUCTURE);
         }
         
-        // Determine which API to use based on the model
-        if (modelName === 'Gemini 1.5 Pro' || modelName === 'Gemini 1.5 Flash') {
-            if (modelName === 'Gemini 1.5 Pro') {
-                mn = "gemini-1.5-pro";
-            }
-            else if (modelName === 'Gemini 1.5 Flash') {
-                mn = "gemini-2.0-flash";
-            }
-
-            // Select Gemini API key based on provider
-            switch(apiProvider) {
-                case 'api_1':
-                    apiKey = process.env.GEMINI_API_KEY_1;
-                    break;
-                case 'api_2':
-                    apiKey = process.env.GEMINI_API_KEY_2;
-                    break;
-                case 'api_3':
-                    apiKey = process.env.GEMINI_API_KEY_3;
-                    break;
-                case 'api_4':
-                    apiKey = process.env.GEMINI_API_KEY_4;
-                    break;
-                case 'api_5':
-                    apiKey = process.env.GEMINI_API_KEY_5;
-                    break;
-                default:
-                    return res.status(400).json({ error: 'Invalid API provider specified' });
-            }
-            
-            if (!apiKey) {
-                return res.status(500).json({ error: 'Gemini API key not configured for specified provider' });
-            }
-            
-            // Call Gemini API
-            console.log("Calling Gemini API with model:", mn);
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: mn});
-            const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
-            latexContent = result.response.text();
-            console.log("Response received from Gemini API");
-            
-        } else {
-            return res.status(400).json({ error: 'Unsupported model specified' });
+        // Select Gemini API key based on provider
+        switch(apiProvider) {
+            case 'api_1':
+                apiKey = process.env.GEMINI_API_KEY_1;
+                break;
+            case 'api_2':
+                apiKey = process.env.GEMINI_API_KEY_2;
+                break;
+            case 'api_3':
+                apiKey = process.env.GEMINI_API_KEY_3;
+                break;
+            case 'api_4':
+                apiKey = process.env.GEMINI_API_KEY_4;
+                break;
+            case 'api_5':
+                apiKey = process.env.GEMINI_API_KEY_5;
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid API provider specified' });
         }
+        
+        if (!apiKey) {
+            return res.status(500).json({ error: 'Gemini API key not configured for specified provider' });
+        }
+        
+        // Call Gemini API
+        console.log("Calling Gemini API with model:", modelName);
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName});
+        const result = await model.generateContent(LATEX_CONVERSION_PROMPT);
+        latexContent = result.response.text();
+        console.log("Response received from Gemini API");
         
         console.log("Processing AI response");
         

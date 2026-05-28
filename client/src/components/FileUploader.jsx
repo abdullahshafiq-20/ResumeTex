@@ -13,9 +13,7 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
     const [processingStep, setProcessingStep] = useState('');
     const [processingMessage, setProcessingMessage] = useState('');
     const navigate = useNavigate();
-    const [selectedModel, setSelectedModel] = useState('Gemini 1.5 Flash');
     const [selectedApi, setSelectedApi] = useState('api_1');
-    const [showModelInfo, setShowModelInfo] = useState(false);
     const [showApiInfo, setShowApiInfo] = useState(false);
     const [pId, setpId] = useState(null);
     const [isTailoredResume, setIsTailoredResume] = useState(false);
@@ -77,16 +75,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
         setIsUploaded(false);
     };
 
-    const handleModelChange = (e) => {
-        if (disable) return;
-        const model = e.target.value;
-        setSelectedModel(model);
-        toast.success(`Switched to ${model}`, {
-            position: 'bottom-center',
-            duration: 2000,
-        });
-    };
-
     const handleApiChange = (e) => {
         if (disable) return;
         setSelectedApi(e.target.value);
@@ -104,7 +92,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
             setProcessingMessage('Extracting data from PDF...');
             const response = await axios.post(`${apiUrl}/extract-pdf`, {
                 pdfUrl: pdfurl,
-                model: selectedModel,
                 apiProvider: selectedApi
             }, {
                 headers: {
@@ -122,7 +109,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
                 const geminicall = await axios.post(`${apiUrl}/convert-latex`, {
                     extractedData: extractedData,
                     template: template,
-                    model: selectedModel,
                     apiProvider: selectedApi,
                     isTailoredResume: isTailoredResume,
                     jobTitle: jobTitle,
@@ -332,42 +318,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
 
             {/* Settings Panel - Always visible */}
             <div className="p-3 sm:p-4 border-b space-y-3 sm:space-y-4">
-                {/* Model Selection */}
-                <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                        <label className="text-xs sm:text-sm font-medium text-gray-700">Model Selection</label>
-                        <div className="relative">
-                            <button
-                                className="text-gray-400 hover:text-gray-600"
-                                onMouseEnter={() => setShowModelInfo(true)}
-                                onMouseLeave={() => setShowModelInfo(false)}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </button>
-                            {showModelInfo && (
-                                <div className="absolute z-10 w-64 p-2 bg-gray-800 text-white text-xs rounded shadow-lg -left-20 top-6">
-                                    Select from listed Gemini models when models are overloaded or api is exhausted.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <select
-                        value={selectedModel}
-                        onChange={handleModelChange}
-                        disabled={disable}
-                        className={`w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white ${disable ? 'cursor-not-allowed' : ''}`}
-                    >
-                        <option value="Gemini 1.5 Flash">Gemini 2.0 Flash</option>
-                        {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
-                        {/* <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option> */}
-                        {/* <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                        <option value="claude-3-opus">Claude 3 Opus</option>
-                        <option value="claude-3-sonnet">Claude 3 Sonnet</option> */}
-                    </select>
-                </div>
-
                 {/* API Selection */}
                 <div className="space-y-2">
                     <div className="flex items-center space-x-2">
