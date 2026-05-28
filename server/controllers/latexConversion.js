@@ -226,58 +226,7 @@ export const ConvertLatex = async (req, res) => {
         }
         
         // Determine which API to use based on the model
-        if (modelName === 'Qwen 32B') {
-            mn = "qwen/qwen2.5-vl-32b-instruct:free";
-            // Select OpenRouter API key based on provider
-            switch(apiProvider) {
-                case 'api_1':
-                    apiKey = process.env.OPENROUTER_API_KEY_1;
-                    break;
-                case 'api_2':
-                    apiKey = process.env.OPENROUTER_API_KEY_2;
-                    break;
-                case 'api_3':
-                    apiKey = process.env.OPENROUTER_API_KEY_3;
-                    break;
-                case 'api_4':
-                    apiKey = process.env.OPENROUTER_API_KEY_4;
-                    break;
-                case 'api_5':
-                    apiKey = process.env.OPENROUTER_API_KEY_5;
-                    break;
-                default:
-                    return res.status(400).json({ error: 'Invalid API provider specified' });
-            }
-            
-            if (!apiKey) {
-                return res.status(500).json({ error: 'OpenRouter API key not configured for specified provider' });
-            }
-            
-            // Call OpenRouter API
-            console.log("Calling OpenRouter API with Qwen model");
-            const openRouterResponse = await axios.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                {
-                    model: mn,
-                    messages: [
-                        {
-                            role: "user",
-                            content: LATEX_CONVERSION_PROMPT
-                        }
-                    ]
-                },
-                {
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json",
-                    }
-                }
-            );
-            
-            latexContent = openRouterResponse.data.choices[0].message.content;
-            console.log("Response received from OpenRouter API");
-            
-        } else if (modelName === 'Gemini 1.5 Pro' || modelName === 'Gemini 1.5 Flash') {
+        if (modelName === 'Gemini 1.5 Pro' || modelName === 'Gemini 1.5 Flash') {
             if (modelName === 'Gemini 1.5 Pro') {
                 mn = "gemini-1.5-pro";
             }

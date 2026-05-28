@@ -18,7 +18,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
     const [showModelInfo, setShowModelInfo] = useState(false);
     const [showApiInfo, setShowApiInfo] = useState(false);
     const [pId, setpId] = useState(null);
-    const [isModelBeta, setIsModelBeta] = useState(false); // New state for tracking beta models
     const [isTailoredResume, setIsTailoredResume] = useState(false);
     const [jobTitle, setJobTitle] = useState('');
     const [jobDescription, setJobDescription] = useState('');
@@ -82,8 +81,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
         if (disable) return;
         const model = e.target.value;
         setSelectedModel(model);
-        // Check if selected model is in beta
-        setIsModelBeta(model === 'Qwen 32B');
         toast.success(`Switched to ${model}`, {
             position: 'bottom-center',
             duration: 2000,
@@ -182,6 +179,16 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
                 })
                 console.log('Delete Response :', DeleteFiles.response )
 
+                // Note: Rate limit call is recorded on the server (recordSuccessfulCall middleware)
+                // Response headers contain: X-RateLimit-Remaining, X-RateLimit-Limit, etc.
+                const remaining = geminicall.headers?.['x-ratelimit-remaining'];
+                if (remaining !== undefined) {
+                    toast.success(`Conversions remaining today: ${remaining}`, {
+                        position: 'bottom-center',
+                        duration: 2000,
+                    });
+                }
+
                 // Navigate to response page with data
                 setTimeout(() => {
                 }, 2000);
@@ -218,7 +225,30 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
 
         } catch (error) {
             console.error('Processing failed:', error);
-            if (!error.message.includes('Gemini API')) {  // Don't show if Gemini error already shown
+            
+            // Handle rate limit error (429)
+            if (error.response?.status === 429) {
+                const resetTime = error.response?.data?.retryAfter 
+                    ? new Date(error.response.data.retryAfter).toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: true 
+                      })
+                    : 'midnight';
+                    
+                toast.error(
+                    <div className="flex flex-col">
+                        <span className="font-bold">Daily Limit Reached</span>
+                        <span className="text-sm">You can make 2 conversions per day</span>
+                        <span className="text-sm">Try again at {resetTime}</span>
+                    </div>,
+                    {
+                        position: 'top-center',
+                        duration: 6000,
+                        icon: '⏱️',
+                    }
+                );
+            } else if (!error.message.includes('Gemini API')) {  // Don't show if Gemini error already shown
                 toast.error(`Processing failed: ${error.message}`, {
                     position: 'bottom-center',
                     duration: 3000,
@@ -322,9 +352,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
                                 </div>
                             )}
                         </div>
-                        {isModelBeta && (
-                            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded ">EXPERIMENTAL</span>
-                        )}
                     </div>
                     <select
                         value={selectedModel}
@@ -332,7 +359,6 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
                         disabled={disable}
                         className={`w-full p-1.5 sm:p-2 border rounded-md text-xs sm:text-sm bg-white ${disable ? 'cursor-not-allowed' : ''}`}
                     >
-                        <option value="Qwen 32B">Qwen 32B (Reponse time : 1 MIN) </option>
                         <option value="Gemini 1.5 Flash">Gemini 2.0 Flash</option>
                         {/* <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B</option> */}
                         {/* <option value="Gemini 1.5 Pro">Gemini 1.5 Pro</option> */}
