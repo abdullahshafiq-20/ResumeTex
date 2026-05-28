@@ -31,10 +31,13 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
         }
     };
 
-    const handleUploadFile = async () => {
-        if (disable || !selectedFile) return;
+    const uploadToCloudinary = async () => {
+        if (disable || !selectedFile) return null;
         
         setIsUploading(true);
+        setProcessingStep('uploading');
+        setProcessingMessage('Uploading resume to Cloudinary...');
+        
         const formData = new FormData();
         formData.append('resume', selectedFile);
 
@@ -60,10 +63,15 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
                 setPdfurl(response.data.data.url);
                 setpId(response.data.data.publicId);
             }
+            return response.data.data.url;
         } catch (error) {
             console.error('Upload failed:', error);
             setIsUploading(false);
-            alert('Upload failed. Please try again.');
+            toast.error('Upload failed. Please try again.', {
+                position: 'bottom-center',
+                duration: 3000,
+            });
+            throw error;
         }
     };
 
@@ -87,11 +95,17 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
     const handleProcess = async () => {
         setIsProcessing(true);
         try {
+            // Step 0: Upload to Cloudinary first
+            const uploadedUrl = await uploadToCloudinary();
+            if (!uploadedUrl) {
+                throw new Error('Failed to upload resume');
+            }
+            
             // Step 1: Extract PDF
             setProcessingStep('extracting');
             setProcessingMessage('Extracting data from PDF...');
             const response = await axios.post(`${apiUrl}/extract-pdf`, {
-                pdfUrl: pdfurl,
+                pdfUrl: uploadedUrl,
                 apiProvider: selectedApi
             }, {
                 headers: {
@@ -247,10 +261,81 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
         }
     };
 
+    // Processing Modal Component
+    const ProcessingModal = () => {
+        if (!isProcessing) return null;
 
+        const steps = [
+            { id: 'uploading', label: 'Uploading Resume' },
+            { id: 'extracting', label: 'Extracting Data' },
+            { id: 'gemini', label: 'Processing with AI' },
+            { id: 'latex', label: 'Generating LaTeX' },
+            { id: 'converting', label: 'Converting to PDF' },
+        ];
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-lg p-8 max-w-md mx-4">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <h2 className="text-xl font-semibold text-gray-800">Processing Your Resume</h2>
+                        <p className="text-sm text-gray-500 mt-1">Please wait while we process your file...</p>
+                    </div>
+
+                    {/* Spinner */}
+                    <div className="flex justify-center mb-8">
+                        <div className="relative w-12 h-12">
+                            <div className="absolute inset-0 rounded-full border-3 border-gray-200"></div>
+                            <div className="absolute inset-0 rounded-full border-3 border-transparent border-t-[#2563EB] animate-spin"></div>
+                        </div>
+                    </div>
+
+                    {/* Steps Progress */}
+                    <div className="space-y-2 mb-8">
+                        {steps.map((step) => {
+                            const isActive = processingStep === step.id;
+                            const isCompleted = steps.findIndex(s => s.id === processingStep) > steps.findIndex(s => s.id === step.id);
+
+                            return (
+                                <div
+                                    key={step.id}
+                                    className="flex items-center space-x-3 py-2"
+                                >
+                                    <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                                        {isCompleted ? (
+                                            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        ) : (
+                                            <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-[#2563EB]' : 'bg-gray-300'}`}></div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className={`text-sm ${isActive ? 'font-semibold text-[#2563EB]' : isCompleted ? 'text-gray-600' : 'text-gray-500'}`}>
+                                            {step.label}
+                                        </p>
+                                        {isActive && processingMessage && (
+                                            <p className="text-xs text-gray-500 mt-0.5">{processingMessage}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Footer Message */}
+                    <div className="text-center text-xs text-gray-400 border-t pt-4">
+                        <p>Estimated time: 30-60 seconds</p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
-        <div className={`w-full max-w-[500px] bg-white rounded-lg border ${disable ? 'opacity-50 pointer-events-none' : ''}`}>
+        <>
+            <ProcessingModal />
+            <div className={`w-full max-w-[500px] bg-white rounded-lg border ${isProcessing || disable ? 'opacity-50 pointer-events-none' : ''}`}>
             {/* Status Strip - Simplified to yellow only */}
             {/* <div className="h-6 rounded-t-lg flex items-center justify-end px-3 bg-yellow-400/20">
                 <div className="flex items-center space-x-2">
@@ -426,42 +511,15 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
                                 
                                 {/* Action Buttons */}
                                 <div className="flex space-x-2">
-                                    {!isUploading && !isUploaded && (
-                                        <>
-                                            <button
-                                                onClick={handleUploadFile}
-                                                className="p-2 hover:bg-blue-100 rounded-full"
-                                            >
-                                                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                                </svg>
-                                            </button>
-                                            <button
-                                                onClick={handleDelete}
-                                                className="p-2 hover:bg-red-100 rounded-full"
-                                            >
-                                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {(
+                                        <button
+                                            onClick={handleDelete}
+                                            className="p-2 hover:bg-red-100 rounded-full"
+                                        >
+                                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
-                                        </>
-                                    )}
-                                    {isUploaded && (
-                                        <div className="flex space-x-2">
-                                            <div className="p-2">
-                                                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </div>
-                                            <button
-                                                onClick={handleDelete}
-                                                className="p-2 hover:bg-red-100 rounded-full"
-                                            >
-                                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -487,23 +545,14 @@ export default function FileUploader({ onFileUpload, apiUrl, template, disable =
             <div className="flex justify-center p-3 sm:p-4 border-t">
                 <button
                     className="px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm text-white bg-[#2563EB] hover:bg-[#1d4ed8] rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    disabled={!selectedFile || isUploading || !isUploaded || isProcessing || (isTailoredResume && !jobTitle) || disable}
+                    disabled={!selectedFile || isProcessing || (isTailoredResume && !jobTitle) || disable}
                     onClick={handleProcess}
                 >
-                    {isProcessing ? (
-                        <>
-                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            {processingMessage || 'Processing...'}
-                        </>
-                    ) : (
-                        'Process'
-                    )}
+                    {isProcessing ? 'Processing...' : 'Process'}
                 </button>
             </div>
         </div>
+        </>
     );
 }
 
